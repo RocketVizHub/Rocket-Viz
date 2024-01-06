@@ -47,6 +47,7 @@ function displayFileDetails(data) {
 }
 
 /** Partie Nicolas  **/
+
 function getFramerate(data) {
   return data.properties.RecordFPS;
 }
@@ -69,11 +70,30 @@ function getListeFramesHighlights(data) {
   return framesHighlights;
 }
 
-function getListFramesGoals(data) {
+
+function getPlayerNamesGoal(data) {
   const goals = data.properties.Goals;
-  const framesGoals = goals.map((goal) => goal.frame);
-  return framesGoals;
+  const playerNames = goals.map((goal) => goal.PlayerName);
+  return playerNames;
 }
+
+function getFramesGoal(data) {
+  const goals = data.properties.Goals;
+  const frames = goals.map((goal) => goal.frame);
+  return frames;
+}
+
+function getAllGoalInformation(data) {
+  const goals = data.properties.Goals;
+  const goalInformation = goals.map((goal) => {
+    return {
+      PlayerName: goal.PlayerName,
+      frame: goal.frame
+    };
+  });
+  return goalInformation;
+}
+
 
 /***********************/
 
