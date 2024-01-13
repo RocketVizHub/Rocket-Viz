@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://d3js.org/topojson.v1.min.js"></script>
+    <title>Rocket Viz</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 56px;
+        }
+
+        @media (min-width: 768px) {
+            body {
+                padding-top: 70px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    
+    <p> Score de l'équipe 1 : <span id="scoreTeam0"></span></p>
+    <p> Score de l'équipe 2 : <span id="scoreTeam1"></span></p>
+    <!-- Create an empty table with an id -->
+    <table id="playerStatsTable" border="1">
+        <thead>
+            <tr>
+                <th>Player Name</th>
+                <th>Score</th>
+                <th>Goals</th>
+                <th>Assists</th>
+                <th>Saves</th>
+                <th>Shots</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Table body will be populated using D3 -->
+        </tbody>
+    </table>
+
+    <script>
+        // fetch('game_stats.json')
+        //     .then(response => response.json())
+        //     .then(data => console.log(data));
+
+                // Fonction pour lire le fichier JSON
+        // function lireFichierJSON() {
+        //     // Chemin vers le fichier JSON
+        //     const cheminFichier = './game_stats.json';
+
+        //     // Utilisation de fetch pour charger le fichier
+        //     fetch(cheminFichier)
+        //         .then(response => {
+        //             // Vérification de la réussite de la requête
+        //             if (!response.ok) {
+        //                 throw new Error('Erreur de chargement du fichier JSON');
+        //             }
+        //             // Retourne la réponse JSON
+        //             return response.json();
+        //         })
+        //         .then(data => {
+        //             console.log(data);
+        //             return data;
+        //         })
+        //         .catch(error => {
+        //             console.error('Erreur :', error);
+        //         });
+        // }
+
+        d3.json("utils/replay03.json").then(function(data) {
+            console.log(data.properties);
+
+            var scoreTeam0;
+            var scoreTeam1;
+
+            if (typeof data.properties.Team0Score === "undefined") scoreTeam0 = 0;
+            else scoreTeam0 = data.properties.Team0Score;
+            if (typeof data.properties.Team1Score === "undefined") scoreTeam1 = 0;
+            else scoreTeam1 = data.properties.Team1Score;
+
+            document.getElementById("scoreTeam0").innerHTML = scoreTeam0;
+            document.getElementById("scoreTeam1").innerHTML = scoreTeam1;
+
+            if (scoreTeam0 > scoreTeam1) {
+                document.getElementById("scoreTeam0").style.color = "green";
+                document.getElementById("scoreTeam1").style.color = "red";
+            } else if (scoreTeam0 < scoreTeam1) {
+                document.getElementById("scoreTeam0").style.color = "red";
+                document.getElementById("scoreTeam1").style.color = "green";
+            } else {
+                document.getElementById("scoreTeam0").style.color = "black";
+                document.getElementById("scoreTeam1").style.color = "black";
+            }
+
+
+            const goalsData = data.properties.Goals;
+
+            // Create a map to store player goals
+            const playerGoalsMap = new Map();
+
+            // Count goals for each player
+            goalsData.forEach(function(goal) {
+                const playerName = goal.PlayerName;
+                if (playerGoalsMap.has(playerName)) {
+                    playerGoalsMap.set(playerName, playerGoalsMap.get(playerName) + 1);
+                } else {
+                    playerGoalsMap.set(playerName, 1);
+                }
+            });
+
+            const playerDatas = data.properties.PlayerStats;
+            const playerAssistsMap = new Map();
+
+            
+            var team0Stats = data.properties.PlayerStats.filter(player => player.Team === 0);
+            var team1Stats = data.properties.PlayerStats.filter(player => player.Team === 1);
+
+            // playerDatas.forEach(element => {
+            //     console.log("elt " + element.Name + " team " + element.Team);
+            //     console.log("score " + element.Score);
+            //     console.log("goals " + element.Goals);
+            //     console.log("assists " + element.Assists);
+            //     console.log("saves " + element.Saves);
+            //     console.log("shots " + element.Shots);
+
+            //     playerAssistsMap.set(element.Name, element.Assists);
+            // });
+
+            // playerAssistsMap.forEach(element => {
+            //     console.log(element);
+            // });
+
+            team1Stats.forEach(element => {
+                console.log("elt " + element.Name + " team " + element.Team);
+                console.log("score " + element.Score);
+                console.log("goals " + element.Goals);
+                console.log("assists " + element.Assists);
+                console.log("saves " + element.Saves);
+                console.log("shots " + element.Shots);
+            });
+            // Convert the map to an array of objects
+            const playerGoalsArray = Array.from(playerGoalsMap, ([playerName, goals]) => ({ playerName, goals }));
+
+            // Create a table row for each player but the table is divided into two parts that are the teams
+
+            // const rows = d3.select("#playerStatsTable tbody")
+            //     .selectAll("tr")
+            //     .data(playerGoalsArray)
+            //     .enter()
+            //     .append("tr");
+
+            // // Add player names to the table
+            // rows.append("td")
+            //     .text(function(d) { return d.playerName; });
+
+            // // Add the number of goals to the table
+            // rows.append("td")
+            //     .text(function(d) { return d.goals; });
+
+
+            function displayPlayerStats(tableId, playerStats) {
+                var table = d3.select("#playerStatsTable");
+
+                var tbody = table.select('tbody');
+
+                tbody.append('tr').append('td')
+                    .attr('colspan', 6)
+                    .style('font-weight', 'bold')
+                    .text('Team ' + playerStats[0].Team);
+
+                var rows = tbody.selectAll('tr').data(playerStats).join('tr');
+
+                playerStats.forEach(element => {
+                    console.log("===============deb================")
+                    console.log("elt " + element.Name + " team " + element.Team);
+                    console.log("score " + element.Score);
+                    console.log("goals " + element.Goals);
+                    console.log("assists " + element.Assists);
+                    console.log("saves " + element.Saves);
+                    console.log("shots " + element.Shots);
+                    console.log("===============fin================")
+                });
+
+                rows.append('td').text(d => d.Name);
+                rows.append('td').text(d => d.Score);
+                rows.append('td').text(d => d.Goals);
+                rows.append('td').text(d => d.Assists);
+                rows.append('td').text(d => d.Saves);
+                rows.append('td').text(d => d.Shots);
+            }
+
+            displayPlayerStats('playerStatsTable', team1Stats);
+            displayPlayerStats('playerStatsTable', team0Stats);
+        });
+
+        // // Appel de la fonction pour lire le fichier JSON
+        // data = lireFichierJSON();
+        // console.log("****" + data);
+
+        //const playerName = data.PlayerName;
+        //console.log(playerName);
+    </script>
+</body>
