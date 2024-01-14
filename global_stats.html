@@ -9,6 +9,43 @@
     <title>Rocket Viz - Aperçu</title>
     <!-- Bootstrap CSS -->
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
+    <script src="script_stats.js"></script>
+    <style>
+        h1 {
+            padding-top: 50px;
+            padding-bottom: 20px;
+        }
+        .player1 {
+            fill: #007BFF; 
+            stroke: black; 
+            stroke-width: 1; 
+        }    
+        .player1.hovered {
+            opacity: 0.6;
+        }
+        .player2 {
+            fill: #6C757D; 
+            stroke: black; 
+            stroke-width: 1; 
+        }    
+        .player2.hovered {
+            opacity: 0.6;
+        }
+        .text-team-results {
+            fill: white;
+            font-weight: bold;
+            font-size: 14px;
+            font-family: sans-serif;
+        }
+        .text-row-name {
+            fill: black;
+            font-size: 20px;
+            font-family: sans-serif;
+        }
+        text {
+            pointer-events: none;
+        }
+    </style>
     <!-- <style>
         body {
             padding-top: 56px;
@@ -46,7 +83,7 @@
     </nav>
 
     <!-- Table Section -->
-    <div class="container mt-3">
+    <div class="container mt-3" id="content">
         <h1> Aperçu de la partie </h1>
 
         <!-- Create an empty table with an id -->
@@ -154,6 +191,227 @@
             }
 
             displayPlayerStats();
+
+            function sortTable(columnName) {
+                var rows = d3.select("#playerStatsTable tbody tr");
+                console.log("coucou");
+
+                rows.sort(function(a, b) {
+                    console.log("coucou2");
+                    console.log(a, d3.select(a).datum());
+                    var aValue = d3.select(a).datum()[columnName];
+                    var bValue = d3.select(b).datum()[columnName];
+
+                    return aValue - bValue;
+                });
+
+                // Mise à jour de l'affichage après le tri
+                rows.transition().duration(500).attr("transform", function(d, i) {
+                    return "translate(0," + i * 50 + ")";
+                });
+            }
+            sortTable("Score");
+
+            var overviewStats = getOverviewStats(data);
+            // Afficher la clé et la valeur de chaque élément du tableau
+            console.log(overviewStats);
+            var width = d3.select("body").node().getBoundingClientRect().width;
+
+            console.log("WIDTH : ", width);
+
+            function showTooltip(player, team, percentage, mousePosition) {
+                var tooltip = d3.select("body").append("div")
+                    .style("position", "absolute")
+                    .style("background-color", "white")
+                    .style("border", "1px solid #ccc")
+                    .style("padding", "10px")
+                    .style("border-radius", "5px")
+                    .style("pointer-events", "none");
+
+                tooltip.html("Team: " + team + "<br>Percentage: " + percentage);
+
+                // // Positionnement de l'info-bulle par rapport à la souris
+                tooltip.style("display", 'block');
+                
+                const width222 = tooltip.node().getBoundingClientRect();
+
+                console.log("width222 : ", width222);
+
+                // Position par rapport à la droite du rectangle
+                if (mousePosition[0] > width / 2) {
+                    tooltip.style("left", 
+                        (mousePosition[0] - 10 - tooltip.node().getBoundingClientRect().width) + "px");
+                }
+
+                // // Supprimer l'info-bulle après un certain temps (par exemple, 2 secondes)
+                // setTimeout(function() {
+                //     tooltip.remove();
+                // }, 2000);
+            }
+
+
+            // Pour chaque élément de la map, on va l'aafficher sous forme de rectangle
+            // On va afficher un rectangle par élément de la map défini de la manière suivante :
+            // - la largeur du rectangle est proportionnelle à la valeur de l'élément
+            // - la hauteur du rectangle est fixe
+            // - la position du rectangle est définie par la position de l'élément dans la map
+            // - la couleur du rectangle est définie par la valeur de l'élément
+            // - le texte du rectangle est défini par la clé de l'élément
+            // - la couleur du texte est définie par la valeur de l'élément
+            // - la taille du texte est fixe
+            // - la position du texte est définie par la position de l'élément dans la map
+            // - la police du texte est fixe
+            function displayOverviewStats() {
+                var widthDelta = 125;
+                var centrageVertical = 30;
+                var svg = d3.select("#content").append("svg")
+                    .attr("width", 1000)
+                    .attr("height", 1000);
+                    
+                var width = 1000;  // Ajout de la variable width pour référence
+
+                console.log("type : ", typeof overviewStats);
+                console.log("length : ", overviewStats.length);
+
+
+                // Rectangle pour les stats du joueur 1
+                var rectanglesPlayer1 = svg.selectAll(".player1")
+                    .data(overviewStats)
+                    .enter()
+                    .append("rect")
+                    .attr("class", "player1")
+                    .attr("y", function(d, i) {
+                        return i * 50;
+                    })
+                    .attr("x", widthDelta)
+                    .attr("width", function(d) {
+                        var sum = d[1][0] + d[1][1];
+                        return d[1][0] / sum * (width - widthDelta);
+                    })
+                    .attr("height", 50)
+                    .attr("fill", function(d) {
+                        return d[1][0] * 10;
+                    });
+                
+                var texts = svg.selectAll("text")
+                    .data(overviewStats)
+                    .enter();
+                
+                var textTeam1 = texts
+                    .append("text")
+                    .attr("class", "text-team-results")
+                    .text(function(d) {
+                        return d[1][0]; // Valeur de la team 1
+                    })
+                    .attr("y", function(d, i) {
+                        return i * 50 + centrageVertical;  // Ajuster pour le centrage vertical
+                    })
+                    .attr("x", widthDelta + 15);
+                    
+                rectanglesPlayer1.on("mouseover", function(e, d) {
+                        var rect = d3.select(this);
+
+                        // Changer la couleur de la bordure lors du survol
+                        rect.classed("hovered", true);
+                        var rectWidth = parseFloat(d3.select(this).attr("width"));
+                        var rectHeight = parseFloat(d3.select(this).attr("height"));
+                        var rectX = parseFloat(d3.select(this).attr("x"));
+                        var rectY = parseFloat(d3.select(this).attr("y"));
+                        var percentage = d[1][0] / (d[1][0] + d[1][1]) * 100;
+                        percentage = Math.round(percentage * 100) / 100;
+                        var percentageText = svg.append("text")
+                            .text(percentage + "%")
+                            .attr("x", parseFloat(d3.select(this).attr("x")) + rectWidth - 60)
+                            .attr("y", parseFloat(d3.select(this).attr("y")) + centrageVertical)
+                            .attr("class", "percentage-text");
+                        // console.log("Largeur du rectangle : " + rectWidth);
+                        // console.log(e);
+                        // var sum = d[0] + d[1];
+                        // var mousePosition = [e.x, e.y];
+                        // var percentage = (d[0] / sum * 100).toFixed(2);
+                        // showTooltip(d[0], 0, percentage + "%", mousePosition);
+                    });
+                rectanglesPlayer1.on("mouseout", function(e, d) {
+                    var rect = d3.select(this);
+
+                    // Supprimer la classe pour le survol
+                    rect.classed("hovered", false);
+                    // Supprimer le texte pour le pourcentage
+                    svg.select(".percentage-text").remove();
+                });
+
+                // Rectangle pour les stats du joueur 2
+                var rectanglesPlayer2 = svg.selectAll(".player2")
+                    .data(overviewStats)
+                    .enter()
+                    .append("rect")
+                    .attr("class", "player2")
+                    .attr("y", function(d, i) {
+                        return i * 50;
+                    })
+                    .attr("x", function(d) {
+                        var sum = d[1][0] + d[1][1];
+                        return width - (d[1][1] / sum * (width - widthDelta));
+                    })
+                    .attr("width", function(d) {
+                        var sum = d[1][0] + d[1][1];
+                        return d[1][1] / sum * (width - widthDelta);
+                    })
+                    .attr("height", 50)
+                    .attr("fill", function(d) {
+                        return d[1][1] * 10;
+                    });
+                var textTeam2 = texts
+                    .append("text")
+                    .attr("class", "text-team-results")
+                    .text(function(d) {
+                        return d[1][1]; // Valeur de la team 1
+                    })
+                    .attr("y", function(d, i) {
+                        return i * 50 + centrageVertical;  // Ajuster pour le centrage vertical
+                    })
+                    .attr("x", width - 30);
+                rectanglesPlayer2.on("mouseover", function(e, d) {
+                        var rect = d3.select(this)
+                            .classed("hovered", true);
+                        var percentage = d[1][1] / (d[1][0] + d[1][1]) * 100;
+                        percentage = Math.round(percentage * 100) / 100;
+                        var percentageText = svg.append("text")
+                            .text(percentage + "%")
+                            .attr("x", parseFloat(d3.select(this).attr("x")) + 10)
+                            .attr("y", parseFloat(d3.select(this).attr("y")) + centrageVertical)
+                            .attr("class", "percentage-text");
+                    });
+                rectanglesPlayer2.on("mouseout", function(e, d) {
+                    var rect = d3.select(this);
+                    rect.classed("hovered", false);
+                    svg.select(".percentage-text").remove();
+                });
+
+                // Texte pour les noms des joueurs
+                var textRowName = texts
+                    .append("text")
+                    .text(function(d) {
+                        return d[0];
+                    })
+                    .attr("y", function(d, i) {
+                        return i * 50 + centrageVertical;
+                    })
+                    .attr("x", 50)
+                    .attr("class", "text-row-name");
+            }
+
+            function loadMapElements(value, key, map) {
+                console.log(key);
+                console.log(map.get(key));
+                console.log(`m[${key}] = ${value}`);
+            }
+
+            // overviewStats.forEach(loadMapElements);
+
+            d3.selectAll("#content").append("h1").text("Statistiques par équipe");
+            displayOverviewStats();
+            
         });
     </script>
 </body>
