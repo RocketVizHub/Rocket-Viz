@@ -38,8 +38,6 @@ async function readFileAsync(file) {
 
 function displayFileDetails(data) {
   console.log(Object.keys(data.properties));
-  console.log(getGoals(data));
-  console.log(getLastFrameTime(data));
   const fileDetailsElement = document.getElementById("fileDetails");
   fileDetailsElement.innerHTML = `
                 <p><strong>header size:</strong> ${data.header_size}</p>
@@ -115,8 +113,96 @@ function getListeFramesHighlights(data) {
   return framesHighlights;
 }
 
-// Récupère les frames qui contiennent un DemolishFx
-function filterFramesWithDemolishFx(data) {
+// Récupère les indices de toutes les frames qui contiennent un DemolishFx
+function findFramesIndicesWithDemolishFx(data) {
+  const frames = data.network_frames.frames;
+  const framesIndicesWithDemolishFx = frames
+    .map((frame, index) => {
+      if (frame.updated_actors.some((actor) => actor.attribute && actor.attribute.DemolishFx)) {
+        return index;
+      }
+      return null;
+    })
+    .filter((index) => index !== null);
+  return framesIndicesWithDemolishFx;
+}
+
+// Function qui récupère les réservations après la destruction pour tous les joueurs
+function getReservationAfterDestroy(data, frameIndicesWithDemolishFx) {
+  const frames = data.network_frames.frames;
+  const playerTeams = getPlayersAndTeams(data);
+
+  frameIndicesWithDemolishFx.forEach((frameIndex) => {
+    const frame = frames[frameIndex];
+
+    
+    const filteredActors = frame.updated_actors.filter((actor) => { // Filtrer les acteurs avec Reservation et number: 1
+      return actor.attribute && actor.attribute.Reservation && actor.attribute.Reservation.number === 1;
+    });
+
+    // Afficher les réservations filtrées
+    filteredActors.forEach((filteredActor, actorIndex) => {
+      const reservationName = filteredActor.attribute.Reservation.name || "N/A";
+      const playerName = reservationName.toLowerCase(); // Assurez-vous que le nom du joueur est en minuscules pour la correspondance
+      const playerTeam = playerTeams.find((player) => player.name.toLowerCase() === playerName)?.team || "Unknown";
+
+      console.log(`Frame ${frameIndex}, Actor ${actorIndex}, Reservation Name: ${reservationName}, Player Team: ${playerTeam}`);
+    });
+  });
+}
+
+// Récupère les réservations après la destruction d'un des joueur de l'équipe 0
+function getTeam0Destroy(data, frameIndicesWithDemolishFx) {
+  const frames = data.network_frames.frames;
+  const playerTeams = getPlayersAndTeams(data);
+  const destroyedFramesTeam0 = [];
+
+  frameIndicesWithDemolishFx.forEach((frameIndex) => {
+    const frame = frames[frameIndex];
+    const filteredActors = frame.updated_actors.filter((actor) => { // Filtrer les acteurs avec Reservation et number: 1
+      return actor.attribute && actor.attribute.Reservation && actor.attribute.Reservation.number === 1;
+    });
+
+    if (filteredActors.some((filteredActor) => { // Vérifier si au moins un acteur dans la frame a "Player Team: Blue"
+      const reservationName = filteredActor.attribute.Reservation.name || "N/A";
+      const playerName = reservationName.toLowerCase();
+      const playerTeam = playerTeams.find((player) => player.name.toLowerCase() === playerName)?.team || "Unknown";
+
+      return playerTeam === "Blue";
+    })) {
+      destroyedFramesTeam0.push(frameIndex);
+    }
+  });
+  return destroyedFramesTeam0;
+}
+
+// Récupère les réservations après la destruction d'un des joueur de l'équipe 1
+function getTeam1Destroy(data, frameIndicesWithDemolishFx) {
+  const frames = data.network_frames.frames;
+  const playerTeams = getPlayersAndTeams(data);
+  const destroyedFramesTeam1 = [];
+
+  frameIndicesWithDemolishFx.forEach((frameIndex) => {
+    const frame = frames[frameIndex];
+    const filteredActors = frame.updated_actors.filter((actor) => { // Filtrer les acteurs avec Reservation et number: 1
+      return actor.attribute && actor.attribute.Reservation && actor.attribute.Reservation.number === 1;
+    });
+
+    if (filteredActors.some((filteredActor) => { // Vérifier si au moins un acteur dans la frame a "Player Team: Orange"
+      const reservationName = filteredActor.attribute.Reservation.name || "N/A";
+      const playerName = reservationName.toLowerCase();
+      const playerTeam = playerTeams.find((player) => player.name.toLowerCase() === playerName)?.team || "Unknown";
+      return playerTeam === "Orange";
+    })) {
+      destroyedFramesTeam1.push(frameIndex);
+    }
+  });
+
+  return destroyedFramesTeam1;
+}
+
+// Récupère le temps où le joueur a été détruit
+function TimesWithDemolishFx(data) {
   const frames = data.network_frames.frames;
   const framesWithDemolishFx = frames
     .filter((frame) => {
@@ -125,8 +211,10 @@ function filterFramesWithDemolishFx(data) {
       });
     })
     .map((frame) => frame.time);
+  console.log("Temps ou a lieu une DemolishFx:", framesWithDemolishFx);
   return framesWithDemolishFx;
 }
+
 
 // Récupère les noms des joueurs de la partie, qui ont une réservation
 function filterFramesWithReservation(data) {
@@ -194,114 +282,88 @@ function prepareDataForTimeline(saves, team) {
 
 // Affiche la timeline
 function displayTimeline(data) {
-  const maxFrames = getMaxFrames(data); // Récupère le nombre de frames max
-  const framerate = getFramerate(data); // Récupère la fréquence d'images
+  const maxFrames = getMaxFrames(data);
+  const framerate = getFramerate(data);
 
-  const maxDuration = getMaxTempsPartie(maxFrames, framerate); // Calcul de la durée totale
+  const maxDuration = getMaxTempsPartie(maxFrames, framerate);
 
-  var margin = { left: 100 }; // Définir une marge à gauche
-  var width = 960 - margin.left; // Ajuster la largeur en fonction de la marge
+  var margin = { left: 100 };
+  var width = 960 - margin.left;
   var height = 500;
 
-  // Création de l'échelle en minutes en fonction des frames
-  const maxMinutes = maxFrames / framerate / 60; // Convertir en minutes
+
+  const maxMinutes = maxFrames / framerate / 60; 
   const xScale = d3.scaleLinear().domain([0, maxMinutes]).range([0, width]);
 
   // Supprime l'ancienne timeline
   d3.select("#timeline").selectAll("*").remove();
 
+  d3.select("#timeline")
+  .classed("timeline-hidden", false)
+  .style("display", "block");
+
   // Création du conteneur SVG
-  const svg = d3
-    .select("#timeline") // Assurez-vous d'avoir un élément avec l'ID "timeline" dans votre HTML
-    .append("svg")
-    .attr("width", width + margin.left) // Ajuster la largeur du SVG en fonction de la marge
+  const svg = d3.select("#timeline").append("svg")
+    .attr("width", width + margin.left)
     .attr("height", height)
     .append("g")
-    .attr("transform", "translate(" + margin.left + ",0)"); // Déplacer le groupe à droite de la marge
+    .attr("transform", "translate(" + margin.left + ",0)");
 
   // Ajouter un rectangle pour chaque équipe
   svg
-    .append("rect")
-    .attr("x", 0)
-    .attr("y", height / 4 - 5) // Décalez le rectangle pour une meilleure visibilité
+    .append("rect").attr("x", 0).attr("y", height / 4 - 5)
     .attr("width", width)
-    .attr("height", 10) // Hauteur du rectangle
-    .attr("fill", "blue"); // Couleur du rectangle pour l'équipe bleue
+    .attr("height", 18)
+    .attr("fill", "blue");
 
   svg
-    .append("rect")
-    .attr("x", 0)
-    .attr("y", height / 3 - 5) // Décalez le rectangle pour une meilleure visibilité
+    .append("rect").attr("x", 0).attr("y", height / 3 - 5)
     .attr("width", width)
-    .attr("height", 10) // Hauteur du rectangle
-    .attr("fill", "orange"); // Couleur du rectangle pour l'équipe orange
+    .attr("height", 18)
+    .attr("fill", "orange");
+
+  // Ajout du texte pour chaque équipe
+  svg
+    .append("text").attr("x", -10).attr("y", height / 4).attr("text-anchor", "end").
+    text("Equipe Bleue").
+    attr("fill", "blue").
+    attr("font-size", "13px");
 
   svg
-    .append("line") // Axe temporel
-    .attr("x1", 0)
-    .attr("y1", height / 2)
-    .attr("x2", width)
-    .attr("y2", height / 2)
-    .attr("stroke", "black")
-    .attr("stroke-width", 2);
-
-  // Ajouter des traits à chaque minute sur l'échelle de temps
-  for (let i = 1; i <= maxMinutes; i++) {
-    svg
-      .append("line")
-      .attr("x1", xScale(i))
-      .attr("y1", height / 2 - 5)
-      .attr("x2", xScale(i))
-      .attr("y2", height / 2 + 5)
-      .attr("stroke", "black")
-      .attr("stroke-width", 1);
-  }
-
-  // Labels pour les équipes avec styles directement dans D3
-  svg
-    .append("text")
-    .attr("x", -10) // Positionner le texte à gauche du SVG
-    .attr("y", height / 4)
-    .attr("text-anchor", "end")
-    .text("Equipe Bleue")
-    .attr("fill", "blue")
-    .attr("font-size", "12px"); // Appliquer la taille de la police
-
-  svg
-    .append("text")
-    .attr("x", -10) // Positionner le texte à gauche du SVG
-    .attr("y", height / 3)
-    .attr("text-anchor", "end")
+    .append("text").attr("x", -10).attr("y", height / 3).attr("text-anchor", "end")
     .text("Equipe Orange")
     .attr("fill", "orange")
-    .attr("font-size", "12px"); // Appliquer la taille de la police
+    .attr("font-size", "13px");
 
-  // Ajout du texte pour la durée totale à l'intérieur du SVG avec le style pour ajuster la position verticale
-  svg
-    .append("text")
-    .attr("x", width / 2) // Positionnez le texte au milieu horizontalement
-    .attr("y", height / 2 - 10) // Ajustez la position verticale pour l'aligner avec la ligne noire
-    .text(`Duration: ${maxDuration}`)
+  svg.append("text").attr("x", width / 2).attr("y", height / 2 - 10)
+    .text(`La partie à durée : ${maxDuration}`)
     .attr("font-size", "12px")
     .style("dominant-baseline", "hanging");
 
+  /*
+  Partie 1: Les goals
+  */
+
   const goals = getGoals(data);
-
   goals.forEach((goal) => {
-    const x = xScale(goal.frame / framerate / 60); // Convertit la frame en minutes
+    const x = xScale(goal.frame / framerate / 60);
 
-    // Ajoute un "G" sur la timeline à la position du but
     svg
-      .append("text")
+      .append("image")
+      .attr("xlink:href", "img/goal_icon.png")
       .attr("x", x)
-      .attr("y", goal.team === 0 ? height / 4 : height / 3) // Positionne le "G" sur la ligne de l'équipe correspondante
-      .text("G")
-      .attr("fill", "black") // Change la couleur en noir
+      .attr("y", goal.team === 0 ? height / 4.75 : height / 3.3)
+      .attr("width", 35)
       .on("mouseover", function () {
-        // Ajoute un gestionnaire d'événements pour l'affichage de l'info-bulle
-        d3.select(this).append("title").text(`Goal by ${goal.player}`);
+        const time = (goal.frame / framerate).toFixed(2);
+        d3.select(this).append("title").text(`Goal by ${goal.player} at ${time} seconds`);
       });
+
   });
+
+  /*
+  Partie 2: Les saves
+  */
 
   const team0Saves = getTeam0Saves(data);
   const team1Saves = getTeam1Saves(data);
@@ -309,39 +371,108 @@ function displayTimeline(data) {
   const timelineDataTeam0 = prepareDataForTimeline(team0Saves, "Team 0");
   const timelineDataTeam1 = prepareDataForTimeline(team1Saves, "Team 1");
 
-  // Ajoute un S sur la timeline de l'équipe 0 à la position de la save
   timelineDataTeam0.forEach((save) => {
     const x = xScale(save.time / framerate / 60);
-
+  
     svg
-      .append("text")
+      .append("image")
+      .attr("xlink:href", "img/save_icon.png")
       .attr("x", x)
-      .attr("y", height / 4) // Positionne le "S" sur la ligne de l'équipe 0
-      .text("S")
-      .attr("fill", "black") // Change la couleur en noir
+      .attr("y", height / 4.75)
+      .attr("width", 35)
+      .attr("height", 35)
       .on("mouseover", function () {
-        // Ajoute un gestionnaire d'événements pour l'affichage de l'info-bulle
-        d3.select(this).append("title").text(`Save by ${save.team}`);
+        const time = (save.time / framerate).toFixed(2);
+        d3.select(this).append("title").text(`Save by ${save.team} at ${time} seconds`);
       });
   });
-
-  // Ajoute un S sur la timeline de l'équipe 1 à la position de la save
+  
   timelineDataTeam1.forEach((save) => {
-    const x = xScale(save.time / framerate / 60); // Convertit la frame en minutes
-
+    const x = xScale(save.time / framerate / 60);
+  
     svg
-      .append("text")
+      .append("image")
+      .attr("xlink:href", "img/save_icon.png")
       .attr("x", x)
-      .attr("y", height / 3) // Positionne le "S" sur la ligne de l'équipe 1
-      .text("S")
-      .attr("fill", "black") // Change la couleur en noir
+      .attr("y", height / 3.3)
+      .attr("width", 35)
+      .attr("height", 35)
       .on("mouseover", function () {
-        // Ajoute un gestionnaire d'événements pour l'affichage de l'info-bulle
-        d3.select(this).append("title").text(`Save by ${save.team}`);
+        const time = (save.time / framerate).toFixed(2);
+        d3.select(this).append("title").text(`Save by ${save.team} at ${time} seconds`);
       });
   });
+
+  /*
+  Partie 3: Les demolitions
+  */
+
+  const frameIndicesWithDemolishFx = findFramesIndicesWithDemolishFx(data);
+  let demolitionDataTeam0 = getTeam0Destroy(data, frameIndicesWithDemolishFx);
+  let demolitionDataTeam1 = getTeam1Destroy(data, frameIndicesWithDemolishFx);
+
+
+  demolitionDataTeam0.forEach((frameIndex) => {
+    const x = xScale(frameIndex / framerate / 60);
+  
+    svg
+      .append("image")
+      .attr("xlink:href", "img/demolition_icon.png")
+      .attr("x", x)
+      .attr("y", height / 4)
+      .attr("width", 20)
+      .attr("height", 20)
+      .on("mouseover", function () {
+        const time = (frameIndex / framerate).toFixed(2);
+        d3.select(this).append("title").text(`Blue player demolished at ${time} seconds`);
+      });
+  });
+  
+  demolitionDataTeam1.forEach((frameIndex) => {
+    const x = xScale(frameIndex / framerate / 60);
+  
+    svg
+      .append("image")
+      .attr("xlink:href", "img/demolition_icon.png")
+      .attr("x", x)
+      .attr("y", height / 3)
+      .attr("width", 20)
+      .attr("height", 20)
+      .on("mouseover", function () {
+        const time = (frameIndex / framerate).toFixed(2);
+        d3.select(this).append("title").text(`Orange player demolished at ${time} seconds`);
+      });
+  });
+
+  /*
+  Partie 4: La légende
+  */
+  const legendData = [
+    { icon: "img/goal_icon.png", description: "But" },
+    { icon: "img/save_icon.png", description: "Sauvegarde" },
+    { icon: "img/demolition_icon.png", description: "Joueur détruit" },
+  ];
+
+  const legendContainer = d3.select("#legend");
+  legendContainer.selectAll("*").remove();
+
+  legendContainer
+    .selectAll("div")
+    .data(legendData)
+    .enter()
+    .append("div")
+    .html((d) => `<img src="${d.icon}" alt="${d.description}" width="20" height="20"> ${d.description}`)
+    .style("margin-right", "20px");
 }
 
 document
   .getElementById("uploadButton")
   .addEventListener("click", handleFileUpload);
+  
+  document.getElementById("uploadButton").addEventListener("click", function () {
+
+d3.select("#timeline").classed("timeline-hidden", true).style("display", "none");
+handleFileUpload();
+
+});
+  
