@@ -194,7 +194,6 @@
 
             function sortTable(columnName) {
                 var rows = d3.select("#playerStatsTable tbody tr");
-                console.log("coucou");
 
                 rows.sort(function(a, b) {
                     console.log("coucou2");
@@ -217,39 +216,6 @@
             console.log(overviewStats);
             var width = d3.select("body").node().getBoundingClientRect().width;
 
-            console.log("WIDTH : ", width);
-
-            function showTooltip(player, team, percentage, mousePosition) {
-                var tooltip = d3.select("body").append("div")
-                    .style("position", "absolute")
-                    .style("background-color", "white")
-                    .style("border", "1px solid #ccc")
-                    .style("padding", "10px")
-                    .style("border-radius", "5px")
-                    .style("pointer-events", "none");
-
-                tooltip.html("Team: " + team + "<br>Percentage: " + percentage);
-
-                // // Positionnement de l'info-bulle par rapport à la souris
-                tooltip.style("display", 'block');
-                
-                const width222 = tooltip.node().getBoundingClientRect();
-
-                console.log("width222 : ", width222);
-
-                // Position par rapport à la droite du rectangle
-                if (mousePosition[0] > width / 2) {
-                    tooltip.style("left", 
-                        (mousePosition[0] - 10 - tooltip.node().getBoundingClientRect().width) + "px");
-                }
-
-                // // Supprimer l'info-bulle après un certain temps (par exemple, 2 secondes)
-                // setTimeout(function() {
-                //     tooltip.remove();
-                // }, 2000);
-            }
-
-
             // Pour chaque élément de la map, on va l'aafficher sous forme de rectangle
             // On va afficher un rectangle par élément de la map défini de la manière suivante :
             // - la largeur du rectangle est proportionnelle à la valeur de l'élément
@@ -266,13 +232,9 @@
                 var centrageVertical = 30;
                 var svg = d3.select("#content").append("svg")
                     .attr("width", 1000)
-                    .attr("height", 1000);
+                    .attr("height", 300);
                     
                 var width = 1000;  // Ajout de la variable width pour référence
-
-                console.log("type : ", typeof overviewStats);
-                console.log("length : ", overviewStats.length);
-
 
                 // Rectangle pour les stats du joueur 1
                 var rectanglesPlayer1 = svg.selectAll(".player1")
@@ -309,14 +271,11 @@
                     .attr("x", widthDelta + 15);
                     
                 rectanglesPlayer1.on("mouseover", function(e, d) {
-                        var rect = d3.select(this);
+                        var rect = d3.select(this)
+                            .classed("hovered", true);
 
-                        // Changer la couleur de la bordure lors du survol
-                        rect.classed("hovered", true);
                         var rectWidth = parseFloat(d3.select(this).attr("width"));
-                        var rectHeight = parseFloat(d3.select(this).attr("height"));
-                        var rectX = parseFloat(d3.select(this).attr("x"));
-                        var rectY = parseFloat(d3.select(this).attr("y"));
+
                         var percentage = d[1][0] / (d[1][0] + d[1][1]) * 100;
                         percentage = Math.round(percentage * 100) / 100;
                         var percentageText = svg.append("text")
@@ -324,12 +283,6 @@
                             .attr("x", parseFloat(d3.select(this).attr("x")) + rectWidth - 60)
                             .attr("y", parseFloat(d3.select(this).attr("y")) + centrageVertical)
                             .attr("class", "percentage-text");
-                        // console.log("Largeur du rectangle : " + rectWidth);
-                        // console.log(e);
-                        // var sum = d[0] + d[1];
-                        // var mousePosition = [e.x, e.y];
-                        // var percentage = (d[0] / sum * 100).toFixed(2);
-                        // showTooltip(d[0], 0, percentage + "%", mousePosition);
                     });
                 rectanglesPlayer1.on("mouseout", function(e, d) {
                     var rect = d3.select(this);
@@ -411,7 +364,199 @@
 
             d3.selectAll("#content").append("h1").text("Statistiques par équipe");
             displayOverviewStats();
+
+            console.log(data.network_frames.frames[0].new_actors[0].attribute);
+
+            // Parcourir le tableau data.network_frames.frames[0].new_actors jusqu'à trouver l'attribut "attribute"
             
+            console.log("Nombre de frames : " + data.network_frames.frames.length);
+            console.log(data.network_frames.frames);
+            var sumTeam0 = 0;
+            var sumTeam1 = 0;
+            // data.network_frames.frames.forEach(frame => {
+            //     var test = 0;
+            //     frame.updated_actors.forEach(actor => {
+            //         // console.log(element);
+            //         if (typeof actor.attribute !== "undefined") {
+            //             // console.log("ta mere", typeof actor.attribute);
+            //             // console.log(actor.attribute);
+            //             var element = actor.attribute;
+            //             if (typeof element.TeamPaint !== "undefined") {
+            //                 // console.log("cc ", element.TeamPaint);
+            //                 if (element.TeamPaint.team === 0) {
+            //                     sumTeam0++;
+            //                     test++;
+            //                 } else if (element.TeamPaint.team === 1) {
+            //                     sumTeam1++;
+            //                     test++;
+            //                 }
+            //             }
+            //         }
+
+            //         // if (element.actor_id == 7) {
+            //         //     console.log("7");
+            //         // } 
+            //         // if (element.object_id == 269) {
+            //         //     console.log("269");
+            //         // }
+            //     });
+                
+            //     console.log(test);
+            // });
+
+            console.log("Somme team 0 : " + sumTeam0);
+            console.log("Somme team 1 : " + sumTeam1);
+
+            console.log(getLocations(data, 0));
+
+            var locationBall = getLocations(data, 0);
+
+            var sumXneg = 0;
+            var sumXpos = 0;
+
+            locationBall.forEach(location => {
+                // console.log(location[1].x);
+                if (location[1].x < 0) {
+                    sumXneg++;
+                } else if (location[1].x > 0) {
+                    sumXpos++;
+                }
+            });
+
+            console.log("Somme X neg : " + sumXneg);
+            console.log("Somme X pos : " + sumXpos);
+
+            // Créer un diagramme circulaire avec sumXneg étant le nombre de fois où la balle est dans le camp de la team 0
+            // et sumXpos étant le nombre de fois où la balle est dans le camp de la team 1
+
+            // var width = 500;
+            // var height = 500;
+            // var radius = Math.min(width, height) / 2;
+
+            // var svg_ball = d3.select("#content").append("svg")
+            //     .attr("width", width)
+            //     .attr("height", height)
+            //     .append("g")
+            //     .attr("transform",
+            //     "translate(" + width / 2 + "," + height / 2 + ")");
+
+            var data_ball = [
+                { team: 'Team1', count: sumXneg },
+                { team: 'Team2', count: sumXpos },
+            ];
+
+            getPieData = d3.pie()
+                .value(function(d) { console.log(d.value); return d.count; });
+            var pieData = getPieData(data_ball);
+
+            function displayCircularDiagram() {
+                const width = 600;
+                const height = 400;
+                
+                const svg = d3.select("#content").append("svg")
+                    .attr('width', width)
+                    .attr('height', height);
+
+                // On utilise la fonction d3.arc qui va s'occuper de
+                // déssiner les arcs de cercle pour nous
+                const arcCreator = d3.arc()
+                    .innerRadius(0)
+                    .outerRadius(height / 2)
+                
+                // une échelle pour la couleur, comme vu plus haut
+                // (en utilisant une palette de couleur catégorielle)
+                const colors = d3.scaleOrdinal()
+                    .domain(data_ball.map(d => d.team))
+                    .range(d3.schemePastel1)
+                
+                // un groupe pour centrer le camembert
+                const pie = svg.append('g')
+                    .attr('transform', `translate(${height / 2}, ${height / 2})`)
+
+                pie.selectAll('path')
+                    .data(pieData)
+                    .enter()
+                    .append('path') // Cette fois on utilise un chemin ('path') et non plus un 'rect' ou un 'circle'
+                    .attr('d', arcCreator) // La fonction responsable de dessiner le chemin pour les données actuelle
+                    .attr('fill', function(d) {
+                        if (d.data.team === "Team1") {
+                            return "#007BFF";
+                        } else if (d.data.team === "Team2") {
+                            return "#6C757D";
+                        }
+                    })
+                    .on('mouseover', (event, d) => {
+                        // On sélectionne le texte grace à sa classe
+                        // et on modifie la valeur d'opacité
+                        d3.select(`.text-${d.data.team}`)
+                            .attr('opacity', 1);
+                    })
+                    .on('mouseout', (event, d) => {
+                        // On sélectionne le texte grace à sa classe
+                        // et on modifie la valeur d'opacité
+                        d3.select(`.text-${d.data.team}`)
+                            .attr('opacity', 0);
+                    });
+
+                // On ajoute un texte avec le nombre de team concerné pour chaque secteur
+                // mais on définie l'opacité à 0
+                // Cette opacité sera modifié (à 1) lors du survol sur le secteur correspondant
+                pie.selectAll('text')
+                    .data(pieData)
+                    .enter()
+                    .append('text')
+                    // On met un nom de classe différent pour chaque texte, 
+                    // pour permettre de sélectionner le bon texte
+                    // dans les gestionnaire d'événement mouseover / mouseout
+                    .attr('class', (d) => `text-${d.data.team}`)
+                    // .centroid permet de trouver le centre de la tranche
+                    .attr('transform', d => `translate(${arcCreator.centroid(d)})`)
+                    .attr('text-anchor', 'middle')
+                    .attr('opacity', 0)
+                    .text(function(d) {
+                        var percentage = d.data.count / (sumXneg + sumXpos) * 100;
+                        percentage = Math.round(percentage * 100) / 100;
+                        return percentage + "%";
+                    });
+
+                // On va également créer une légende
+                // Pour cela, on va lié un tableau contenant le nom des teams
+                // avec des rectangles et des textes
+                const legend = svg.append('g')
+                    .attr('transform', `translate(${height-10})`)
+                
+                const rectWidth = 20
+                
+                // On va réutiliser l'échelle de couleurs, comme lors du dessin des secteurs
+                legend.selectAll('rect')
+                    .data(pieData)
+                    .enter()
+                    .append('rect')
+                    .attr('x', 0)
+                    .attr('y', (d, i) => i * rectWidth)
+                    .attr('width', rectWidth)
+                    .attr('height', rectWidth)
+                    .attr('fill', (d) => colors(d.data.team));
+                
+                // les noms de teams
+                legend.selectAll('text')
+                    .data(pieData)
+                    .enter()
+                    .append('text')
+                    .attr('x', rectWidth * 1.5)
+                    .attr('y', (d, i) => i * rectWidth + rectWidth * 0.75)
+                    .text(d => d.data.team);
+                
+                return svg.node()
+            }
+            d3.selectAll("#content").append("h1").text("Pressure");
+            d3.selectAll("#content")
+                .append("p")
+                .text("Pressure is a measure of how much time the ball spends on a side.");
+            displayCircularDiagram();
+
+
+
         });
     </script>
 </body>
