@@ -15,20 +15,22 @@
             padding-top: 50px;
             padding-bottom: 20px;
         }
-        .player1 {
-            fill: #007BFF; 
+        .team1 {
+            fill: #307fe2; 
+            background-color: #307fe2;
             stroke: black; 
             stroke-width: 1; 
         }    
-        .player1.hovered {
+        .team1.hovered {
             opacity: 0.6;
         }
-        .player2 {
-            fill: #6C757D; 
+        .team2 {
+            fill: #e87722; 
+            background-color: #e87722;
             stroke: black; 
             stroke-width: 1; 
         }    
-        .player2.hovered {
+        .team2.hovered {
             opacity: 0.6;
         }
         .text-team-results {
@@ -109,8 +111,6 @@
 
     <script>
         d3.json("utils/replay03.json").then(function(data) {
-            console.log(data.properties);
-
             var scoreTeam0;
             var scoreTeam1;
 
@@ -155,8 +155,8 @@
                                 .attr('colspan', 6)
                                 .style('font-weight', 'bold')
                                 .classed('text-light', true)
-                                .classed('bg-primary', d === scoreTeam0)
-                                .classed('bg-secondary', d === scoreTeam1);
+                                .classed('team1', d === scoreTeam0)
+                                .classed('team2', d === scoreTeam1);
                             return d;
                         } else {
                             return d.Name;
@@ -216,17 +216,7 @@
             console.log(overviewStats);
             var width = d3.select("body").node().getBoundingClientRect().width;
 
-            // Pour chaque élément de la map, on va l'aafficher sous forme de rectangle
-            // On va afficher un rectangle par élément de la map défini de la manière suivante :
-            // - la largeur du rectangle est proportionnelle à la valeur de l'élément
-            // - la hauteur du rectangle est fixe
-            // - la position du rectangle est définie par la position de l'élément dans la map
-            // - la couleur du rectangle est définie par la valeur de l'élément
-            // - le texte du rectangle est défini par la clé de l'élément
-            // - la couleur du texte est définie par la valeur de l'élément
-            // - la taille du texte est fixe
-            // - la position du texte est définie par la position de l'élément dans la map
-            // - la police du texte est fixe
+            // Pour chaque élément de la map, on va l'fficher sous forme de rectangle
             function displayOverviewStats() {
                 var widthDelta = 125;
                 var centrageVertical = 30;
@@ -237,11 +227,11 @@
                 var width = 1000;  // Ajout de la variable width pour référence
 
                 // Rectangle pour les stats du joueur 1
-                var rectanglesPlayer1 = svg.selectAll(".player1")
+                var rectanglesPlayer1 = svg.selectAll(".team1")
                     .data(overviewStats)
                     .enter()
                     .append("rect")
-                    .attr("class", "player1")
+                    .attr("class", "team1")
                     .attr("y", function(d, i) {
                         return i * 50;
                     })
@@ -294,11 +284,11 @@
                 });
 
                 // Rectangle pour les stats du joueur 2
-                var rectanglesPlayer2 = svg.selectAll(".player2")
+                var rectanglesPlayer2 = svg.selectAll(".team2")
                     .data(overviewStats)
                     .enter()
                     .append("rect")
-                    .attr("class", "player2")
+                    .attr("class", "team2")
                     .attr("y", function(d, i) {
                         return i * 50;
                     })
@@ -407,38 +397,21 @@
             console.log("Somme team 0 : " + sumTeam0);
             console.log("Somme team 1 : " + sumTeam1);
 
-            console.log(getLocations(data, 0));
 
             var locationBall = getLocations(data, 0);
 
             var sumXneg = 0;
             var sumXpos = 0;
 
+            // La largeur du terrain est y (-5 200 => 5 200)
             locationBall.forEach(location => {
-                // console.log(location[1].x);
-                if (location[1].x < 0) {
+                if (location[1].y < 0) {
                     sumXneg++;
-                } else if (location[1].x > 0) {
+                } else if (location[1].y > 0) {
                     sumXpos++;
                 }
             });
 
-            console.log("Somme X neg : " + sumXneg);
-            console.log("Somme X pos : " + sumXpos);
-
-            // Créer un diagramme circulaire avec sumXneg étant le nombre de fois où la balle est dans le camp de la team 0
-            // et sumXpos étant le nombre de fois où la balle est dans le camp de la team 1
-
-            // var width = 500;
-            // var height = 500;
-            // var radius = Math.min(width, height) / 2;
-
-            // var svg_ball = d3.select("#content").append("svg")
-            //     .attr("width", width)
-            //     .attr("height", height)
-            //     .append("g")
-            //     .attr("transform",
-            //     "translate(" + width / 2 + "," + height / 2 + ")");
 
             var data_ball = [
                 { team: 'Team1', count: sumXneg },
@@ -478,13 +451,8 @@
                     .enter()
                     .append('path') // Cette fois on utilise un chemin ('path') et non plus un 'rect' ou un 'circle'
                     .attr('d', arcCreator) // La fonction responsable de dessiner le chemin pour les données actuelle
-                    .attr('fill', function(d) {
-                        if (d.data.team === "Team1") {
-                            return "#007BFF";
-                        } else if (d.data.team === "Team2") {
-                            return "#6C757D";
-                        }
-                    })
+                    .attr('fill', d => ({ Team1: "#307fe2", Team2: "#e87722" }[d.data.team]))
+
                     .on('mouseover', (event, d) => {
                         // On sélectionne le texte grace à sa classe
                         // et on modifie la valeur d'opacité
@@ -536,9 +504,9 @@
                     .attr('y', (d, i) => i * rectWidth)
                     .attr('width', rectWidth)
                     .attr('height', rectWidth)
-                    .attr('fill', (d) => colors(d.data.team));
+                    .attr('fill', d => ({ Team1: "#307fe2", Team2: "#e87722" }[d.data.team]));
                 
-                // les noms de teams
+                // les noms des teams
                 legend.selectAll('text')
                     .data(pieData)
                     .enter()
