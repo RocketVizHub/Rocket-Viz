@@ -10,8 +10,8 @@ async function handleFileUpload() {
       // Display file details
       displayFileDetails(data);
 
-      // Debug axel
-      displayDebugAxel(data);
+      // Display & Debug axel
+      displayNDebugAxel(data);
     } else {
       console.error("No file selected.");
     }
@@ -50,13 +50,18 @@ function displayFileDetails(data) {
 }
 
 /** Partie Axel **/
-function displayDebugAxel(data) {
+function displayNDebugAxel(data) {
   console.log("--- AXEL IS DEBUGGING ---");
   
   debugClassIndices(data);
-  console.log(getCarsIds(data));
-  ballLocations = getLocations(data, 0);
+  ballTimeNActorId = getBallTimeNActorId(data);
+  console.log(ballTimeNActorId);
+  ballLocations = getBallLocations(data, ballTimeNActorId, 0, -1);
   console.log(ballLocations);
+
+
+  // ballLocations = getLocations(data, 0);
+  // console.log(ballLocations);
   minMaxLocations = getMinMaxLocations(ballLocations);
   console.log(minMaxLocations);
   ratioXY = (minMaxLocations.xMax - minMaxLocations.xMin) / (minMaxLocations.yMax - minMaxLocations.yMin);
@@ -79,6 +84,9 @@ function displayDebugAxel(data) {
         end_color: "#21A38B"
       }
   );
+
+  var slider = new Slider('#ex2', {});
+
   
   console.log("--- DEBUGGED ---");
 }
@@ -92,19 +100,73 @@ function debugClassIndices(data) {
 }
 
 /**
- * Retrieves the stream IDs of cars from the given data.
- * @param {Object} data - The data object containing class indices and net cache.
- * @returns {Array} - An array of stream IDs.
+ * Retrieves the time and actor ID for each frame where the ball is at location (0, 0) and is sleeping.
+ * @param {Object} data - The data object containing network frames.
+ * @returns {Array} - An array of arrays, where each inner array contains the frame time and actor ID.
  */
-function getCarsIds(data) {
-  const class_indices = data.class_indices;
-  const index = class_indices.filter((class_index) => class_index.class === "TAGame.RBActor_TA")[0].index;
+function getBallTimeNActorId(data) {
+  const frames = data.network_frames.frames;
+  const ballTimeNActorId = new Array();
+  frames.forEach((frame) => {
+    frame.updated_actors.forEach((actor) => {
+      if (actor.attribute && actor.attribute.RigidBody && actor.attribute.RigidBody.sleeping === true && actor.attribute.RigidBody.location && actor.attribute.RigidBody.location.x === 0 && actor.attribute.RigidBody.location.y === 0) {
+        ballTimeNActorId.push([frame.time, actor.actor_id]);
+      }
+    });
+  });
+  return ballTimeNActorId;
+}
 
-  const net_cache = data.net_cache;
-  const indices = net_cache.filter((obj) => obj.object_ind === index)[0].properties;
-  const stream_ids = new Array();
-  indices.forEach((obj) => stream_ids.push(obj.stream_id));
-  return stream_ids;
+/**
+ * Retrieves the locations of a ball from the given data within a specified time range.
+ * If endTime is -1, all frames after startTime will be considered.
+ * For each frame, the actor in ballTimeNActorId with the corresponding time will be picked.
+ *
+ * @param {object} data - The data containing network frames.
+ * @param {object} ballTimeNActorId - The ball time and actor ID mapping.
+ * @param {number} startTime - The start time of the desired time range.
+ * @param {number} endTime - The end time of the desired time range. Use -1 to consider all frames after startTime.
+ * @returns {Array} - An array of ball locations, each containing the time and location coordinates.
+ */
+function getBallLocations(data, ballTimeNActorId, startTime, endTime) {
+  /*
+  if endTime is -1, we will take all the frames after startTime
+  for each frame we will pick the actor in ballTimeNActorId with the corresponding time
+  */
+  // console.log(ballTimeNActorId);
+  const frames = data.network_frames.frames;
+  const locations = new Array();
+  frames.forEach((frame) => {
+    if (frame.time >= startTime && (frame.time <= endTime || endTime === -1)) {
+      // check what actor_id we need to use
+      ballActorId = findBallActorId(ballTimeNActorId, frame.time);
+      // console.log(ballActorId);
+
+      frame.updated_actors.forEach((actor) => {
+        if (actor.actor_id === ballActorId && actor.attribute && actor.attribute.RigidBody && actor.attribute.RigidBody.location) {
+          // console.log(actor.attribute.RigidBody.location);
+          locations.push([frame.time, actor.attribute.RigidBody.location]);
+        }
+      });
+    }
+  });
+  return locations;
+}
+
+/**
+ * Finds the actor ID associated with a given time in an array of ball time and actor ID pairs.
+ * @param {Array<Array<number|string>>} ballTimeNActorId - The array of ball time and actor ID pairs.
+ * @param {number} time - The time to search for.
+ * @returns {number|string} - The actor ID associated with the given time.
+ */
+function findBallActorId(ballTimeNActorId, time) {
+  for (let i = 0; i < ballTimeNActorId.length-1; i++) {
+    if (ballTimeNActorId[i+1][0] > time) {
+      // console.log(ballTimeNActorId[i][1]);
+      return ballTimeNActorId[i][1];
+    }
+  }
+  return ballTimeNActorId[ballTimeNActorId.length-1][1];
 }
 
 /**
@@ -320,6 +382,9 @@ function displayHeatmap(data, options) {
   const numrows = data.length;
   // assume all subarrays have same length
   const numcols = data[0].length;
+
+  // remove the old svg if it exists
+  d3.select(container).select("svg").remove();
 
   // Create the SVG container
   const svg = d3
