@@ -38,6 +38,8 @@ async function readFileAsync(file) {
 
 function displayFileDetails(data) {
   console.log(Object.keys(data.properties));
+  list_frame_demo = findFramesIndicesWithDemolishFx(data);
+  console.log(getReservationAfterDestroy(data, list_frame_demo));
   const fileDetailsElement = document.getElementById("fileDetails");
   fileDetailsElement.innerHTML = `
                 <p><strong>header size:</strong> ${data.header_size}</p>
@@ -151,7 +153,6 @@ function getReservationAfterDestroy(data, frameIndicesWithDemolishFx) {
   });
 }
 
-// Récupère les réservations après la destruction d'un des joueur de l'équipe 0
 function getTeam0Destroy(data, frameIndicesWithDemolishFx) {
   const frames = data.network_frames.frames;
   const playerTeams = getPlayersAndTeams(data);
@@ -159,24 +160,24 @@ function getTeam0Destroy(data, frameIndicesWithDemolishFx) {
 
   frameIndicesWithDemolishFx.forEach((frameIndex) => {
     const frame = frames[frameIndex];
-    const filteredActors = frame.updated_actors.filter((actor) => { // Filtrer les acteurs avec Reservation et number: 1
+    const filteredActors = frame.updated_actors.filter((actor) => {
       return actor.attribute && actor.attribute.Reservation && actor.attribute.Reservation.number === 1;
     });
 
-    if (filteredActors.some((filteredActor) => { // Vérifier si au moins un acteur dans la frame a "Player Team: Blue"
+    filteredActors.forEach((filteredActor) => {
       const reservationName = filteredActor.attribute.Reservation.name || "N/A";
       const playerName = reservationName.toLowerCase();
       const playerTeam = playerTeams.find((player) => player.name.toLowerCase() === playerName)?.team || "Unknown";
 
-      return playerTeam === "Blue";
-    })) {
-      destroyedFramesTeam0.push(frameIndex);
-    }
+      if (playerTeam === "Blue") {
+        destroyedFramesTeam0.push({ frameIndex, playerName });
+      }
+    });
   });
+
   return destroyedFramesTeam0;
 }
 
-// Récupère les réservations après la destruction d'un des joueur de l'équipe 1
 function getTeam1Destroy(data, frameIndicesWithDemolishFx) {
   const frames = data.network_frames.frames;
   const playerTeams = getPlayersAndTeams(data);
@@ -184,18 +185,19 @@ function getTeam1Destroy(data, frameIndicesWithDemolishFx) {
 
   frameIndicesWithDemolishFx.forEach((frameIndex) => {
     const frame = frames[frameIndex];
-    const filteredActors = frame.updated_actors.filter((actor) => { // Filtrer les acteurs avec Reservation et number: 1
+    const filteredActors = frame.updated_actors.filter((actor) => {
       return actor.attribute && actor.attribute.Reservation && actor.attribute.Reservation.number === 1;
     });
 
-    if (filteredActors.some((filteredActor) => { // Vérifier si au moins un acteur dans la frame a "Player Team: Orange"
+    filteredActors.forEach((filteredActor) => {
       const reservationName = filteredActor.attribute.Reservation.name || "N/A";
       const playerName = reservationName.toLowerCase();
       const playerTeam = playerTeams.find((player) => player.name.toLowerCase() === playerName)?.team || "Unknown";
-      return playerTeam === "Orange";
-    })) {
-      destroyedFramesTeam1.push(frameIndex);
-    }
+
+      if (playerTeam === "Orange") {
+        destroyedFramesTeam1.push({ frameIndex, playerName });
+      }
+    });
   });
 
   return destroyedFramesTeam1;
@@ -412,7 +414,7 @@ function displayTimeline(data) {
   let demolitionDataTeam1 = getTeam1Destroy(data, frameIndicesWithDemolishFx);
 
 
-  demolitionDataTeam0.forEach((frameIndex) => {
+  demolitionDataTeam0.forEach(({ frameIndex, playerName }) => {
     const x = xScale(frameIndex / framerate / 60);
   
     svg
@@ -424,11 +426,11 @@ function displayTimeline(data) {
       .attr("height", 20)
       .on("mouseover", function () {
         const time = (frameIndex / framerate).toFixed(2);
-        d3.select(this).append("title").text(`Blue player demolished at ${time} seconds`);
+        d3.select(this).append("title").text(`${playerName} demolished at ${time} seconds`);
       });
   });
   
-  demolitionDataTeam1.forEach((frameIndex) => {
+  demolitionDataTeam1.forEach(({ frameIndex, playerName }) => {
     const x = xScale(frameIndex / framerate / 60);
   
     svg
@@ -440,7 +442,7 @@ function displayTimeline(data) {
       .attr("height", 20)
       .on("mouseover", function () {
         const time = (frameIndex / framerate).toFixed(2);
-        d3.select(this).append("title").text(`Orange player demolished at ${time} seconds`);
+        d3.select(this).append("title").text(`${playerName} demolished at ${time} seconds`);
       });
   });
 
