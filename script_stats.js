@@ -11,7 +11,9 @@ async function handleFileUpload() {
       displayFileDetails(data);
 
       // Display & Debug axel
+      document.getElementById("ball_heatmap_buttons").innerHTML = "";
       displayNDebugAxel(data);
+
     } else {
       console.error("No file selected.");
     }
@@ -85,10 +87,49 @@ function displayNDebugAxel(data) {
       }
   );
 
-  var slider = new Slider('#ex2', {});
-
+  for (var i = 0; i < ballTimeNActorId.length; i++) {
+    createButtons(i, "toto", "ball_heatmap_buttons", data, ballTimeNActorId[i][0], ballTimeNActorId[i+1] ? ballTimeNActorId[i+1][0] : -1, width, height, xSize, ySize);
+  }
   
   console.log("--- DEBUGGED ---");
+}
+
+function createButtons(id, text, containerId, data, start, end, width, height, xSize, ySize) {
+  var btn = document.createElement("button");
+
+  btn.id = id;
+  btn.className = "btn btn-primary mt-3";
+  btn.innerText = text;
+  btn.style.borderRadius = "0";
+
+  btn.onclick = function() {
+    refreshHeatmap(data, start, end, width, height, xSize, ySize);
+  };
+
+  document.getElementById(containerId).appendChild(btn);
+}
+
+function refreshHeatmap(data, start, end, width, height, xSize, ySize) {
+  console.log("refreshing heatmap");
+  console.log(start);
+  console.log(end);
+
+  ballTimeNActorId = getBallTimeNActorId(data);
+  ballLocations = getBallLocations(data, ballTimeNActorId, start, end);
+  heatmap = locationsToHeatmap(ballLocations, xSize, ySize);
+  console.log(heatmap);
+
+  heatmap = thresholdHeatmap(heatmap);
+  displayHeatmap(
+      heatmap,
+      {
+        width: width,
+        height: height,
+        container: "#ball_heatmap",
+        start_color: "#FC7C89",
+        end_color: "#21A38B"
+      }
+  );
 }
 
 /**
@@ -361,7 +402,8 @@ function thresholdHeatmap(heatmap) {
  * @param {string} options.end_color - The ending color for the heatmap.
  */
 function displayHeatmap(data, options) {
-  const margin = { top: 50, right: 50, bottom: 180, left: 180 };
+  const margin = { top: 0, right: 0, bottom: 0, left: 0};
+  // const margin = { top: 50, right: 50, bottom: 180, left: 180 };
   const width = options.width;
   const height = options.height;
   const container = options.container;
