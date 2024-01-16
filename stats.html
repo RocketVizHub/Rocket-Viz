@@ -7,6 +7,23 @@
     <title>Rocket Viz - Stats</title>
     <!-- Bootstrap CSS -->
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
+    
+
+    <!-- Custom CSS -->
+    <style>
+        #timeline {
+            display: none;
+            border: 3px solid black;
+            height: 270px;
+        }
+
+        .timeline-visible {
+            display: block;
+        }
+    </style>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js"></script>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
 </head>
 
 <body>
@@ -42,6 +59,20 @@
     <div class="container mt-3">
         <h2>File Information</h2>
         <div id="fileDetails"></div>
+        <div id="heatmaps">
+            <div style="display:inline-block" id="ball_heatmap"></div>
+            <div style="display:inline-block" id="ball_heatmap_buttons"></div>
+        </div>
+    </div>
+
+
+    <!-- Display Section -->
+    <div class="container mt-3">
+        <h2>Timeline</h2>
+        <div id="timelineDetails">
+            <div id="timeline"></div>
+            <div id="legend" class="mt-3"></div>
+        </div>
     </div>
 
     <!-- Bootstrap JS and dependencies -->
