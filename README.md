@@ -3,38 +3,53 @@ DAKHLI Sonia
 LERAY Nicolas
 
 # Rocket-Viz
+
 Projet de visualisation des données du jeu Rocket League.
-Rocket League est un jeu vidéo dont le but est de marquer des buts en utilisant des voitures pour frapper un ballon dans un but adverse, combinant ainsi des éléments de football et de conduite. 
+Rocket League est un jeu vidéo dont le but est de marquer des buts en utilisant des voitures pour frapper un ballon dans un but adverse, combinant ainsi des éléments de football et de conduite.
 
 Nous utilisons : https://github.com/nickbabcock/rrrocket pour parser un fichier de replay Rocket League en fichier json.
 
 ## Séparation du travail
+
 Nous avons chacun travaillé sur différentes parties :
+
 - **Nicolas** : Timeline
 - **Axel** : Heatmap
 - **Sonia** : tableau des scores, statistiques par équipe, diagramme pression.
 
 ## Suivi
+
 ### 13/12/2023 - Définition du projet
-Choix du sujet : Analyse de données personnelles du jeu **Rocket-League**.  
+
+Choix du sujet : Analyse de données personnelles du jeu **Rocket-League**.
 
 ### 19/12/2023 - Début du projet
+
 Chargement et début du traitement du fichier json.
 
-### 19/12/2023  => 16/01/2024 - Début de la partie Statistique globales
+### 19/12/2023 => 16/01/2024 - Début de la partie Statistique globales
+
 #### Nicolas
+
 - (Depuis le 19/12/2023) Affichage de la **timeline**.
-#### Axel 
+
+#### Axel
+
 - (Depuis le 19/12/2023) Affichage de la **heatmap**.
+
 #### Sonia
+
 - (19/12/2023) Affichage d'un premier **tableau des scores** sans mise en forme.
 - (Depuis le 09/01/2024) Amélioration du **tableau des scores**, ajout des **statistiques par équipe** et du diagramme circulaire de **pressure**.
 
 ## Structure du projet
+
 ### Timeline
+
 La timeline est une représentation visuelle des événements clés qui se produisent pendant un match. Elle permet aux joueurs de comprendre rapidement le déroulement du match et de repérer les moments importants.
 
 #### Fonctionnalités de la Timeline
+
 La timeline de Rocket League comprend les fonctionnalités suivantes :
 
 **Buts** : Les buts marqués par chaque équipe sont représentés sur la timeline. Chaque but est représenté par une icône de ballon de football, placée à l'endroit exact de la timeline où le but a été marqué.
@@ -48,24 +63,29 @@ La timeline de Rocket League comprend les fonctionnalités suivantes :
 La timeline est un outil puissant pour analyser un match de Rocket League. Elle vous permet de voir rapidement quand et où les événements clés ont eu lieu, ce qui peut vous aider à comprendre comment le match s'est déroulé et où vous pouvez vous améliorer pour les futurs matchs.
 
 ### HeatMap
+
 Représente la position du ballon tout au long de la game.
 
 ### Aperçu des statistiques globales
-#### Tableau des scores
-Le tableau des scores est composé de la manière suivante :  
-|        | Score | Goals | Assists | Saves | Shots |
-|--------|-------|-------|---------|-------|-------|
-|Score Team 1                                      |
-|Joueur 1| 120   | 0     | 1       | 0     | 0     | 
-|Joueur 2| 150   | 1     | 0       | 0     | 1     | 
-|Score Team 2                                      |
-|Joueur 3| 250   | 1     | 0       | 1     | 0     | 
-|Joueur 4| 220   | 0     | 1       | 0     | 0     | 
 
-#### Statistiques par équipe 
+#### Tableau des scores
+
+Le tableau des scores est composé de la manière suivante :  
+| | Score | Goals | Assists | Saves | Shots |
+|--------|-------|-------|---------|-------|-------|
+|Score Team 1 |
+|Joueur 1| 120 | 0 | 1 | 0 | 0 |
+|Joueur 2| 150 | 1 | 0 | 0 | 1 |
+|Score Team 2 |
+|Joueur 3| 250 | 1 | 0 | 1 | 0 |
+|Joueur 4| 220 | 0 | 1 | 0 | 0 |
+
+#### Statistiques par équipe
+
 Les statistiques par équipe permettent la confrontation
 des scores totaux des deux équipes.
 
 #### Pressure
+
 La pressure est représentée par un diagramme circulaire montrant
 quel pourcentage de la partie la balle a passé sur le demi-terrain de chacune des deux équipes.
