@@ -525,23 +525,75 @@ function displayNDebugAxel(data) {
       }
   );
 
+  scoreData = getScore(data);
+  console.log(scoreData);
+  winner = scoreData[scoreData.length-1].score.Blue > scoreData[scoreData.length-1].score.Orange ? "Blue" : "Orange";
+
   for (var i = 0; i < ballTimeNActorId.length; i++) {
-    createButtons(i, "toto", "ball_heatmap_buttons", data, ballTimeNActorId[i][0], ballTimeNActorId[i+1] ? ballTimeNActorId[i+1][0] : -1, width, height, xSize, ySize);
+    createButtons(i, i===0 ? "0-0" : ""+scoreData[i-1].score.Blue + "-" + scoreData[i-1].score.Orange, i===scoreData.length ? winner : scoreData[i].scoredBy, "ball_heatmap_buttons", data, ballTimeNActorId[i][0], ballTimeNActorId[i+1] ? ballTimeNActorId[i+1][0] : -1, width, height, xSize, ySize);
   }
   
   console.log("--- DEBUGGED ---");
 }
 
-function createButtons(id, text, containerId, data, start, end, width, height, xSize, ySize) {
+function getScore(data) {
+  const goals = getGoals(data);
+  const score = { Blue: 0, Orange: 0 };
+  const scoreList = [];
+
+  goals.forEach((goal) => {
+    if (goal.team === 0) {
+      score.Blue++;
+    } else if (goal.team === 1) {
+      score.Orange++;
+    }
+
+    scoreList.push({
+      // Ajoute le score actuel à la liste à chaque but
+      score: {
+        Blue: score.Blue,
+        Orange: score.Orange,
+      },
+      scoredBy: goal.team === 0 ? "Blue" : "Orange",
+    });
+  });
+
+  return scoreList;
+}
+
+function createButtons(id, text, team, containerId, data, start, end, width, height, xSize, ySize) {
   var btn = document.createElement("button");
 
-  btn.id = id;
-  btn.className = "btn btn-primary mt-3";
+  btn.id = "#ball_heatmap_buttons" + id;
+  btn.className = "btn mt-3";
   btn.innerText = text;
   btn.style.borderRadius = "0";
 
+  blueColor = "#307fe2";
+  orangeColor = "#e87722";
+  lightBlueColor = "#6b9ddb";
+  lightOrangeColor = "#de9f6f";
+  if (team === "Blue") {
+    color = blueColor;
+    lightColor = lightBlueColor;
+  } else if (team === "Orange") {
+    color = orangeColor;
+    lightColor = lightOrangeColor;
+  }
+
+  btn.style.backgroundColor = color;
+  btn.style.borderColor = color;
+
   btn.onclick = function() {
     refreshHeatmap(data, start, end, width, height, xSize, ySize);
+    var buttons = document.querySelectorAll("#ball_heatmap_buttons");
+    for (var i = 0; i < buttons.length; i++) {
+      var button = document.getElementById("#ball_heatmap_buttons" + i);
+      button.style.backgroundColor = lightColor;
+      button.style.borderColor = lightColor;
+    }
+    btn.style.backgroundColor = color;
+    btn.style.borderColor = color;
   };
 
   document.getElementById(containerId).appendChild(btn);
@@ -922,7 +974,7 @@ function displayHeatmap(data, options) {
 
   cell
     .append("rect")
-    .attr("width", x.rangeBand())
+    .attr("width", x.rangeBand()+0.4)
     .attr("height", y.rangeBand()+0.4);
     // .attr("width", x.rangeBand()-0.3) if we want the borders
 
