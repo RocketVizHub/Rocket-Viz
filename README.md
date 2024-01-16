@@ -6,6 +6,8 @@ LERAY Nicolas
 Projet de visualisation des données du jeu Rocket League.
 Rocket League est un jeu vidéo dont le but est de marquer des buts en utilisant des voitures pour frapper un ballon dans un but adverse, combinant ainsi des éléments de football et de conduite. 
 
+Nous utilisons : https://github.com/nickbabcock/rrrocket pour parser un fichier de replay Rocket League en fichier json.
+
 ## Séparation du travail
 Nous avons chacun travaillé sur différentes parties :
 - **Nicolas** : Timeline
@@ -14,7 +16,7 @@ Nous avons chacun travaillé sur différentes parties :
 
 ## Suivi
 ### 13/12/2023 - Définition du projet
-Choix du sujet : Analyse de données personnelles du jeu **Rocket-League**.
+Choix du sujet : Analyse de données personnelles du jeu **Rocket-League**.  
 
 ### 19/12/2023 - Début du projet
 Chargement et début du traitement du fichier json.
