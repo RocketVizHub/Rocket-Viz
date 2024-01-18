@@ -16,6 +16,11 @@ async function handleFileUpload() {
       // Display & Debug axel
       document.getElementById("ball_heatmap_buttons").innerHTML = "";
       displayNDebugAxel(data);
+
+      // sonia
+      document.getElementById("playerStatsContent").innerHTML = "";
+      document.getElementById("content").innerHTML = "";
+      displayPlayerStats(data);
     } else {
       console.error("No file selected.");
     }
@@ -1243,6 +1248,8 @@ function getTeamStats(team0, team1) {
   map.set("Assists", { [team0[0].Team]: assists1, [team1[1].Team]: assists });
   map.set("Saves", { [team0[0].Team]: saves1, [team1[1].Team]: saves });
   map.set("Shots", { [team0[0].Team]: shots1, [team1[1].Team]: shots });
+
+  console.log(map);
 
   return map;
 }

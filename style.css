@@ -1,0 +1,36 @@
+h1 {
+	padding-top: 50px;
+	padding-bottom: 20px;
+}
+.team1 {
+	fill: #307fe2; 
+	background-color: #307fe2;
+	stroke: black; 
+	stroke-width: 1; 
+}    
+.team1.hovered {
+	opacity: 0.6;
+}
+.team2 {
+	fill: #e87722; 
+	background-color: #e87722;
+	stroke: black; 
+	stroke-width: 1; 
+}    
+.team2.hovered {
+	opacity: 0.6;
+}
+.text-team-results {
+	fill: white;
+	font-weight: bold;
+	font-size: 14px;
+	font-family: sans-serif;
+}
+.text-row-name {
+	fill: black;
+	font-size: 20px;
+	font-family: sans-serif;
+}
+text {
+	pointer-events: none;
+}

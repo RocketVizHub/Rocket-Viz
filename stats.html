@@ -7,6 +7,7 @@
     <title>Rocket Viz - Stats</title>
     <!-- Bootstrap CSS -->
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="style.css" rel="stylesheet">
     
 
     <!-- Custom CSS -->
@@ -24,6 +25,8 @@
 
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js"></script>
     <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <!-- <script src="https://d3js.org/topojson.v1.min.js"></script> -->
 </head>
 
 <body>
@@ -56,6 +59,29 @@
         <h2>File Upload</h2>
         <input type="file" id="fileInput" class="form-control-file">
         <button id="uploadButton" class="btn btn-primary mt-3">Upload File</button>
+    </div>
+
+    <!-- Table Section -->
+    <div class="container mt-3">
+        <h1> Aperçu de la partie </h1>
+
+        <!-- Create an empty table with an id -->
+        <table id="playerStatsTable" border="1" class="table table-bordered table-striped">
+            <thead class="thead-dark">
+                <tr>
+                    <th></th>
+                    <th>Score</th>
+                    <th>Goals</th>
+                    <th>Assists</th>
+                    <th>Saves</th>
+                    <th>Shots</th>
+                </tr>
+            </thead>
+            <tbody id="playerStatsContent">
+                <!-- Table body will be populated using D3 -->
+            </tbody>
+        </table>
+        <div id="content"></div>
     </div>
 
     <!-- Display Section -->
