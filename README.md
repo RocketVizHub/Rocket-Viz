@@ -98,6 +98,7 @@ quel pourcentage de la partie la balle a passé sur le demi-terrain de chacune d
 - [ ] Rubrique "Problèmes" dans README
 ### HeatMap
 - [ ] Fond de carte
+- [ ] Plus fluide / jolie 
 - [ ] Infos sur les joueurs
 - [ ] Connexion timeline + HeatMap
 - [ ] Visibilité de timeline + HeatMap 
