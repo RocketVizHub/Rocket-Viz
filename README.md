@@ -89,3 +89,18 @@ des scores totaux des deux équipes.
 
 La pressure est représentée par un diagramme circulaire montrant
 quel pourcentage de la partie la balle a passé sur le demi-terrain de chacune des deux équipes.
+
+## Améliorations
+- [ ] Github Pages
+- [ ] Avoir des fichiers déjà chargés
+- [x] Intégration de la partie "Statistiques globales"
+- [ ] Mettre sur le site un lien vers le README
+- [ ] Rubrique "Problèmes" dans README
+### HeatMap
+- [ ] Fond de carte
+- [ ] Infos sur les joueurs
+- [ ] Connexion timeline + HeatMap
+- [ ] Visibilité de timeline + HeatMap 
+
+ ## Problèmes
+ - Complexité du fichier JSON
