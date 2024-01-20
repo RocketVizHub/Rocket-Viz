@@ -1,0 +1,61 @@
+h1 {
+	padding-top: 50px;
+	padding-bottom: 20px;
+}
+td:hover {
+	font-weight: bold;
+}
+td::after {
+	display: block;
+	content: attr(data-text);
+	font-weight: bold;
+	color: transparent;
+	height: 1px;
+	margin-bottom: -1px;
+	visibility: hidden;
+	overflow: hidden;
+}
+.team1 {
+	fill: #307fe2; 
+	background-color: #307fe2;
+	stroke: white; 
+	stroke-width: 1; 
+}    
+.team1.hovered {
+	opacity: 0.6;
+}
+.team2 {
+	fill: #e87722; 
+	background-color: #e87722;
+	stroke: white; 
+	stroke-width: 1; 
+}    
+.team2.hovered {
+	opacity: 0.6;
+}
+.text-team-results {
+	fill: white;
+	font-weight: bold;
+	font-size: 14px;
+	font-family: sans-serif;
+}
+.text-row-name {
+	fill: black;
+	font-size: 20px;
+	font-family: sans-serif;
+}
+text {
+	pointer-events: none;
+}
+
+.table-and-chart-container {
+	display: flex;
+	align-items: flex-start;
+}
+#barChart {
+	/* flex: 0 0 40%; Adjust the width of the bar chart container as needed */
+	margin-left: 50px; /* Adjust the margin between the table and the bar chart */
+}
+#barChart.hovered {
+	opacity: 0.6;
+}
