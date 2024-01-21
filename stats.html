@@ -134,18 +134,38 @@
 						</div>
 					</div>
 
-					<!-- Display Section -->
-					<!-- <div class="container mt-3">
-						<h2>Heatmaps</h2>
-						<div id="heatmaps">
-							<div style="display:inline-block" id="ball_heatmap"></div>
-							<div style="display:inline-block" id="ball_heatmap_buttons"></div>
-						</div>
-					</div> -->
-				</div>
-			</div>
-		</div>
-	  </div>
+    <!-- Sélection d'un fichier -->
+    <div id="element-ancre">
+        <label for="select-files">Chose a file : </label></br>
+        <select id="select-files"></select>
+    </div>
+
+    <!-- Display Section -->
+    <div class="container mt-3">
+        <h2>File Information</h2>
+        <div id="fileDetails"></div>
+        <div id="heatmaps">
+            <div style="display:inline-block" id="ball_heatmap"></div>
+            <div style="display:inline-block" id="ball_heatmap_buttons"></div>
+        </div>
+    </div>
+
+
+    <!-- Display Section -->
+    <div class="container mt-3">
+        <h2>Timeline</h2>
+        <div id="timelineDetails">
+            <div id="timeline"></div>
+            <div id="legend" class="mt-3"></div>
+            <label for="startTime">Start Time:</label>
+            <input type="text" id="startTime" placeholder="Enter start time in minutes" />
+            
+            <label for="endTime">End Time:</label>
+            <input type="text" id="endTime" placeholder="Enter end time in minutes" />
+            
+            <button id="updateTimeline">Update Timeline</button>
+        </div>
+    </div>
 
     <!-- Bootstrap JS and dependencies -->
 	<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>

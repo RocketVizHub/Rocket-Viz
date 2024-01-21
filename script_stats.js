@@ -108,31 +108,12 @@ function displayAccordionsNReplayInformations() {
 }
 
 function displayFileDetails(data) {
-  console.log(Object.keys(data.properties));
-  list_frame_demo = findFramesIndicesWithDemolishFx(data);
-  console.log(getReservationAfterDestroy(data, list_frame_demo));
-  console.log(getMaxFrames(data));
-  console.log(getMaxTempsPartie(getMaxFrames(data), getFramerate(data)));
-  console.log(getListeFramesHighlights(data));
-  // console.log(getListFramesGoals(data));
-  // const fileDetailsElement = document.getElementById("fileDetails");
-  // fileDetailsElement.innerHTML = `
-  //               <p><strong>header size:</strong> ${data.header_size}</p>
-	// 			<p><strong>Replay Name:</strong> ${data.properties.ReplayName}</p>
-  //           `;
-  d3.select("#fileDetails").selectAll("*").remove();
-  d3.select("#fileDetails")
-    .append("p")
-    .html(`<strong>Replay Name:</strong> ${data.properties.ReplayName}`);
-  d3.select("#fileDetails")
-    .append("p")
-    .html(`<strong>Map playes:</strong> ${data.properties.MapName}`);
-  d3.select("#fileDetails")
-    .append("p")
-    .html(`<strong>Date:</strong> ${data.properties.Date}`);
-  d3.select("#fileDetails")
-    .append("p")
-    .html(`<strong>Saved by:</strong> ${data.properties.PlayerName}`);
+
+  const fileDetailsElement = document.getElementById("fileDetails");
+  fileDetailsElement.innerHTML = `
+                <p><strong>header size:</strong> ${data.header_size}</p>
+				<p><strong>Replay Name:</strong> ${data.properties.ReplayName}</p>
+            `;
 }
 
 /******************************* Partie Axel ********************************/
@@ -428,8 +409,13 @@ function prepareDataForTimeline(saves, team) {
   }));
 }
 
+let filteredDemolitions = [];
+let filteredSavesTeam0 = [];
+let filteredSavesTeam1 = [];
+let filteredGoals = [];
+
 // Affiche la timeline
-function displayTimeline(data) {
+function displayTimeline(data, startTime, endTime) {
   const maxFrames = getMaxFrames(data);
   const framerate = getFramerate(data);
 
@@ -439,7 +425,12 @@ function displayTimeline(data) {
   var width = 960 - margin.left;
   var height = 500;
 
-  const maxMinutes = maxFrames / framerate / 60;
+  let maxMinutes;
+  if (startTime !== undefined && endTime !== undefined) {
+    maxMinutes = endTime - startTime;
+  } else {
+    maxMinutes = maxFrames / framerate / 60;
+  }
   const xScale = d3.scaleLinear().domain([0, maxMinutes]).range([0, width]);
 
   // Supprime l'ancienne timeline
@@ -636,7 +627,117 @@ function displayTimeline(data) {
         `<img src="${d.icon}" alt="${d.description}" width="20" height="20"> ${d.description}`
     )
     .style("margin-right", "20px");
+
+/*
+ Partie 5: Sélection de la partition de la timeline à afficher
+*/
+
+function displayUpdateTimeline() {
+  try {
+    const startTime = Number(document.getElementById("startTime").value);
+    const endTime = Number(document.getElementById("endTime").value);
+
+    const filteredData = getFilteredData(data, startTime, endTime);
+
+    d3.select("#timeline").selectAll("*").remove();
+    displayTimeline(filteredData, startTime, endTime);
+
+    // Rafraîchir la heatmap
+    startFrame = startTime * 60;
+    endFrame = endTime * 60;
+    refreshHeatmap(data, startFrame, endFrame, width, height, xSize, ySize);
+    
+  } catch (error) {
+    console.error("Error updating timeline:", error);
+  }
 }
+
+document.getElementById("updateTimeline").addEventListener("click", displayUpdateTimeline);
+
+}
+
+
+function getFilteredData(data, startTime, endTime) {
+  const framerate = getFramerate(data);
+  const startSeconds = Number(startTime) * 60;
+  const endSeconds = Number(endTime) * 60;
+
+  // Filtrer les frames
+  const frames = data.network_frames.frames.filter(frame => {
+    return frame.time >= startSeconds && frame.time <= endSeconds;
+  });
+
+  // Partie 1: Filtrer les buts
+  const goals = getGoals(data);
+  // Filtrer les buts qui sont dans la partition de la timeline
+  const filteredGoals = goals.filter(goal => {
+    return goal.frame / framerate >= startSeconds && goal.frame / framerate <= endSeconds;
+  });
+
+  // Partie 2: Filtrer les démolitions
+  const frameIndicesWithDemolishFx = findFramesIndicesWithDemolishFx(data);
+  const demolitionDataTeam0 = getTeam0Destroy(data, frameIndicesWithDemolishFx).filter(({ frameIndex }) => frameIndex / framerate >= startSeconds && frameIndex / framerate <= endSeconds);
+  const demolitionDataTeam1 = getTeam1Destroy(data, frameIndicesWithDemolishFx).filter(({ frameIndex }) => frameIndex / framerate >= startSeconds && frameIndex / framerate <= endSeconds);
+
+  // Partie 3: Filtrer les sauvegardes
+  const team0Saves = getTeam0Saves(data);
+  const filteredSavesTeam0 = team0Saves.filter(save => {
+    return save.frame / framerate >= startSeconds && save.frame / framerate <= endSeconds;
+  });
+
+  const team1Saves = getTeam1Saves(data);
+  const filteredSavesTeam1 = team1Saves.filter(save => {
+    return save.frame / framerate >= startSeconds && save.frame / framerate <= endSeconds;
+  });
+
+
+  // Obtenir les données de la balle
+  const ballTimeNActorId = getBallTimeNActorId(data);
+  const ballLocations = getBallLocations(data, ballTimeNActorId, startTime, endTime);
+
+  // Filtrer les données de la balle
+  const filteredBallTimeNActorId = ballTimeNActorId.filter(([time, actorId]) => {
+    return time >= startTime && time <= endTime;
+  });
+  const filteredBallLocations = ballLocations.filter(([time, location]) => {
+    return time >= startTime && time <= endTime;
+  });
+
+  heatmap = locationsToHeatmap(filteredBallLocations, xSize, ySize);
+
+  return {
+    ...data,
+    network_frames: {
+      ...data.network_frames,
+      frames: frames
+    },
+    //TimeLine
+    goals: filteredGoals,
+    demolitionDataTeam0: demolitionDataTeam0,
+    demolitionDataTeam1: demolitionDataTeam1,
+    team0Saves: filteredSavesTeam0,
+    team1Saves: filteredSavesTeam1,
+    // Heatmap
+    ballTimeNActorId: filteredBallTimeNActorId,
+    ballLocations: filteredBallLocations,
+    heatmap: heatmap,
+  };  
+}
+
+document
+  .getElementById("uploadButton")
+  .addEventListener("click", handleFileUpload);
+
+document.getElementById("uploadButton").addEventListener("click", function () {
+  d3.select("#timeline")
+    .classed("timeline-hidden", true)
+    .style("display", "none");
+  handleFileUpload();
+});
+
+
+
+
 
 /** Partie Axel **/
 function displayNDebugAxel(data) {
@@ -764,7 +865,7 @@ function createButtons(
 
   btn.style.backgroundColor = color;
   btn.style.borderColor = color;
-
+  
   btn.onclick = function () {
     refreshHeatmap(data, start, end, width, height, xSize, ySize);
     var buttons = document.querySelectorAll("#ball_heatmap_buttons");
@@ -1221,7 +1322,13 @@ function displayHeatmap(data, options) {
 /******************************* Partie Nicolas ********************************/
 
 function getFramerate(data) {
-  return data.properties.RecordFPS;
+  if (data && data.properties) {
+    return data.properties.RecordFPS;
+  } else {
+    // Gérer le cas où data ou data.properties est indéfini
+    console.error("Data or data.properties is undefined.");
+    return null; // ou une valeur par défaut
+  }
 }
 
 function getMaxFrames(data) {
