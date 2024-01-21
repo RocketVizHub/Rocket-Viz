@@ -1097,10 +1097,19 @@ function displayHeatmap(data, options) {
   //   .attr("width", width)
   //   .attr("height", height);
   
+  svg.append('defs')
+    .append('filter')
+    .attr('id', 'brightness')
+    .append('feComponentTransfer')
+    .append('feFuncR')
+    .attr('type', 'linear')
+    .attr('slope', '0.1'); // Adjust this value to change the brightness
+
   svg.append("svg:image")
-    .attr("xlink:href", "./img/map.png") // Remplacez par le chemin de votre image
+    .attr("xlink:href", "./img/map3.png") // Remplacez par le chemin de votre image
     .attr("width", width)
-    .attr("height", height);
+    .style("opcacity", 0.5);
+    // .attr("filter", "url(#brightness)")
   // Build some scales for us to use
   const x = d3.scale.ordinal().domain(d3.range(numcols)).rangeBands([0, width]);
   const y = d3.scale
@@ -1151,7 +1160,7 @@ function displayHeatmap(data, options) {
       return data[i];
     })
     .style("fill", colorMap)
-    .style("opacity", 0.4);
+    .style("opacity", 0.6);
 }
 
 /******************************* Partie Nicolas ********************************/
