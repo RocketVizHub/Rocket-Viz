@@ -105,3 +105,10 @@ text {
 .timeline-visible {
 	display: block;
 }
+
+.table>:not(caption) {
+	/* dont set a background color */
+
+	background-color: #f0f0f0;
+	/* background-color: ; */
+}

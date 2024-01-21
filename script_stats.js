@@ -1766,7 +1766,15 @@ function displayScoreBoard(teamsStats, scoreTeam0, scoreTeam1) {
         .classed("team1", d === scoreTeam0)
         .classed("team2", d === scoreTeam1)
         .classed("score", true)
-        .style("padding", "3px");
+        .style("padding", "3px")
+        .style("background-color", function (d) {
+          if (d === scoreTeam0) {
+            return COL_BLUE;
+          } else {
+            return COL_ORANGE;
+          }
+        }
+      );
       if (d == scoreTeam0)
         // var text = "🏁 " + d;
         var text = "🏳  " + d;
