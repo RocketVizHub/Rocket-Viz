@@ -115,7 +115,8 @@ quel pourcentage de la partie la balle a passé sur le demi-terrain de chacune d
 - Histogramme de comparaison entre un joueur et, au choix :
   -  **tous les joueurs** 
   -  **tous ses alliés**
-  -  **tous ses adversaires**
+  -  **tous ses adversaires**  
+
 Le score du joueur est de la couleur de son équipe, le score moyen des autres joueurs (ne l'incluant pas lui) est en gris.
   -  **un des autres joueurs** apparentant ou non à son équipe.
 
