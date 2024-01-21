@@ -1407,7 +1407,6 @@ function handleRowSelection(teamsStats, selectedPlayer) {
   d3.select("#barChartSelect").selectAll("*").remove();
 
   var playerName = selectedPlayer.Name;
-  var playerTeam = selectedPlayer.Team;
 
   var textPlayerName = "Statistiques de " + playerName + " : ";
 
@@ -1445,157 +1444,63 @@ function handleRowSelection(teamsStats, selectedPlayer) {
 
   // Ajoutez une fonction pour gérer les changements dans le sélecteur
   confrontSelect.on("change", function () {
+    
+    d3.select("#playerSelect").remove();
     // Obtenez la valeur sélectionnée
     var selectedOption = confrontSelect.property("value");
-
-    console.log(typeof selectedOption);
-
-    // Utilisez la valeur sélectionnée pour mettre à jour les données
-    meanStats = rearrangeOrder(calculateMeanStats(teamsStats, selectedPlayer, playerName, selectedOption));
-
-    console.log(meanStats);
-
-    drawHistogram(teamsStats, selectedPlayer, selectedOption);
-  });
-
-
-  var barWidth = 20;
-  var widthDelta = 10;
-  var width = rearrangedPlayer.size * (2 * barWidth + widthDelta);
-  var height = 400;
-  // Create a bar chart
-  var svg = d3.select("#barChart")
-    .append("svg")
-    .attr("width", width)
-    .attr("height", height)
-    .style("display", "block");
-
-  var teamMax = new Map();
-
-  teamsStats.forEach(team => {
-    team.forEach(member => {
-      for (const [key, value] of Object.entries(member)) {
-        if (key != "Name" && key !== "OnlineID" && key !== "Team" && key !== "Platform" && key !== "bBot") {
-          if (teamMax.has(key)) {
-            if (teamMax.get(key) < value)
-              teamMax.set(key, value);
-          } else {
-            teamMax.set(key, value);
-          }
-        }
-      }
-    });
-  });
-
-  var bars = svg.selectAll("#barChart")
-    .data(rearrangedPlayer)
-    .enter()
-    .append("rect")
-    .attr("class", "barChart")
-    .attr("x", function (d, i) {
-      return 2 * i * barWidth + widthDelta * i; 
-    })
-    .attr("y", function (d) {
-      return width - width * d[1] / teamMax.get(d[0]);
-    })
-    .attr("width", barWidth)
-    .attr("height", function (d) {
-      return 2 + width * d[1] / teamMax.get(d[0]); 
-    })
-    .attr("fill", function (d) {
-      if (playerTeam == 0) {
-        return "#307fe2";
-      } else {
-        return "#e87722";
-      }
-    });
-
-    var text = svg.selectAll("text")
-      .data(rearrangedPlayer)
-      .enter()
-      .append("text")
-      .text(function(d) {
-        return d[0];
-      })
-      .attr("y", function (d) {
-        // return 250;
-        return width + 15;
-      })
-      .attr("x", function (d, i) {
-        return 2 * i * barWidth + widthDelta * i; 
-      })
-      .attr("font-size", "15px");
-  
-    bars.on("mouseover", function(e, d) {
-      d3.select(this).style("opacity", "0.8").text;
-      if (d[1] != 0) {
-        var rectWidth = parseFloat(d3.select(this).attr("width"));
-        var xPosition = parseFloat(d3.select(this).attr("x")) + 15;
-        var yPosition = parseFloat(d3.select(this).attr("y")) + 10;
     
-        // Rotate the text
-        var resultText = svg
-            .append("text")
-            .text(d[1])
-            .attr("x", xPosition)
-            .attr("y", yPosition)
-            .attr("class", "result-text")
-            .attr("text-anchor", "end") // Adjust text anchor based on your preference
-            .attr("alignment-baseline", "ideographic") // Adjust alignment baseline based on your preference
-            .attr("transform", "rotate(-90 " + xPosition + " " + yPosition + ")")
-            .style("color", "white");
-      }
-    });
+    if (selectedOption === SelectEnum.OnePlayer) {
+      // Supprimez la liste déroulante existante si elle existe déjà
+      d3.select("#playerSelect").remove();
 
-    bars.on("mouseout", function() {
-      d3.select(this).style("opacity", "1");
-      svg.select(".result-text").remove();
-    })
-  
-  var bars2 = svg.selectAll("#barChart2")
-    .data(meanStats)
-    .enter()
-    .append("rect")
-    .attr("class", "barChart2")
-    .attr("x", function (d, i) {
-      return 2 * i * barWidth + barWidth + widthDelta * i; 
-    })
-    .attr("y", function (d) {
-      return width - width * d[1] / teamMax.get(d[0]);
-    })
-    .attr("width", barWidth)
-    .attr("height", function (d) {
-      return 2 + width * d[1] / teamMax.get(d[0]); 
-    })
-    .attr("fill", "grey");
-  
-    bars2.on("mouseover", function(e, d) {
-      d3.select(this).style("opacity", "0.8").text;
-      var rectWidth = parseFloat(d3.select(this).attr("width"));
-      var xPosition = parseFloat(d3.select(this).attr("x")) + 15;
-      var yPosition = parseFloat(d3.select(this).attr("y")) + 10;
-  
-      // Rotate the text
-      var resultText = svg
-          .append("text")
-          .text(Math.round(d[1] * 100) / 100)
-          .attr("x", xPosition)
-          .attr("y", yPosition)
-          .attr("class", "result-text")
-          .attr("text-anchor", "end") // Adjust text anchor based on your preference
-          .attr("alignment-baseline", "ideographic") // Adjust alignment baseline based on your preference
-          .attr("transform", "rotate(-90 " + xPosition + " " + yPosition + ")")
-          .style("color", "white");
-    });
+      // Créez une nouvelle sélection pour les joueurs
+      var playerSelectContainer = body.append("div");
 
-    bars2.on("mouseout", function() {
-      d3.select(this).style("opacity", "1");
-      svg.select(".result-text").remove();
-    })
+      playerSelectContainer
+        .append("label")
+        .attr("for", "playerSelect")
+        .text("Select a player: ");
 
-    return svg.node();
+      var playerSelect = playerSelectContainer
+        .append("select")
+        .attr("id", "playerSelect");
+
+      // Ajoutez les options des noms des joueurs à la nouvelle liste déroulante
+      var playerOptions = teamsStats.flatMap(team => team.map(player => player.Name));
+
+      playerSelect
+        .selectAll("option")
+        .data(playerOptions)
+        .enter()
+        .append("option")
+        .attr("value", function(d) { 
+          return d; 
+        })
+        .text(function(d) { return d; });
+
+      playerSelect.on("change", function () {
+        var selectedPlayerName = playerSelect.property("value");
+        var stats = teamsStats.flat().filter(player => player.Name === selectedPlayerName);
+        meanStats = rearrangeOrder(stats[0]);
+        drawHistogram(teamsStats, selectedPlayer, meanStats);
+      });
+    } else {
+      d3.select("#playerSelect").remove();
+      drawHistogram(teamsStats, selectedPlayer, selectedOption);
+    }
+  });
+
+  drawHistogram(teamsStats, selectedPlayer, SelectEnum.AllPlayers);
 }
 
+/**
+ * Affiche l'histogramme à droite du tableau de score.
+ * @param {Map} teamsStats contient les informations de tous les joueurs.
+ * @param {Map} selectedPlayer contient les informations du joueur sélectionné.
+ * @param {Enum} selectedOption Confrontation à la moyenne de tous les ennemis,
+ * de tous les alliés ou de tous les joueurs.
+ * @returns 
+ */
 function drawHistogram(teamsStats, selectedPlayer, selectedOption) {
   // Clear existing bar chart
   d3.select("#barChart").selectAll("*").remove();
@@ -1605,7 +1510,14 @@ function drawHistogram(teamsStats, selectedPlayer, selectedOption) {
 
   var meanStats;
 
-  meanStats = rearrangeOrder(calculateMeanStats(teamsStats, selectedPlayer, playerName, selectedOption));
+  if (typeof selectedOption !== "object")
+    meanStats = rearrangeOrder(calculateMeanStats(teamsStats, selectedPlayer, playerName, selectedOption));
+  else {
+    console.log("select", selectedOption);
+    meanStats = selectedOption;
+  }
+
+  console.log(meanStats, typeof meanStats);
  
   var rearrangedPlayer = rearrangeOrder(selectedPlayer);
 
@@ -1618,7 +1530,8 @@ function drawHistogram(teamsStats, selectedPlayer, selectedOption) {
     .append("svg")
     .attr("width", width)
     .attr("height", height)
-    .style("display", "block");
+    .style("display", "block")
+    .style("margin-top", "10px");
 
   var teamMax = new Map();
 
@@ -1678,10 +1591,11 @@ function drawHistogram(teamsStats, selectedPlayer, selectedOption) {
   
     bars.on("mouseover", function(e, d) {
       d3.select(this).style("opacity", "0.8").text;
-      if (d[1] != 0) {
+      // if (d[1] != 0) {
         var rectWidth = parseFloat(d3.select(this).attr("width"));
         var xPosition = parseFloat(d3.select(this).attr("x")) + 15;
-        var yPosition = parseFloat(d3.select(this).attr("y")) + 10;
+        if (d[1] != 0) var yPosition = parseFloat(d3.select(this).attr("y")) + 10;
+        else var yPosition = parseFloat(d3.select(this).attr("y")) - 15;
     
         // Rotate the text
         var resultText = svg
@@ -1694,7 +1608,7 @@ function drawHistogram(teamsStats, selectedPlayer, selectedOption) {
             .attr("alignment-baseline", "ideographic") // Adjust alignment baseline based on your preference
             .attr("transform", "rotate(-90 " + xPosition + " " + yPosition + ")")
             .style("color", "white");
-      }
+      // }
     });
 
     bars.on("mouseout", function() {
@@ -1723,7 +1637,8 @@ function drawHistogram(teamsStats, selectedPlayer, selectedOption) {
       d3.select(this).style("opacity", "0.8").text;
       var rectWidth = parseFloat(d3.select(this).attr("width"));
       var xPosition = parseFloat(d3.select(this).attr("x")) + 15;
-      var yPosition = parseFloat(d3.select(this).attr("y")) + 10;
+      if (d[1] != 0) var yPosition = parseFloat(d3.select(this).attr("y")) + 10;
+      else var yPosition = parseFloat(d3.select(this).attr("y")) - 15;
   
       // Rotate the text
       var resultText = svg
@@ -1742,6 +1657,51 @@ function drawHistogram(teamsStats, selectedPlayer, selectedOption) {
       d3.select(this).style("opacity", "1");
       svg.select(".result-text").remove();
     })
+  
+  
+ //------------------------------- Légende -------------------------------
+  const legend = svg.append("g");//.attr("transform", `translate(${height - 10})`);
+
+  const rectWidth = 20;
+
+  if (typeof selectedOption === "object") {
+    selectedOption = SelectEnum.OnePlayer;
+  }
+
+  const dataLegend = [playerName, selectedOption];
+
+  legend.selectAll("rect")
+    .data(dataLegend)
+    .enter()
+    .append("rect")
+    .attr("x", 0)
+    .attr("y", function (d, i) {  
+      console.log("1d", d, i);
+      return i * rectWidth + width + 30;
+    })
+    .attr("width", rectWidth)
+    .attr("height", rectWidth)
+    .attr("fill", function(d) {
+    console.log("2d", d, d === playerName, playerTeam, playerTeam == 0);
+      if (d === playerName) {
+        if (playerTeam === 0) {
+          return "#307fe2";
+        } else {
+          return "#e87722";
+        }
+      } else {
+        return "grey";
+      }
+    }); //({ Team1: "#307fe2", Team2: "#e87722" }[d.data.team]));
+
+  legend
+    .selectAll("text")
+    .data(dataLegend)
+    .enter()
+    .append("text")
+    .attr("x", rectWidth * 1.5)
+    .attr("y", (d, i) => i * rectWidth + rectWidth * 0.75 + width + 30)
+    .text((d) => d);
 
 
   return svg.node();
@@ -1821,9 +1781,9 @@ function displayScoreBoard(teamsStats, scoreTeam0, scoreTeam1) {
         .style("padding", "3px");
       if (d == scoreTeam0)
         // var text = "🏁 " + d;
-        var text = "🏁  " + d + " 🏁";
+        var text = "🏳  " + d;
       else 
-        var text = "🚩 " + d;
+        var text = "🏳 " + d;
       return text;
     } else {
       d3.select(this).classed("name", true);
@@ -2004,7 +1964,6 @@ function displayOverviewStats(overviewStats) {
  */
 function displayPressure(data_ball, sumXneg, sumXpos) {
   getPieData = d3.pie().value(function (d) {
-    console.log(d.value);
     return d.count;
   });
   var pieData = getPieData(data_ball);
