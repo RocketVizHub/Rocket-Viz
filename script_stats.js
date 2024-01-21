@@ -2,7 +2,6 @@ async function handleFileUpload() {
   try {
     const fileInput = document.getElementById("fileInput");
     const file = fileInput.files[0];
-    console.log(fileInput, file);
     if (file) {
       const fileContent = await readFileAsync(file);
       const data = JSON.parse(fileContent);
@@ -1260,8 +1259,6 @@ function getTeamStats(team0, team1) {
   map.set("Saves", { [team0[0].Team]: saves1, [team1[0].Team]: saves });
   map.set("Shots", { [team0[0].Team]: shots1, [team1[0].Team]: shots });
 
-  console.log(map);
-
   return map;
 }
 /**
@@ -1270,7 +1267,6 @@ function getTeamStats(team0, team1) {
  * @returns
  */
 function getOverviewStats(data) {
-  console.log("get", data);
   const player = getPlayerStats(data);
   const playerTeam0 = player.filter((player) => player.Team === 0);
   const playerTeam1 = player.filter((player) => player.Team === 1);
@@ -1516,11 +1512,8 @@ function drawHistogram(teamsStats, selectedPlayer, selectedOption, oppenentName 
   if (typeof selectedOption !== "object")
     meanStats = rearrangeOrder(calculateMeanStats(teamsStats, selectedPlayer, playerName, selectedOption));
   else {
-    console.log("select", selectedOption);
     meanStats = selectedOption;
   }
-
-  console.log(meanStats, typeof meanStats);
  
   var rearrangedPlayer = rearrangeOrder(selectedPlayer);
 
@@ -1770,7 +1763,6 @@ function displayScoreBoard(teamsStats, scoreTeam0, scoreTeam1) {
     });
 
   var bestPlayerName = findMVP(teamsStats);
-  console.log("mvp : ", bestPlayerName);
 
   rows2.append("td").text(function (d) {
     if (typeof d === "number" && Number.isInteger(d)) {
@@ -2062,14 +2054,16 @@ document
 handleFileUpload();
 
 
-/** Pré-chargement des fichiers */
+/******************************* Pré-chargement des fichiers ********************************/
 const files = [
   { name: "Replay 1", path: "./utils/replay03.json" },
   { name: "Replay 2", path: "./utils/replay04.json" }
 ];
 
-// Sélectionnez le menu déroulant
+// Sélection du menu déroulant
 const selectMenu = document.getElementById("select-files");
+
+var datas = {};
 
 // Remplir le menu déroulant avec les options basées sur les fichiers JSON
 files.forEach((file, index) => {
@@ -2079,27 +2073,10 @@ files.forEach((file, index) => {
   selectMenu.appendChild(option);
 });
 
-// Gérer l'événement de changement dans le menu déroulant
-selectMenu.addEventListener("change", function () {
-  const selectedIndex = this.value;
-  console.log(files[selectedIndex]);
-  const selectedFile = files[selectedIndex];
-
-  // handleFileUploadSelect(selectedFile);
-
-  // Charger le fichier JSON correspondant
-  loadJsonFile(selectedFile.path)
-    .then((result) => {
-      // Faire quelque chose avec les données du fichier JSON, par exemple :
-      console.log("Données du fichier sélectionné :", result.data);
-      displayAllStats(result.data);
-    })
-    .catch((error) => {
-      console.error("Erreur lors du chargement du fichier JSON :", error);
-    });
-});
-
-// Fonction pour charger un fichier JSON
+/** 
+ * Fonction pour charger un fichier JSON
+ * @param filePath nom du fichier.
+ */
 function loadJsonFile(filePath) {
   return new Promise((resolve, reject) => {
     d3.json(filePath)
@@ -2108,23 +2085,46 @@ function loadJsonFile(filePath) {
   });
 }
 
+// Charge tous les fichiers dans une Map pour pas avoir à refaire le chargement
+// plusieurs fois
+files.forEach((file, index) => {
+  loadJsonFile(file.path)
+    .then((result) => {
+      datas[index] = result.data;
+      if (index === 0) {
+        displayAllStats(result.data);
+      }
+    })
+    .catch((error) => {
+      console.error("Erreur lors du chargement du fichier JSON :", error);
+  });
+});
+
+
+/**
+ * Gérer l'événement de changement dans le menu déroulant.
+ */
+selectMenu.addEventListener("change", function () {
+  displayAllStats(datas[this.value]);
+});
+
+/**
+ * Affiche la page entière.
+ * @param {Map} data toutes les données.
+ */
 function displayAllStats(data) {
-  console.log("all stats", data);
-      // const data = JSON.parse(fileContent);
+  // Display file details
+  displayFileDetails(data);
 
-      // Display file details
-      displayFileDetails(data);
+  // Afficher la timeline avec les données récupérées
+  displayTimeline(data);
 
-      // Afficher la timeline avec les données récupérées
-      displayTimeline(data);
+  // Display & Debug Axel
+  document.getElementById("ball_heatmap_buttons").innerHTML = "";
+  displayNDebugAxel(data);
 
-      // Display & Debug axel
-      document.getElementById("ball_heatmap_buttons").innerHTML = "";
-      displayNDebugAxel(data);
-
-      // sonia
-      document.getElementById("playerStatsContent").innerHTML = "";
-      document.getElementById("content").innerHTML = "";
-      displayPlayerStats(data);
+  // Affichage des statistiques gloables
+  document.getElementById("playerStatsContent").innerHTML = "";
+  document.getElementById("content").innerHTML = "";
+  displayPlayerStats(data);
 }
-
