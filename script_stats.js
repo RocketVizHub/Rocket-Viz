@@ -1,8 +1,11 @@
+const COL_GREEN = "#098149"; //#21A38B;
+const COL_BLUE = "#307fe2";
+const COL_ORANGE = "#e87722";
+
 async function handleFileUpload() {
   try {
     const fileInput = document.getElementById("fileInput");
     const file = fileInput.files[0];
-
     if (file) {
       const fileContent = await readFileAsync(file);
       const data = JSON.parse(fileContent);
@@ -60,7 +63,8 @@ function displayFileDetails(data) {
             `;
 }
 
-/** Partie Axel **/
+/******************************* Partie Axel ********************************/
+
 function displayDebugAxel(data) {
   console.log("--- AXEL IS DEBUGGING ---");
 
@@ -87,7 +91,7 @@ function displayDebugAxel(data) {
     height: height,
     container: "#ball_heatmap",
     start_color: "#FC7C89",
-    end_color: "#21A38B",
+    end_color: COL_GREEN,
   });
 
   console.log("--- DEBUGGED ---");
@@ -139,14 +143,14 @@ function getPlayersAndTeams(data) {
 
   const playersAndTeams = playerStats.map((player) => ({
     name: player.Name,
-    team: player.Team === 0 ? "Blue" : "Orange",
+    team: player.Team === 0 ? "COL_BLUE" : "Orange",
   }));
 
   allPlayers.forEach((playerName) => {
     if (!playersAndTeams.some((player) => player.name === playerName)) {
       playersAndTeams.push({
         name: playerName,
-        team: oppositeTeam === 0 ? "Blue" : "Orange",
+        team: oppositeTeam === 0 ? "COL_BLUE" : "Orange",
       });
     }
   });
@@ -233,7 +237,7 @@ function getTeam0Destroy(data, frameIndicesWithDemolishFx) {
         playerTeams.find((player) => player.name.toLowerCase() === playerName)
           ?.team || "Unknown";
 
-      if (playerTeam === "Blue") {
+      if (playerTeam === "COL_BLUE") {
         destroyedFramesTeam0.push({ frameIndex, playerName });
       }
     });
@@ -388,7 +392,7 @@ function displayTimeline(data) {
     .attr("y", height / 4 - 5)
     .attr("width", width)
     .attr("height", 18)
-    .attr("fill", "blue");
+    .attr("fill", COL_BLUE);
 
   svg
     .append("rect")
@@ -396,32 +400,32 @@ function displayTimeline(data) {
     .attr("y", height / 3 - 5)
     .attr("width", width)
     .attr("height", 18)
-    .attr("fill", "orange");
+    .attr("fill", COL_ORANGE);
 
   // Ajout du texte pour chaque équipe
   svg
     .append("text")
     .attr("x", -10)
-    .attr("y", height / 4)
-    .attr("text-anchor", "end")
-    .text("Equipe Bleue")
-    .attr("fill", "blue")
-    .attr("font-size", "13px");
+    .attr("y", height / 4 + 10)
+    .attr("text-anchor", "end") 
+    .text("Blue Team")
+    .attr("fill", COL_BLUE)
+    .attr("font-size", "14px");
 
   svg
     .append("text")
     .attr("x", -10)
-    .attr("y", height / 3)
+    .attr("y", height / 3 + 10)
     .attr("text-anchor", "end")
-    .text("Equipe Orange")
-    .attr("fill", "orange")
-    .attr("font-size", "13px");
+    .text("Orange Team")
+    .attr("fill", COL_ORANGE)
+    .attr("font-size", "14px");
 
   svg
     .append("text")
     .attr("x", width / 2)
     .attr("y", height / 2 - 10)
-    .text(`La partie à durée : ${maxDuration}`)
+    .text(`The game lasted ${maxDuration}`)
     .attr("font-size", "12px")
     .style("dominant-baseline", "hanging");
 
@@ -541,9 +545,9 @@ function displayTimeline(data) {
   Partie 4: La légende
   */
   const legendData = [
-    { icon: "img/goal_icon.png", description: "But" },
-    { icon: "img/save_icon.png", description: "Sauvegarde" },
-    { icon: "img/demolition_icon.png", description: "Joueur détruit" },
+    { icon: "img/goal_icon.png", description: "Goal" },
+    { icon: "img/save_icon.png", description: "Save" },
+    { icon: "img/demolition_icon.png", description: "Destroyed player (joueur détruit)" },
   ];
 
   const legendContainer = d3.select("#legend");
@@ -603,7 +607,7 @@ function displayNDebugAxel(data) {
     height: height,
     container: "#ball_heatmap",
     start_color: "#FC7C89",
-    end_color: "#21A38B",
+    end_color: COL_GREEN,
   });
 
   scoreData = getScore(data);
@@ -729,7 +733,7 @@ function refreshHeatmap(data, start, end, width, height, xSize, ySize) {
     height: height,
     container: "#ball_heatmap",
     start_color: "#FC7C89",
-    end_color: "#21A38B",
+    end_color: COL_GREEN,
   });
 }
 
@@ -1085,13 +1089,17 @@ function displayHeatmap(data, options) {
     .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-  // Add a background to the SVG
-  const background = svg
-    .append("rect")
-    .style("stroke", "black")
+  // // Add a background to the SVG
+  // const background = svg
+  //   .append("rect")
+  //   .style("stroke", "black")
+  //   .attr("width", width)
+  //   .attr("height", height);
+  
+  svg.append("svg:image")
+    .attr("xlink:href", "./img/map.png") // Remplacez par le chemin de votre image
     .attr("width", width)
     .attr("height", height);
-
   // Build some scales for us to use
   const x = d3.scale.ordinal().domain(d3.range(numcols)).rangeBands([0, width]);
   const y = d3.scale
@@ -1141,10 +1149,11 @@ function displayHeatmap(data, options) {
     .data((d, i) => {
       return data[i];
     })
-    .style("fill", colorMap);
+    .style("fill", colorMap)
+    .style("opacity", 0.4);
 }
 
-/** Partie Nicolas  **/
+/******************************* Partie Nicolas ********************************/
 
 function getFramerate(data) {
   return data.properties.RecordFPS;
@@ -1159,7 +1168,7 @@ function getMaxTempsPartie(nbFrames, framerate) {
   const dureeEnMinutes = Math.floor(dureeEnSecondes / 60); // Partie entière des minutes
   const dureeEnSecondesRestantes = Math.round(dureeEnSecondes % 60); // Partie en secondes
 
-  return `${dureeEnMinutes} minutes et ${dureeEnSecondesRestantes} secondes`;
+  return `${dureeEnMinutes} minutes and ${dureeEnSecondesRestantes} seconds`;
 }
 
 function getListeFramesHighlights(data) {
@@ -1191,7 +1200,7 @@ function getAllGoalInformation(data) {
   return goalInformation;
 }
 
-/** Partie Sonia  **/
+/******************************* Partie Sonia ********************************/
 
 /**
  * Énumération permettant la sélection du groupe de personne
@@ -1225,52 +1234,35 @@ function getPlayerStats(data) {
  * @returns
  */
 function getTeamStats(team0, team1) {
-  let goals1 = 0,
-    assists1 = 0,
-    saves1 = 0,
-    shots1 = 0,
-    score1 = 0;
+  const getStatsTotal = (team) => team.reduce((acc, player) => {
+    acc.goals += player.Goals;
+    acc.assists += player.Assists;
+    acc.saves += player.Saves;
+    acc.shots += player.Shots;
+    acc.score += player.Score;
+    return acc;
+  }, { goals: 0, assists: 0, saves: 0, shots: 0, score: 0 });
 
-  team0.forEach((player) => {
-    goals1 = goals1 + player.Goals;
-    assists1 = assists1 + player.Assists;
-    saves1 = saves1 + player.Saves;
-    shots1 = shots1 + player.Shots;
-    score1 = score1 + player.Score;
-  });
-
-  let goals = 0,
-    assists = 0,
-    saves = 0,
-    shots = 0,
-    score = 0;
-  team1.forEach((player) => {
-    goals = goals + player.Goals;
-    assists = assists + player.Assists;
-    saves = saves + player.Saves;
-    shots = shots + player.Shots;
-    score = score + player.Score;
-  });
+  const statsTeam0 = getStatsTotal(team0);
+  const statsTeam1 = getStatsTotal(team1);
 
   const map = new Map();
 
-  map.set("Score", { [team0[0].Team]: score1, [team1[1].Team]: score });
-  map.set("Goals", { [team0[0].Team]: goals1, [team1[1].Team]: goals });
-  map.set("Assists", { [team0[0].Team]: assists1, [team1[1].Team]: assists });
-  map.set("Saves", { [team0[0].Team]: saves1, [team1[1].Team]: saves });
-  map.set("Shots", { [team0[0].Team]: shots1, [team1[1].Team]: shots });
-
-  console.log(map);
+  map.set("Score", { [team0[0].Team]: statsTeam0.score, [team1[0].Team]: statsTeam1.score });
+  map.set("Goals", { [team0[0].Team]: statsTeam0.goals, [team1[0].Team]: statsTeam1.goals });
+  map.set("Assists", { [team0[0].Team]: statsTeam0.assists, [team1[0].Team]: statsTeam1.assists });
+  map.set("Saves", { [team0[0].Team]: statsTeam0.saves, [team1[0].Team]: statsTeam1.saves });
+  map.set("Shots", { [team0[0].Team]: statsTeam0.shots, [team1[0].Team]: statsTeam1.shots });
 
   return map;
 }
+
 /**
  * Récupère les statisques permettant de faire l'affichage de l'overview par équipe.
  * @param {*} data
  * @returns
  */
 function getOverviewStats(data) {
-  console.log("get", data);
   const player = getPlayerStats(data);
   const playerTeam0 = player.filter((player) => player.Team === 0);
   const playerTeam1 = player.filter((player) => player.Team === 1);
@@ -1314,7 +1306,7 @@ function displayPlayerStats(data) {
 
   var width = d3.select("body").node().getBoundingClientRect().width;
 
-  d3.selectAll("#content").append("h1").text("Statistiques par équipe");
+  d3.selectAll("#content").append("h1").text("Team Statistics");
   displayOverviewStats(overviewStats);
 
   var locationBall = getLocations(data, 0);
@@ -1408,7 +1400,7 @@ function handleRowSelection(teamsStats, selectedPlayer) {
 
   var playerName = selectedPlayer.Name;
 
-  var textPlayerName = "Statistiques de " + playerName + " : ";
+  var textPlayerName = playerName + "'s statistics : ";
 
   d3.select("#barChartSelect").append("p").text(textPlayerName);
 
@@ -1440,17 +1432,19 @@ function handleRowSelection(teamsStats, selectedPlayer) {
     .text(function(d) { return d; });
 
   var meanStats = rearrangeOrder(calculateMeanStats(teamsStats, selectedPlayer, playerName, SelectEnum.AllPlayers));
-  var rearrangedPlayer = rearrangeOrder(selectedPlayer);
 
   // Ajoutez une fonction pour gérer les changements dans le sélecteur
   confrontSelect.on("change", function () {
-    
+    // Remove the "Select a player:" text and the player selection dropdown
+    d3.select("#playerSelectLabel").remove();
     d3.select("#playerSelect").remove();
+
     // Obtenez la valeur sélectionnée
     var selectedOption = confrontSelect.property("value");
     
     if (selectedOption === SelectEnum.OnePlayer) {
       // Supprimez la liste déroulante existante si elle existe déjà
+      d3.select("#playerSelectLabel").remove();
       d3.select("#playerSelect").remove();
 
       // Créez une nouvelle sélection pour les joueurs
@@ -1458,8 +1452,10 @@ function handleRowSelection(teamsStats, selectedPlayer) {
 
       playerSelectContainer
         .append("label")
+        .attr("id", "playerSelectLabel")
         .attr("for", "playerSelect")
-        .text("Select a player: ");
+        .text("Select a player: ")
+        .style("margin-right", "10px");;
 
       var playerSelect = playerSelectContainer
         .append("select")
@@ -1482,10 +1478,9 @@ function handleRowSelection(teamsStats, selectedPlayer) {
         var selectedPlayerName = playerSelect.property("value");
         var stats = teamsStats.flat().filter(player => player.Name === selectedPlayerName);
         meanStats = rearrangeOrder(stats[0]);
-        drawHistogram(teamsStats, selectedPlayer, meanStats);
+        drawHistogram(teamsStats, selectedPlayer, meanStats, selectedPlayerName);
       });
     } else {
-      d3.select("#playerSelect").remove();
       drawHistogram(teamsStats, selectedPlayer, selectedOption);
     }
   });
@@ -1501,7 +1496,7 @@ function handleRowSelection(teamsStats, selectedPlayer) {
  * de tous les alliés ou de tous les joueurs.
  * @returns 
  */
-function drawHistogram(teamsStats, selectedPlayer, selectedOption) {
+function drawHistogram(teamsStats, selectedPlayer, selectedOption, oppenentName = null) {
   // Clear existing bar chart
   d3.select("#barChart").selectAll("*").remove();
 
@@ -1513,11 +1508,8 @@ function drawHistogram(teamsStats, selectedPlayer, selectedOption) {
   if (typeof selectedOption !== "object")
     meanStats = rearrangeOrder(calculateMeanStats(teamsStats, selectedPlayer, playerName, selectedOption));
   else {
-    console.log("select", selectedOption);
     meanStats = selectedOption;
   }
-
-  console.log(meanStats, typeof meanStats);
  
   var rearrangedPlayer = rearrangeOrder(selectedPlayer);
 
@@ -1567,9 +1559,9 @@ function drawHistogram(teamsStats, selectedPlayer, selectedOption) {
     })
     .attr("fill", function (d) {
       if (playerTeam == 0) {
-        return "#307fe2";
+        return COL_BLUE;
       } else {
-        return "#e87722";
+        return COL_ORANGE;
       }
     });
 
@@ -1591,8 +1583,6 @@ function drawHistogram(teamsStats, selectedPlayer, selectedOption) {
   
     bars.on("mouseover", function(e, d) {
       d3.select(this).style("opacity", "0.8").text;
-      // if (d[1] != 0) {
-        var rectWidth = parseFloat(d3.select(this).attr("width"));
         var xPosition = parseFloat(d3.select(this).attr("x")) + 15;
         if (d[1] != 0) var yPosition = parseFloat(d3.select(this).attr("y")) + 10;
         else var yPosition = parseFloat(d3.select(this).attr("y")) - 15;
@@ -1604,11 +1594,10 @@ function drawHistogram(teamsStats, selectedPlayer, selectedOption) {
             .attr("x", xPosition)
             .attr("y", yPosition)
             .attr("class", "result-text")
-            .attr("text-anchor", "end") // Adjust text anchor based on your preference
-            .attr("alignment-baseline", "ideographic") // Adjust alignment baseline based on your preference
+            .attr("text-anchor", "end") 
+            .attr("alignment-baseline", "ideographic") 
             .attr("transform", "rotate(-90 " + xPosition + " " + yPosition + ")")
             .style("color", "white");
-      // }
     });
 
     bars.on("mouseout", function() {
@@ -1635,7 +1624,6 @@ function drawHistogram(teamsStats, selectedPlayer, selectedOption) {
   
     bars2.on("mouseover", function(e, d) {
       d3.select(this).style("opacity", "0.8").text;
-      var rectWidth = parseFloat(d3.select(this).attr("width"));
       var xPosition = parseFloat(d3.select(this).attr("x")) + 15;
       if (d[1] != 0) var yPosition = parseFloat(d3.select(this).attr("y")) + 10;
       else var yPosition = parseFloat(d3.select(this).attr("y")) - 15;
@@ -1647,8 +1635,8 @@ function drawHistogram(teamsStats, selectedPlayer, selectedOption) {
           .attr("x", xPosition)
           .attr("y", yPosition)
           .attr("class", "result-text")
-          .attr("text-anchor", "end") // Adjust text anchor based on your preference
-          .attr("alignment-baseline", "ideographic") // Adjust alignment baseline based on your preference
+          .attr("text-anchor", "end") 
+          .attr("alignment-baseline", "ideographic") 
           .attr("transform", "rotate(-90 " + xPosition + " " + yPosition + ")")
           .style("color", "white");
     });
@@ -1660,7 +1648,7 @@ function drawHistogram(teamsStats, selectedPlayer, selectedOption) {
   
   
  //------------------------------- Légende -------------------------------
-  const legend = svg.append("g");//.attr("transform", `translate(${height - 10})`);
+  const legend = svg.append("g");
 
   const rectWidth = 20;
 
@@ -1676,23 +1664,21 @@ function drawHistogram(teamsStats, selectedPlayer, selectedOption) {
     .append("rect")
     .attr("x", 0)
     .attr("y", function (d, i) {  
-      console.log("1d", d, i);
       return i * rectWidth + width + 30;
     })
     .attr("width", rectWidth)
     .attr("height", rectWidth)
     .attr("fill", function(d) {
-    console.log("2d", d, d === playerName, playerTeam, playerTeam == 0);
       if (d === playerName) {
         if (playerTeam === 0) {
-          return "#307fe2";
+          return COL_BLUE;
         } else {
-          return "#e87722";
+          return COL_ORANGE;
         }
       } else {
         return "grey";
       }
-    }); //({ Team1: "#307fe2", Team2: "#e87722" }[d.data.team]));
+    });
 
   legend
     .selectAll("text")
@@ -1701,7 +1687,10 @@ function drawHistogram(teamsStats, selectedPlayer, selectedOption) {
     .append("text")
     .attr("x", rectWidth * 1.5)
     .attr("y", (d, i) => i * rectWidth + rectWidth * 0.75 + width + 30)
-    .text((d) => d);
+    .text(function (d, i) {
+      if (oppenentName === null || i === 0) return d;
+      else return oppenentName;
+    });
 
 
   return svg.node();
@@ -1751,9 +1740,9 @@ function displayScoreBoard(teamsStats, scoreTeam0, scoreTeam1) {
     .on("mouseover", function (e, d) {
       // d3.select(this).style("font-weight", "bold");
       if (d.Team === 0) {
-        d3.select(this).style("color", "#307fe2");
+        d3.select(this).style("color", COL_BLUE);
       } else {
-        d3.select(this).style("color", "#e87722");
+        d3.select(this).style("color", COL_ORANGE);
       }
     })
     .on("mouseout", function (e, d) {
@@ -1766,7 +1755,6 @@ function displayScoreBoard(teamsStats, scoreTeam0, scoreTeam1) {
     });
 
   var bestPlayerName = findMVP(teamsStats);
-  console.log("mvp : ", bestPlayerName);
 
   rows2.append("td").text(function (d) {
     if (typeof d === "number" && Number.isInteger(d)) {
@@ -1880,9 +1868,9 @@ function displayOverviewStats(overviewStats) {
     var percentageText = svg
       .append("text")
       .text(percentage + "%")
-      .attr("x", parseFloat(d3.select(this).attr("x")) + rectWidth - 60)
+      .attr("x", parseFloat(d3.select(this).attr("x")) + rectWidth - 10)
       .attr("y", parseFloat(d3.select(this).attr("y")) + centrageVertical)
-      .attr("class", "percentage-text");
+      .attr("class", "percentage-text").attr("text-anchor", "end");
   });
   rectanglesPlayer1.on("mouseout", function (e, d) {
     var rect = d3.select(this);
@@ -1919,12 +1907,15 @@ function displayOverviewStats(overviewStats) {
     .append("text")
     .attr("class", "text-team-results")
     .text(function (d) {
-      return d[1][1]; // Valeur de la team 1
+      if (d[1][1] !== 0)
+        return d[1][1]; // Valeur de la team 1
+      return "";
     })
     .attr("y", function (d, i) {
       return i * 50 + centrageVertical; // Ajuster pour le centrage vertical
     })
-    .attr("x", width - 30);
+    .attr("x", width - 15)
+    .attr("text-anchor", "end");
   rectanglesPlayer2.on("mouseover", function (e, d) {
     var rect = d3.select(this).classed("hovered", true);
     var percentage = (d[1][1] / (d[1][0] + d[1][1])) * 100;
@@ -1991,7 +1982,7 @@ function displayPressure(data_ball, sumXneg, sumXpos) {
     .enter()
     .append("path")
     .attr("d", arcCreator) 
-    .attr("fill", (d) => ({ Team1: "#307fe2", Team2: "#e87722" }[d.data.team]))
+    .attr("fill", (d) => ({ Team1: COL_BLUE, Team2: COL_ORANGE }[d.data.team]))
 
     .on("mouseover", (event, d) => {
       d3.select(`.text-${d.data.team}`).attr("opacity", 1);
@@ -2032,7 +2023,7 @@ function displayPressure(data_ball, sumXneg, sumXpos) {
     .attr("y", (d, i) => i * rectWidth)
     .attr("width", rectWidth)
     .attr("height", rectWidth)
-    .attr("fill", (d) => ({ Team1: "#307fe2", Team2: "#e87722" }[d.data.team]));
+    .attr("fill", (d) => ({ Team1: COL_BLUE, Team2: COL_ORANGE }[d.data.team]));
 
   legend
     .selectAll("text")
@@ -2046,10 +2037,88 @@ function displayPressure(data_ball, sumXneg, sumXpos) {
   return svg.node();
 }
 
-/***********************/
+/******************************* Bouton upload de fichiers ********************************/
 
 document
   .getElementById("uploadButton")
   .addEventListener("click", handleFileUpload);
 
 handleFileUpload();
+
+
+/******************************* Pré-chargement des fichiers ********************************/
+const files = [
+  { name: "Replay 1", path: "./utils/replay03.json" },
+  { name: "Replay 2", path: "./utils/replay04.json" }
+];
+
+// Sélection du menu déroulant
+const selectMenu = document.getElementById("select-files");
+
+var datas = {};
+
+// Remplir le menu déroulant avec les options basées sur les fichiers JSON
+files.forEach((file, index) => {
+  const option = document.createElement("option");
+  option.value = index;
+  option.text = file.name;
+  selectMenu.appendChild(option);
+});
+
+/** 
+ * Fonction pour charger un fichier JSON
+ * @param filePath nom du fichier.
+ */
+function loadJsonFile(filePath) {
+  return new Promise((resolve, reject) => {
+    d3.json(filePath)
+      .then((data) => resolve({ filePath, data }))
+      .catch((error) => reject({ filePath, error }));
+  });
+}
+
+// Charge tous les fichiers dans une Map pour pas avoir à refaire le chargement
+// plusieurs fois
+files.forEach((file, index) => {
+  loadJsonFile(file.path)
+    .then((result) => {
+      datas[index] = result.data;
+      if (index === 0) {
+        displayAllStats(result.data);
+      }
+    })
+    .catch((error) => {
+      console.error("Erreur lors du chargement du fichier JSON :", error);
+  });
+});
+
+
+/**
+ * Gérer l'événement de changement dans le menu déroulant.
+ */
+selectMenu.addEventListener("change", function () {
+  displayAllStats(datas[this.value]);
+});
+
+/**
+ * Affiche la page entière.
+ * @param {Map} data toutes les données.
+ */
+function displayAllStats(data) {
+  // Display file details
+  displayFileDetails(data);
+
+  // Afficher la timeline avec les données récupérées
+  displayTimeline(data);
+
+  // Display & Debug Axel
+  document.getElementById("ball_heatmap_buttons").innerHTML = "";
+  displayNDebugAxel(data);
+
+  // Affichage des statistiques gloables
+  document.getElementById("playerStatsContent").innerHTML = "";
+  document.getElementById("content").innerHTML = "";
+  document.getElementById("barChart").innerHTML="";
+  document.getElementById("barChartSelect").innerHTML="";
+  displayPlayerStats(data);
+}

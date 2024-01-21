@@ -1,5 +1,5 @@
 h1 {
-	padding-top: 50px;
+	padding-top: 20px;
 	padding-bottom: 20px;
 }
 th {
@@ -86,4 +86,22 @@ text {
 }
 .option {
 	margin-left: 10px;
+}
+#element-ancre {
+	position: fixed;
+	/* /* left: 50px; */
+	top: 55px;
+	left: 5px;
+	/* padding: 10px; */ 
+	/* background-color: #f0f0f0;
+	border: 1px solid #ccc; */
+}
+#timeline {
+	display: none;
+	/* border: 3px solid black; */
+	height: 270px;
+}
+
+.timeline-visible {
+	display: block;
 }

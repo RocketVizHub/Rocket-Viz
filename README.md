@@ -93,7 +93,7 @@ quel pourcentage de la partie la balle a passé sur le demi-terrain de chacune d
 
 ## Améliorations
 - [ ] Github Pages
-- [ ] Avoir des fichiers déjà chargés
+- [x] Avoir des fichiers déjà chargés
 - [x] Intégration de la partie "Statistiques globales"
 - [ ] Mettre sur le site un lien vers le README
 - [ ] Rubrique "Problèmes" dans README
@@ -108,9 +108,18 @@ quel pourcentage de la partie la balle a passé sur le demi-terrain de chacune d
 #### Avant modification
 ![ScoreBoard Avant](./data/Scoreboard.png)
 #### Après modification
-- Couleur + gras en hover de ligne.
+- **Hover** : couleur de texte et de fond de ligne changées.
+- **Score** plus visible (centré et augmenté en taille).
+- **MVP** : le meilleur joueur de la partie voit maintenant son nom écrit en gras et une couronne placée devant son nom vient renforcer sa visibilité.
 ![ScoreBoard Après](./data/Scoreboard_new.png)
-- Histogramme de comparaison entre un joueur et tous ses adversaires (le score du joueur est de la couleur de son équipe, le score moyen des autres joueurs (ne l'incluant pas lui) est en gris)
+- Histogramme de comparaison entre un joueur et, au choix :
+  -  **tous les joueurs** 
+  -  **tous ses alliés**
+  -  **tous ses adversaires**  
+
+Le score du joueur est de la couleur de son équipe, le score moyen des autres joueurs (ne l'incluant pas lui) est en gris.
+  -  **un des autres joueurs** apparentant ou non à son équipe.
+
 ![ScoreBoard + Histogramme](./data/Scoreboard_Histogramme_new.png)
 
 ### Diagramme circulaire de la pression
@@ -132,5 +141,5 @@ quel pourcentage de la partie la balle a passé sur le demi-terrain de chacune d
 #### Après modification
 ![Timeline Après](./data/Timeline_new.png)
 
-## Problèmes
+## Difficultés rencontrées 
  - Complexité du fichier JSON
