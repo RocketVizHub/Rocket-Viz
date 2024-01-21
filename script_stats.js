@@ -2,7 +2,7 @@ async function handleFileUpload() {
   try {
     const fileInput = document.getElementById("fileInput");
     const file = fileInput.files[0];
-
+    console.log(fileInput, file);
     if (file) {
       const fileContent = await readFileAsync(file);
       const data = JSON.parse(fileContent);
@@ -1884,9 +1884,9 @@ function displayOverviewStats(overviewStats) {
     var percentageText = svg
       .append("text")
       .text(percentage + "%")
-      .attr("x", parseFloat(d3.select(this).attr("x")) + rectWidth - 60)
+      .attr("x", parseFloat(d3.select(this).attr("x")) + rectWidth - 10)
       .attr("y", parseFloat(d3.select(this).attr("y")) + centrageVertical)
-      .attr("class", "percentage-text");
+      .attr("class", "percentage-text").attr("text-anchor", "end");
   });
   rectanglesPlayer1.on("mouseout", function (e, d) {
     var rect = d3.select(this);
@@ -1923,7 +1923,9 @@ function displayOverviewStats(overviewStats) {
     .append("text")
     .attr("class", "text-team-results")
     .text(function (d) {
-      return d[1][1]; // Valeur de la team 1
+      if (d[1][1] !== 0)
+        return d[1][1]; // Valeur de la team 1
+      return "";
     })
     .attr("y", function (d, i) {
       return i * 50 + centrageVertical; // Ajuster pour le centrage vertical
@@ -2058,3 +2060,71 @@ document
   .addEventListener("click", handleFileUpload);
 
 handleFileUpload();
+
+
+/** Pré-chargement des fichiers */
+const files = [
+  { name: "Replay 1", path: "./utils/replay03.json" },
+  { name: "Replay 2", path: "./utils/replay04.json" }
+];
+
+// Sélectionnez le menu déroulant
+const selectMenu = document.getElementById("select-files");
+
+// Remplir le menu déroulant avec les options basées sur les fichiers JSON
+files.forEach((file, index) => {
+  const option = document.createElement("option");
+  option.value = index;
+  option.text = file.name;
+  selectMenu.appendChild(option);
+});
+
+// Gérer l'événement de changement dans le menu déroulant
+selectMenu.addEventListener("change", function () {
+  const selectedIndex = this.value;
+  console.log(files[selectedIndex]);
+  const selectedFile = files[selectedIndex];
+
+  // handleFileUploadSelect(selectedFile);
+
+  // Charger le fichier JSON correspondant
+  loadJsonFile(selectedFile.path)
+    .then((result) => {
+      // Faire quelque chose avec les données du fichier JSON, par exemple :
+      console.log("Données du fichier sélectionné :", result.data);
+      displayAllStats(result.data);
+    })
+    .catch((error) => {
+      console.error("Erreur lors du chargement du fichier JSON :", error);
+    });
+});
+
+// Fonction pour charger un fichier JSON
+function loadJsonFile(filePath) {
+  return new Promise((resolve, reject) => {
+    d3.json(filePath)
+      .then((data) => resolve({ filePath, data }))
+      .catch((error) => reject({ filePath, error }));
+  });
+}
+
+function displayAllStats(data) {
+  console.log("all stats", data);
+      // const data = JSON.parse(fileContent);
+
+      // Display file details
+      displayFileDetails(data);
+
+      // Afficher la timeline avec les données récupérées
+      displayTimeline(data);
+
+      // Display & Debug axel
+      document.getElementById("ball_heatmap_buttons").innerHTML = "";
+      displayNDebugAxel(data);
+
+      // sonia
+      document.getElementById("playerStatsContent").innerHTML = "";
+      document.getElementById("content").innerHTML = "";
+      displayPlayerStats(data);
+}
+

@@ -87,3 +87,12 @@ text {
 .option {
 	margin-left: 10px;
 }
+#element-ancre {
+	position: fixed;
+	/* /* left: 50px; */
+	top: 55px;
+	left: 5px;
+	/* padding: 10px; */ 
+	/* background-color: #f0f0f0;
+	border: 1px solid #ccc; */
+  }
