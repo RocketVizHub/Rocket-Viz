@@ -1254,11 +1254,11 @@ function getTeamStats(team0, team1) {
 
   const map = new Map();
 
-  map.set("Score", { [team0[0].Team]: score1, [team1[1].Team]: score });
-  map.set("Goals", { [team0[0].Team]: goals1, [team1[1].Team]: goals });
-  map.set("Assists", { [team0[0].Team]: assists1, [team1[1].Team]: assists });
-  map.set("Saves", { [team0[0].Team]: saves1, [team1[1].Team]: saves });
-  map.set("Shots", { [team0[0].Team]: shots1, [team1[1].Team]: shots });
+  map.set("Score", { [team0[0].Team]: score1, [team1[0].Team]: score });
+  map.set("Goals", { [team0[0].Team]: goals1, [team1[0].Team]: goals });
+  map.set("Assists", { [team0[0].Team]: assists1, [team1[0].Team]: assists });
+  map.set("Saves", { [team0[0].Team]: saves1, [team1[0].Team]: saves });
+  map.set("Shots", { [team0[0].Team]: shots1, [team1[0].Team]: shots });
 
   console.log(map);
 
@@ -1928,7 +1928,8 @@ function displayOverviewStats(overviewStats) {
     .attr("y", function (d, i) {
       return i * 50 + centrageVertical; // Ajuster pour le centrage vertical
     })
-    .attr("x", width - 30);
+    .attr("x", width - 15)
+    .attr("text-anchor", "end");
   rectanglesPlayer2.on("mouseover", function (e, d) {
     var rect = d3.select(this).classed("hovered", true);
     var percentage = (d[1][1] / (d[1][0] + d[1][1])) * 100;
