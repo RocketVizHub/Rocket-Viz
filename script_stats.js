@@ -1459,7 +1459,8 @@ function handleRowSelection(teamsStats, selectedPlayer) {
         .append("label")
         .attr("id", "playerSelectLabel")
         .attr("for", "playerSelect")
-        .text("Select a player: ");
+        .text("Select a player: ")
+        .style("margin-right", "10px");;
 
       var playerSelect = playerSelectContainer
         .append("select")
