@@ -4,6 +4,7 @@ LERAY Nicolas
 
 # Rocket-Viz
 
+
 Projet de visualisation des données du jeu Rocket League.
 Rocket League est un jeu vidéo dont le but est de marquer des buts en utilisant des voitures pour frapper un ballon dans un but adverse, combinant ainsi des éléments de football et de conduite.
 
@@ -103,5 +104,33 @@ quel pourcentage de la partie la balle a passé sur le demi-terrain de chacune d
 - [ ] Connexion timeline + HeatMap
 - [ ] Visibilité de timeline + HeatMap 
 
- ## Problèmes
+### Statistiques Globales
+#### Avant modification
+![ScoreBoard Avant](./data/Scoreboard.png)
+#### Après modification
+- Couleur + gras en hover de ligne.
+![ScoreBoard Après](./data/Scoreboard_new.png)
+- Histogramme de comparaison entre un joueur et tous ses adversaires (le score du joueur est de la couleur de son équipe, le score moyen des autres joueurs (ne l'incluant pas lui) est en gris)
+![ScoreBoard + Histogramme](./data/Scoreboard_Histogramme_new.png)
+
+### Diagramme circulaire de la pression
+### Modification
+- Transparence lors du hover  
+![Diagramme Circulaire Après](./data/Pressure_new.png)
+
+### HeatMap
+#### Avant modification
+![HeatMap Avant](./data/HeatMap.png)
+
+#### Après modification
+![HeatMap Après](./data/HeatMap_new.png)
+
+### Timeline
+#### Avant modification
+![Timeline Avant](./data/Timeline.png)
+
+#### Après modification
+![Timeline Après](./data/Timeline_new.png)
+
+## Problèmes
  - Complexité du fichier JSON

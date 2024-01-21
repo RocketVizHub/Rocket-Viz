@@ -8,6 +8,7 @@
     <!-- Bootstrap CSS -->
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="style.css" rel="stylesheet">
+    <link href="style.css" rel="stylesheet">
     
 
     <!-- Custom CSS -->
@@ -25,6 +26,8 @@
 
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js"></script>
     <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <!-- <script src="https://d3js.org/topojson.v1.min.js"></script> -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <!-- <script src="https://d3js.org/topojson.v1.min.js"></script> -->
 </head>
@@ -46,9 +49,6 @@
                 <li class="nav-item active">
                     <a class="nav-link" href="#">Stats</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="global_stats.html">Aperçu</a>
-                </li>
                 <!-- Add additional navigation items as needed -->
             </ul>
         </div>
@@ -66,21 +66,29 @@
         <h1> Aperçu de la partie </h1>
 
         <!-- Create an empty table with an id -->
-        <table id="playerStatsTable" border="1" class="table table-bordered table-striped">
-            <thead class="thead-dark">
-                <tr>
-                    <th></th>
-                    <th>Score</th>
-                    <th>Goals</th>
-                    <th>Assists</th>
-                    <th>Saves</th>
-                    <th>Shots</th>
-                </tr>
-            </thead>
-            <tbody id="playerStatsContent">
-                <!-- Table body will be populated using D3 -->
-            </tbody>
-        </table>
+        <div class="table-and-chart-container">
+            <!-- <div class="table-container"> -->
+                <table id="playerStatsTable" border="1" class="table table-bordered">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th></th>
+                            <th>Score</th>
+                            <th>Goals</th>
+                            <th>Assists</th>
+                            <th>Saves</th>
+                            <th>Shots</th>
+                        </tr>
+                    </thead>
+                    <tbody id="playerStatsContent">
+                        <!-- Table body will be populated using D3 -->
+                    </tbody>
+                </table>
+            <!-- </div> -->
+            <div id="barChartContainer">
+                <div id="barChartSelect"></div>
+                <div id="barChart"></div>
+            </div>
+        </div>
         <div id="content"></div>
     </div>
 

@@ -2,10 +2,43 @@ h1 {
 	padding-top: 50px;
 	padding-bottom: 20px;
 }
+th {
+	text-align: center;
+}
+td.name {
+	text-align: left;
+}
+td {
+	text-align: center;
+}
+tr:hover {
+	/* font-weight: bold; */
+    /* text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4); */
+
+	background-color: rgb(240,240,240);
+}
+td::before {
+    display: block;
+    content: attr(title);
+    font-weight: bold;
+    height: 0;
+    overflow: hidden;
+    visibility: hidden;
+}
+td::after {
+	display: block;
+	content: attr(data-text);
+	font-weight: bold;
+	color: transparent;
+	height: 1px;
+	margin-bottom: -1px;
+	visibility: hidden;
+	overflow: hidden;
+}
 .team1 {
 	fill: #307fe2; 
 	background-color: #307fe2;
-	stroke: black; 
+	stroke: white; 
 	stroke-width: 1; 
 }    
 .team1.hovered {
@@ -14,7 +47,7 @@ h1 {
 .team2 {
 	fill: #e87722; 
 	background-color: #e87722;
-	stroke: black; 
+	stroke: white; 
 	stroke-width: 1; 
 }    
 .team2.hovered {
@@ -33,4 +66,24 @@ h1 {
 }
 text {
 	pointer-events: none;
+}
+.score {
+	text-align: center;
+	font-size: 28px;
+	padding: 3px;
+}
+
+.table-and-chart-container {
+	display: flex;
+	align-items: flex-start;
+}
+#barChartContainer {
+	/* flex: 0 0 40%; Adjust the width of the bar chart container as needed */
+	margin-left: 50px; /* Adjust the margin between the table and the bar chart */
+}
+#barChart.hovered {
+	opacity: 0.6;
+}
+.option {
+	margin-left: 10px;
 }

@@ -1194,6 +1194,17 @@ function getAllGoalInformation(data) {
 /** Partie Sonia  **/
 
 /**
+ * Énumération permettant la sélection du groupe de personne
+ * auquel on veut comparer un joueur dans l'histogramme.
+ */
+const SelectEnum = {
+	AllPlayers: "All Players",
+	Team: "Team",
+	Enemies: "Enemies",
+	OnePlayer: "One Player"
+};
+
+/**
  * Récupère les statistiques des joueurs.
  * @param {*} data
  * @returns
@@ -1333,6 +1344,389 @@ function displayPlayerStats(data) {
 }
 
 /**
+ * Calcule la moyenne des résultats des autres adversaires pour le Score, les Goals,
+ * les Assists, les Shots et les Saves.
+ * @param {Map} teamsStats tableau contenant les statistiques des joueurs.
+ * @param {Map} selectedPlayer joueur sélectionné.
+ * @param {String} playerName nom du joueur sélectionné.
+ * @param {Enum} selectedOpponent tous les autres joueurs / team / team adverse.
+ * @returns {Map} contenant la moyenne des Score, Goals, Assists, Saves et Shots des joueurs
+ * autres que le joueur sélectionné.
+ */
+function calculateMeanStats(teamsStats, selectedPlayer, playerName, selectedOpponent) {
+  var allStats = teamsStats.flat().filter(player => player.Name !== playerName);
+  var team = teamsStats.flat().filter(player => player.Name === playerName)[0].Team;
+  var totalCount = 0;
+  var meanStats = allStats.reduce(function (acc, player) {
+    for (var key in player) {
+      if (typeof selectedPlayer[key] !== "undefined") {
+        if (selectedOpponent === SelectEnum.AllPlayers
+          || (selectedOpponent === SelectEnum.Team && player.Team === team)
+          || (selectedOpponent === SelectEnum.Enemies && player.Team !== team)) {
+          acc[key] = (acc[key] || 0) + player[key];
+          if (key === "Score") totalCount++;
+        }
+      }
+    }
+    return acc;
+  }, {});
+
+  for (var key in meanStats) {
+    meanStats[key] /= totalCount;
+  }
+
+  return meanStats;
+}
+
+/**
+ * Réarrange des données dans l'ordre suivant : Score, Goals, Assists, Saves, Shots.
+ * @param {Map} selectedPlayer joueur sélectionné. 
+ * @returns {Map} joueur sélectionné avec les données réarrangées.
+ */
+function rearrangeOrder(selectedPlayer) {  
+  var order = ['Score', 'Goals', 'Assists', 'Saves', 'Shots'];
+  var rearrangedPlayer = new Map();
+  order.forEach(function (key) {
+      if (selectedPlayer.hasOwnProperty(key)) {
+          rearrangedPlayer.set(key, selectedPlayer[key]);
+      }
+  });
+  return rearrangedPlayer;
+}
+
+/**
+ * Affichage de l'histogramme de comparaison des statistiques d'un joueur avec
+ * les autres joueurs de la partie.
+ * @param {Map} teamsStats tableau contenant les statistiques de tous les joueurs.
+ * @param {Map} selectedPlayer joueur sélectionné.
+ * @returns 
+ */
+function handleRowSelection(teamsStats, selectedPlayer) {
+  // Clear existing bar chart
+  d3.select("#barChart").selectAll("*").remove();
+  d3.select("#barChartSelect").selectAll("*").remove();
+
+  var playerName = selectedPlayer.Name;
+
+  var textPlayerName = "Statistiques de " + playerName + " : ";
+
+  d3.select("#barChartSelect").append("p").text(textPlayerName);
+
+  // Sélectionnez l'élément où vous souhaitez ajouter le sélecteur (par exemple, le body du document)
+  var body = d3.select("#barChartSelect");
+
+  // Ajoutez le label et le sélecteur
+  var selectorContainer = body.append("div");
+
+  selectorContainer
+    .append("label")
+    .attr("for", "confrontSelect")
+    .text("Confront : ")
+    .style("margin-right", "10px");
+
+  var confrontSelect = selectorContainer
+    .append("select")
+    .attr("id", "confrontSelect");
+
+  // Ajoutez les options au sélecteur
+  var options = Object.values(SelectEnum);
+
+  confrontSelect
+    .selectAll("option")
+    .data(options)
+    .enter()
+    .append("option")
+    .attr("value", function(d) { return d; })
+    .text(function(d) { return d; });
+
+  var meanStats = rearrangeOrder(calculateMeanStats(teamsStats, selectedPlayer, playerName, SelectEnum.AllPlayers));
+  var rearrangedPlayer = rearrangeOrder(selectedPlayer);
+
+  // Ajoutez une fonction pour gérer les changements dans le sélecteur
+  confrontSelect.on("change", function () {
+    
+    d3.select("#playerSelect").remove();
+    // Obtenez la valeur sélectionnée
+    var selectedOption = confrontSelect.property("value");
+    
+    if (selectedOption === SelectEnum.OnePlayer) {
+      // Supprimez la liste déroulante existante si elle existe déjà
+      d3.select("#playerSelect").remove();
+
+      // Créez une nouvelle sélection pour les joueurs
+      var playerSelectContainer = body.append("div");
+
+      playerSelectContainer
+        .append("label")
+        .attr("for", "playerSelect")
+        .text("Select a player: ");
+
+      var playerSelect = playerSelectContainer
+        .append("select")
+        .attr("id", "playerSelect");
+
+      // Ajoutez les options des noms des joueurs à la nouvelle liste déroulante
+      var playerOptions = teamsStats.flatMap(team => team.map(player => player.Name));
+
+      playerSelect
+        .selectAll("option")
+        .data(playerOptions)
+        .enter()
+        .append("option")
+        .attr("value", function(d) { 
+          return d; 
+        })
+        .text(function(d) { return d; });
+
+      playerSelect.on("change", function () {
+        var selectedPlayerName = playerSelect.property("value");
+        var stats = teamsStats.flat().filter(player => player.Name === selectedPlayerName);
+        meanStats = rearrangeOrder(stats[0]);
+        drawHistogram(teamsStats, selectedPlayer, meanStats);
+      });
+    } else {
+      d3.select("#playerSelect").remove();
+      drawHistogram(teamsStats, selectedPlayer, selectedOption);
+    }
+  });
+
+  drawHistogram(teamsStats, selectedPlayer, SelectEnum.AllPlayers);
+}
+
+/**
+ * Affiche l'histogramme à droite du tableau de score.
+ * @param {Map} teamsStats contient les informations de tous les joueurs.
+ * @param {Map} selectedPlayer contient les informations du joueur sélectionné.
+ * @param {Enum} selectedOption Confrontation à la moyenne de tous les ennemis,
+ * de tous les alliés ou de tous les joueurs.
+ * @returns 
+ */
+function drawHistogram(teamsStats, selectedPlayer, selectedOption) {
+  // Clear existing bar chart
+  d3.select("#barChart").selectAll("*").remove();
+
+  var playerName = selectedPlayer.Name;
+  var playerTeam = selectedPlayer.Team;
+
+  var meanStats;
+
+  if (typeof selectedOption !== "object")
+    meanStats = rearrangeOrder(calculateMeanStats(teamsStats, selectedPlayer, playerName, selectedOption));
+  else {
+    console.log("select", selectedOption);
+    meanStats = selectedOption;
+  }
+
+  console.log(meanStats, typeof meanStats);
+ 
+  var rearrangedPlayer = rearrangeOrder(selectedPlayer);
+
+  var barWidth = 20;
+  var widthDelta = 10;
+  var width = rearrangedPlayer.size * (2 * barWidth + widthDelta);
+  var height = 400;
+  // Create a bar chart
+  var svg = d3.select("#barChart")
+    .append("svg")
+    .attr("width", width)
+    .attr("height", height)
+    .style("display", "block")
+    .style("margin-top", "10px");
+
+  var teamMax = new Map();
+
+  teamsStats.forEach(team => {
+    team.forEach(member => {
+      for (const [key, value] of Object.entries(member)) {
+        if (key != "Name" && key !== "OnlineID" && key !== "Team" && key !== "Platform" && key !== "bBot") {
+          if (teamMax.has(key)) {
+            if (teamMax.get(key) < value)
+              teamMax.set(key, value);
+          } else {
+            teamMax.set(key, value);
+          }
+        }
+      }
+    });
+  });
+
+  var bars = svg.selectAll("#barChart")
+    .data(rearrangedPlayer)
+    .enter()
+    .append("rect")
+    .attr("class", "barChart")
+    .attr("x", function (d, i) {
+      return 2 * i * barWidth + widthDelta * i; 
+    })
+    .attr("y", function (d) {
+      return width - width * d[1] / teamMax.get(d[0]);
+    })
+    .attr("width", barWidth)
+    .attr("height", function (d) {
+      return 2 + width * d[1] / teamMax.get(d[0]); 
+    })
+    .attr("fill", function (d) {
+      if (playerTeam == 0) {
+        return "#307fe2";
+      } else {
+        return "#e87722";
+      }
+    });
+
+    var text = svg.selectAll("text")
+      .data(rearrangedPlayer)
+      .enter()
+      .append("text")
+      .text(function(d) {
+        return d[0];
+      })
+      .attr("y", function (d) {
+        // return 250;
+        return width + 15;
+      })
+      .attr("x", function (d, i) {
+        return 2 * i * barWidth + widthDelta * i; 
+      })
+      .attr("font-size", "15px");
+  
+    bars.on("mouseover", function(e, d) {
+      d3.select(this).style("opacity", "0.8").text;
+      // if (d[1] != 0) {
+        var rectWidth = parseFloat(d3.select(this).attr("width"));
+        var xPosition = parseFloat(d3.select(this).attr("x")) + 15;
+        if (d[1] != 0) var yPosition = parseFloat(d3.select(this).attr("y")) + 10;
+        else var yPosition = parseFloat(d3.select(this).attr("y")) - 15;
+    
+        // Rotate the text
+        var resultText = svg
+            .append("text")
+            .text(d[1])
+            .attr("x", xPosition)
+            .attr("y", yPosition)
+            .attr("class", "result-text")
+            .attr("text-anchor", "end") // Adjust text anchor based on your preference
+            .attr("alignment-baseline", "ideographic") // Adjust alignment baseline based on your preference
+            .attr("transform", "rotate(-90 " + xPosition + " " + yPosition + ")")
+            .style("color", "white");
+      // }
+    });
+
+    bars.on("mouseout", function() {
+      d3.select(this).style("opacity", "1");
+      svg.select(".result-text").remove();
+    })
+  
+  var bars2 = svg.selectAll("#barChart2")
+    .data(meanStats)
+    .enter()
+    .append("rect")
+    .attr("class", "barChart2")
+    .attr("x", function (d, i) {
+      return 2 * i * barWidth + barWidth + widthDelta * i; 
+    })
+    .attr("y", function (d) {
+      return width - width * d[1] / teamMax.get(d[0]);
+    })
+    .attr("width", barWidth)
+    .attr("height", function (d) {
+      return 2 + width * d[1] / teamMax.get(d[0]); 
+    })
+    .attr("fill", "grey");
+  
+    bars2.on("mouseover", function(e, d) {
+      d3.select(this).style("opacity", "0.8").text;
+      var rectWidth = parseFloat(d3.select(this).attr("width"));
+      var xPosition = parseFloat(d3.select(this).attr("x")) + 15;
+      if (d[1] != 0) var yPosition = parseFloat(d3.select(this).attr("y")) + 10;
+      else var yPosition = parseFloat(d3.select(this).attr("y")) - 15;
+  
+      // Rotate the text
+      var resultText = svg
+          .append("text")
+          .text(Math.round(d[1] * 100) / 100)
+          .attr("x", xPosition)
+          .attr("y", yPosition)
+          .attr("class", "result-text")
+          .attr("text-anchor", "end") // Adjust text anchor based on your preference
+          .attr("alignment-baseline", "ideographic") // Adjust alignment baseline based on your preference
+          .attr("transform", "rotate(-90 " + xPosition + " " + yPosition + ")")
+          .style("color", "white");
+    });
+
+    bars2.on("mouseout", function() {
+      d3.select(this).style("opacity", "1");
+      svg.select(".result-text").remove();
+    })
+  
+  
+ //------------------------------- Légende -------------------------------
+  const legend = svg.append("g");//.attr("transform", `translate(${height - 10})`);
+
+  const rectWidth = 20;
+
+  if (typeof selectedOption === "object") {
+    selectedOption = SelectEnum.OnePlayer;
+  }
+
+  const dataLegend = [playerName, selectedOption];
+
+  legend.selectAll("rect")
+    .data(dataLegend)
+    .enter()
+    .append("rect")
+    .attr("x", 0)
+    .attr("y", function (d, i) {  
+      console.log("1d", d, i);
+      return i * rectWidth + width + 30;
+    })
+    .attr("width", rectWidth)
+    .attr("height", rectWidth)
+    .attr("fill", function(d) {
+    console.log("2d", d, d === playerName, playerTeam, playerTeam == 0);
+      if (d === playerName) {
+        if (playerTeam === 0) {
+          return "#307fe2";
+        } else {
+          return "#e87722";
+        }
+      } else {
+        return "grey";
+      }
+    }); //({ Team1: "#307fe2", Team2: "#e87722" }[d.data.team]));
+
+  legend
+    .selectAll("text")
+    .data(dataLegend)
+    .enter()
+    .append("text")
+    .attr("x", rectWidth * 1.5)
+    .attr("y", (d, i) => i * rectWidth + rectWidth * 0.75 + width + 30)
+    .text((d) => d);
+
+
+  return svg.node();
+}
+
+/**
+ * Trouve le meilleur joueur de la game.
+ * @param {Map} teamsStats 
+ * @returns le nom du meilleur joueur de la partie.
+ */
+function findMVP(teamsStats) {
+  var bestPlayerName;
+  var bestPlayerScore = 0;
+  teamsStats.forEach(team => {
+    team.forEach(member => {
+      if (member.Score > bestPlayerScore) {
+        bestPlayerName = member.Name;
+        bestPlayerScore = member.Score;
+      }
+    });
+  });
+  return bestPlayerName;
+}
+
+/**
  * Affiche le tableau des scores.
  * @param {Array} teamsStats
  * @param {Integer} scoreTeam0
@@ -1353,7 +1747,26 @@ function displayScoreBoard(teamsStats, scoreTeam0, scoreTeam1) {
       return d;
     })
     .enter()
-    .append("tr");
+    .append("tr")
+    .on("mouseover", function (e, d) {
+      // d3.select(this).style("font-weight", "bold");
+      if (d.Team === 0) {
+        d3.select(this).style("color", "#307fe2");
+      } else {
+        d3.select(this).style("color", "#e87722");
+      }
+    })
+    .on("mouseout", function (e, d) {
+      //put the text in normal
+      d3.select(this).style("font", null).style("color", null);
+    })
+    .on("click", function (e, d) {
+      if (typeof d !== "number")
+        handleRowSelection(teamsStats, d);
+    });
+
+  var bestPlayerName = findMVP(teamsStats);
+  console.log("mvp : ", bestPlayerName);
 
   rows2.append("td").text(function (d) {
     if (typeof d === "number" && Number.isInteger(d)) {
@@ -1363,10 +1776,24 @@ function displayScoreBoard(teamsStats, scoreTeam0, scoreTeam1) {
         .style("font-weight", "bold")
         .classed("text-light", true)
         .classed("team1", d === scoreTeam0)
-        .classed("team2", d === scoreTeam1);
-      return d;
+        .classed("team2", d === scoreTeam1)
+        .classed("score", true)
+        .style("padding", "3px");
+      if (d == scoreTeam0)
+        // var text = "🏁 " + d;
+        var text = "🏳  " + d;
+      else 
+        var text = "🏳 " + d;
+      return text;
     } else {
-      return d.Name;
+      d3.select(this).classed("name", true);
+      if (d.Name == bestPlayerName) {
+        text = "♛ "+ d.Name;
+        d3.select(this).style("font-weight", "bold");
+      } else {
+        text = d.Name;
+      }
+      return text;
     }
   });
 
@@ -1404,8 +1831,7 @@ function displayScoreBoard(teamsStats, scoreTeam0, scoreTeam1) {
 function displayOverviewStats(overviewStats) {
   var widthDelta = 125;
   var centrageVertical = 30;
-  var svg = d3
-    .select("#content")
+  var svg = d3.select("#content")
     .append("svg")
     .attr("width", 1000)
     .attr("height", 300);
@@ -1413,8 +1839,7 @@ function displayOverviewStats(overviewStats) {
   var width = 1000; // Ajout de la variable width pour référence
 
   // Rectangle pour les stats du joueur 1
-  var rectanglesPlayer1 = svg
-    .selectAll(".team1")
+  var rectanglesPlayer1 = svg.selectAll(".team1")
     .data(overviewStats)
     .enter()
     .append("rect")
@@ -1531,15 +1956,14 @@ function displayOverviewStats(overviewStats) {
 }
 
 /**
- * Calcule la pression (c'est-à-dire le temps que passe la balle dans chaque camp).
- * @param {Map} data_ball
- * @param {Integer} sumXneg
- * @param {Integer} sumXpos
+ * Diagramme circulaire la pression (c'est-à-dire le temps que passe la balle dans chaque camp).
+ * @param {Map} data_ball : positions de la balle au cours de la partie.
+ * @param {Integer} sumXneg : nombre de fois que la balle est du côté de l'équipe 0.
+ * @param {Integer} sumXpos : nombre de fois que la balle est du côté de l'équipe 1.
  * @returns
  */
 function displayPressure(data_ball, sumXneg, sumXpos) {
   getPieData = d3.pie().value(function (d) {
-    console.log(d.value);
     return d.count;
   });
   var pieData = getPieData(data_ball);
@@ -1552,21 +1976,11 @@ function displayPressure(data_ball, sumXneg, sumXpos) {
     .attr("width", width)
     .attr("height", height);
 
-  // On utilise la fonction d3.arc qui va s'occuper de
-  // déssiner les arcs de cercle pour nous
   const arcCreator = d3
     .arc()
     .innerRadius(0)
     .outerRadius(height / 2);
 
-  // une échelle pour la couleur, comme vu plus haut
-  // (en utilisant une palette de couleur catégorielle)
-  const colors = d3
-    .scaleOrdinal()
-    .domain(data_ball.map((d) => d.team))
-    .range(d3.schemePastel1);
-
-  // un groupe pour centrer le camembert
   const pie = svg
     .append("g")
     .attr("transform", `translate(${height / 2}, ${height / 2})`);
@@ -1575,34 +1989,26 @@ function displayPressure(data_ball, sumXneg, sumXpos) {
     .selectAll("path")
     .data(pieData)
     .enter()
-    .append("path") // Cette fois on utilise un chemin ('path') et non plus un 'rect' ou un 'circle'
-    .attr("d", arcCreator) // La fonction responsable de dessiner le chemin pour les données actuelle
+    .append("path")
+    .attr("d", arcCreator) 
     .attr("fill", (d) => ({ Team1: "#307fe2", Team2: "#e87722" }[d.data.team]))
 
     .on("mouseover", (event, d) => {
-      // On sélectionne le texte grace à sa classe
-      // et on modifie la valeur d'opacité
       d3.select(`.text-${d.data.team}`).attr("opacity", 1);
+      d3.select(event.target).attr("opacity", 0.8);
     })
     .on("mouseout", (event, d) => {
-      // On sélectionne le texte grace à sa classe
-      // et on modifie la valeur d'opacité
       d3.select(`.text-${d.data.team}`).attr("opacity", 0);
+      d3.select(event.target).attr("opacity", 1);
     });
 
-  // On ajoute un texte avec le nombre de team concerné pour chaque secteur
-  // mais on définie l'opacité à 0
-  // Cette opacité sera modifié (à 1) lors du survol sur le secteur correspondant
+ //------------------------------- Pourcentage -------------------------------
   pie
     .selectAll("text")
     .data(pieData)
     .enter()
     .append("text")
-    // On met un nom de classe différent pour chaque texte,
-    // pour permettre de sélectionner le bon texte
-    // dans les gestionnaire d'événement mouseover / mouseout
     .attr("class", (d) => `text-${d.data.team}`)
-    // .centroid permet de trouver le centre de la tranche
     .attr("transform", (d) => `translate(${arcCreator.centroid(d)})`)
     .attr("text-anchor", "middle")
     .attr("opacity", 0)
@@ -1612,14 +2018,11 @@ function displayPressure(data_ball, sumXneg, sumXpos) {
       return percentage + "%";
     });
 
-  // On va également créer une légende
-  // Pour cela, on va lié un tableau contenant le nom des teams
-  // avec des rectangles et des textes
+ //------------------------------- Légende -------------------------------
   const legend = svg.append("g").attr("transform", `translate(${height - 10})`);
 
   const rectWidth = 20;
 
-  // On va réutiliser l'échelle de couleurs, comme lors du dessin des secteurs
   legend
     .selectAll("rect")
     .data(pieData)
@@ -1631,7 +2034,6 @@ function displayPressure(data_ball, sumXneg, sumXpos) {
     .attr("height", rectWidth)
     .attr("fill", (d) => ({ Team1: "#307fe2", Team2: "#e87722" }[d.data.team]));
 
-  // les noms des teams
   legend
     .selectAll("text")
     .data(pieData)
@@ -1649,3 +2051,5 @@ function displayPressure(data_ball, sumXneg, sumXpos) {
 document
   .getElementById("uploadButton")
   .addEventListener("click", handleFileUpload);
+
+handleFileUpload();
