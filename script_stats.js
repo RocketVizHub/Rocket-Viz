@@ -1,64 +1,14 @@
 const COL_GREEN = "#098149"; //#21A38B;
 const COL_BLUE = "#307fe2";
 const COL_ORANGE = "#e87722";
-const COL_START = "#ffffff";
-const COL_END = "#e87722";
-
-document
-  .getElementById("uploadButton")
-  .addEventListener("click", handleFileUpload);
-
-document
-  .getElementById("replay1")
-  .addEventListener("click", function() {
-    readExemple("https://raw.githubusercontent.com/RocketVizHub/Rocket-Viz/main/utils/replay03.json");
-  });
-
-document
-  .getElementById("replay2")
-  .addEventListener("click", function() {
-    readExemple("https://raw.githubusercontent.com/RocketVizHub/Rocket-Viz/main/utils/replay04.json");
-  });
-
-async function readExemple(path) {
-  console.log(path);
-  try {
-    const fileContent = await fetch(path);
-    const data = await fileContent.json();
-
-    displayAccordionsNReplayInformations();
-
-    // Display file details
-    displayFileDetails(data);
-
-    // Afficher la timeline avec les données récupérées
-    displayTimeline(data);
-
-    // Display & Debug axel
-    document.getElementById("ball_heatmap_buttons").innerHTML = "";
-    displayNDebugAxel(data);
-
-    // sonia
-    document.getElementById("playerStatsContent").innerHTML = "";
-    document.getElementById("content").innerHTML = "";
-    document.getElementById("pressure").innerHTML = "";
-    displayPlayerStats(data);
-  } catch (error) {
-    console.error("Error reading file:", error);
-  }
-}
-
 
 async function handleFileUpload() {
   try {
     const fileInput = document.getElementById("fileInput");
-    console.log(fileInput.files);
     const file = fileInput.files[0];
     if (file) {
       const fileContent = await readFileAsync(file);
       const data = JSON.parse(fileContent);
-
-      displayAccordionsNReplayInformations();
 
       // Display file details
       displayFileDetails(data);
@@ -73,7 +23,6 @@ async function handleFileUpload() {
       // sonia
       document.getElementById("playerStatsContent").innerHTML = "";
       document.getElementById("content").innerHTML = "";
-      document.getElementById("pressure").innerHTML = "";
       displayPlayerStats(data);
     } else {
       console.error("No file selected.");
@@ -97,14 +46,6 @@ async function readFileAsync(file) {
 
     reader.readAsText(file);
   });
-}
-
-function displayAccordionsNReplayInformations() {
-  d3.select(".fileDetails")
-    .style("display", "block");
-  
-  d3.select(".accordion")
-    .style("display", "block");
 }
 
 function displayFileDetails(data) {
@@ -143,9 +84,8 @@ function displayDebugAxel(data) {
     width: width,
     height: height,
     container: "#ball_heatmap",
-    // start_color: "#FC7C89",
-    start_color: COL_START,
-    end_color: COL_END,
+    start_color: "#FC7C89",
+    end_color: COL_GREEN,
   });
 
   console.log("--- DEBUGGED ---");
@@ -641,12 +581,6 @@ function displayUpdateTimeline() {
 
     d3.select("#timeline").selectAll("*").remove();
     displayTimeline(filteredData, startTime, endTime);
-
-    // Rafraîchir la heatmap
-    startFrame = startTime * 60;
-    endFrame = endTime * 60;
-    refreshHeatmap(data, startFrame, endFrame, width, height, xSize, ySize);
-    
   } catch (error) {
     console.error("Error updating timeline:", error);
   }
@@ -690,38 +624,18 @@ function getFilteredData(data, startTime, endTime) {
     return save.frame / framerate >= startSeconds && save.frame / framerate <= endSeconds;
   });
 
-
-  // Obtenir les données de la balle
-  const ballTimeNActorId = getBallTimeNActorId(data);
-  const ballLocations = getBallLocations(data, ballTimeNActorId, startTime, endTime);
-
-  // Filtrer les données de la balle
-  const filteredBallTimeNActorId = ballTimeNActorId.filter(([time, actorId]) => {
-    return time >= startTime && time <= endTime;
-  });
-  const filteredBallLocations = ballLocations.filter(([time, location]) => {
-    return time >= startTime && time <= endTime;
-  });
-
-  heatmap = locationsToHeatmap(filteredBallLocations, xSize, ySize);
-
   return {
     ...data,
     network_frames: {
       ...data.network_frames,
       frames: frames
     },
-    //TimeLine
     goals: filteredGoals,
     demolitionDataTeam0: demolitionDataTeam0,
     demolitionDataTeam1: demolitionDataTeam1,
     team0Saves: filteredSavesTeam0,
     team1Saves: filteredSavesTeam1,
-    // Heatmap
-    ballTimeNActorId: filteredBallTimeNActorId,
-    ballLocations: filteredBallLocations,
-    heatmap: heatmap,
-  };  
+  };
 }
 
 document
@@ -763,15 +677,14 @@ function displayNDebugAxel(data) {
 
   heatmap = thresholdHeatmap(heatmap);
 
-  const width = 450;
-  const height = 450 * ratioXY;
+  const width = 350;
+  const height = 350 * ratioXY;
   displayHeatmap(heatmap, {
     width: width,
     height: height,
     container: "#ball_heatmap",
-    // start_color: "#FC7C89",
-    start_color: COL_START,
-    end_color: COL_END,
+    start_color: "#FC7C89",
+    end_color: COL_GREEN,
   });
 
   scoreData = getScore(data);
@@ -865,7 +778,7 @@ function createButtons(
 
   btn.style.backgroundColor = color;
   btn.style.borderColor = color;
-  
+
   btn.onclick = function () {
     refreshHeatmap(data, start, end, width, height, xSize, ySize);
     var buttons = document.querySelectorAll("#ball_heatmap_buttons");
@@ -896,9 +809,8 @@ function refreshHeatmap(data, start, end, width, height, xSize, ySize) {
     width: width,
     height: height,
     container: "#ball_heatmap",
-    // start_color: "#FC7C89",
-    start_color: COL_START,
-    end_color: COL_END,
+    start_color: "#FC7C89",
+    end_color: COL_GREEN,
   });
 }
 
@@ -1260,12 +1172,11 @@ function displayHeatmap(data, options) {
   //   .style("stroke", "black")
   //   .attr("width", width)
   //   .attr("height", height);
-
+  
   svg.append("svg:image")
-    .attr("xlink:href", "./img/map3.png") // Remplacez par le chemin de votre image
-    .attr("width", width);
-    // .style("opacity", 0.8);
-    // .attr("filter", "url(#brightness)")
+    .attr("xlink:href", "./img/map.png") // Remplacez par le chemin de votre image
+    .attr("width", width)
+    .attr("height", height);
   // Build some scales for us to use
   const x = d3.scale.ordinal().domain(d3.range(numcols)).rangeBands([0, width]);
   const y = d3.scale
@@ -1306,8 +1217,8 @@ function displayHeatmap(data, options) {
 
   cell
     .append("rect")
-    .attr("width", x.rangeBand() + 0.5)
-    .attr("height", y.rangeBand() + 0.5);
+    .attr("width", x.rangeBand() + 0.4)
+    .attr("height", y.rangeBand() + 0.4);
   // .attr("width", x.rangeBand()-0.3) if we want the borders
 
   row
@@ -1316,7 +1227,7 @@ function displayHeatmap(data, options) {
       return data[i];
     })
     .style("fill", colorMap)
-    .style("opacity", 0.5);
+    .style("opacity", 0.4);
 }
 
 /******************************* Partie Nicolas ********************************/
@@ -1500,8 +1411,8 @@ function displayPlayerStats(data) {
     { team: "Team2", count: sumXpos },
   ];
 
-  // d3.selectAll("#content").append("h1").text("Pressure");
-  d3.selectAll("#pressure")
+  d3.selectAll("#content").append("h1").text("Pressure");
+  d3.selectAll("#content")
     .append("p")
     .text("Pressure is a measure of how much time the ball spends on a side.");
   displayPressure(data_ball, sumXneg, sumXpos);
@@ -1938,15 +1849,7 @@ function displayScoreBoard(teamsStats, scoreTeam0, scoreTeam1) {
         .classed("team1", d === scoreTeam0)
         .classed("team2", d === scoreTeam1)
         .classed("score", true)
-        .style("padding", "3px")
-        .style("background-color", function (d) {
-          if (d === scoreTeam0) {
-            return COL_BLUE;
-          } else {
-            return COL_ORANGE;
-          }
-        }
-      );
+        .style("padding", "3px");
       if (d == scoreTeam0)
         // var text = "🏁 " + d;
         var text = "🏳  " + d;
@@ -2142,7 +2045,7 @@ function displayPressure(data_ball, sumXneg, sumXpos) {
   const height = 400;
 
   const svg = d3
-    .select("#pressure")
+    .select("#content")
     .append("svg")
     .attr("width", width)
     .attr("height", height);
@@ -2217,6 +2120,34 @@ function displayPressure(data_ball, sumXneg, sumXpos) {
   return svg.node();
 }
 
+/******************************* Bouton upload de fichiers ********************************/
+
+document
+  .getElementById("uploadButton")
+  .addEventListener("click", handleFileUpload);
+
+handleFileUpload();
+
+
+/******************************* Pré-chargement des fichiers ********************************/
+const files = [
+  { name: "Replay 1", path: "./utils/replay03.json" },
+  { name: "Replay 2", path: "./utils/replay04.json" }
+];
+
+// Sélection du menu déroulant
+const selectMenu = document.getElementById("select-files");
+
+var datas = {};
+
+// Remplir le menu déroulant avec les options basées sur les fichiers JSON
+files.forEach((file, index) => {
+  const option = document.createElement("option");
+  option.value = index;
+  option.text = file.name;
+  selectMenu.appendChild(option);
+});
+
 /** 
  * Fonction pour charger un fichier JSON
  * @param filePath nom du fichier.
@@ -2229,6 +2160,28 @@ function loadJsonFile(filePath) {
   });
 }
 
+// Charge tous les fichiers dans une Map pour pas avoir à refaire le chargement
+// plusieurs fois
+files.forEach((file, index) => {
+  loadJsonFile(file.path)
+    .then((result) => {
+      datas[index] = result.data;
+      if (index === 0) {
+        displayAllStats(result.data);
+      }
+    })
+    .catch((error) => {
+      console.error("Erreur lors du chargement du fichier JSON :", error);
+  });
+});
+
+
+/**
+ * Gérer l'événement de changement dans le menu déroulant.
+ */
+selectMenu.addEventListener("change", function () {
+  displayAllStats(datas[this.value]);
+});
 
 /**
  * Affiche la page entière.
