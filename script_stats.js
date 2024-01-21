@@ -4,9 +4,53 @@ const COL_ORANGE = "#e87722";
 const COL_START = "#ffffff";
 const COL_END = "#e87722";
 
+document
+  .getElementById("uploadButton")
+  .addEventListener("click", handleFileUpload);
+
+document
+  .getElementById("replay1")
+  .addEventListener("click", function() {
+    readExemple("https://raw.githubusercontent.com/RocketVizHub/Rocket-Viz/main/utils/replay03.json");
+  });
+
+document
+  .getElementById("replay2")
+  .addEventListener("click", function() {
+    readExemple("https://raw.githubusercontent.com/RocketVizHub/Rocket-Viz/main/utils/replay04.json");
+  });
+
+async function readExemple(path) {
+  console.log(path);
+  try {
+    const fileContent = await fetch(path);
+    const data = await fileContent.json();
+
+    // Display file details
+    displayFileDetails(data);
+
+    // Afficher la timeline avec les données récupérées
+    displayTimeline(data);
+
+    // Display & Debug axel
+    document.getElementById("ball_heatmap_buttons").innerHTML = "";
+    displayNDebugAxel(data);
+
+    // sonia
+    document.getElementById("playerStatsContent").innerHTML = "";
+    document.getElementById("content").innerHTML = "";
+    document.getElementById("pressure").innerHTML = "";
+    displayPlayerStats(data);
+  } catch (error) {
+    console.error("Error reading file:", error);
+  }
+}
+
+
 async function handleFileUpload() {
   try {
     const fileInput = document.getElementById("fileInput");
+    console.log(fileInput.files);
     const file = fileInput.files[0];
     if (file) {
       const fileContent = await readFileAsync(file);
@@ -568,17 +612,6 @@ function displayTimeline(data) {
     )
     .style("margin-right", "20px");
 }
-
-document
-  .getElementById("uploadButton")
-  .addEventListener("click", handleFileUpload);
-
-document.getElementById("uploadButton").addEventListener("click", function () {
-  d3.select("#timeline")
-    .classed("timeline-hidden", true)
-    .style("display", "none");
-  handleFileUpload();
-});
 
 /** Partie Axel **/
 function displayNDebugAxel(data) {
@@ -2052,34 +2085,6 @@ function displayPressure(data_ball, sumXneg, sumXpos) {
   return svg.node();
 }
 
-/******************************* Bouton upload de fichiers ********************************/
-
-document
-  .getElementById("uploadButton")
-  .addEventListener("click", handleFileUpload);
-
-handleFileUpload();
-
-
-/******************************* Pré-chargement des fichiers ********************************/
-const files = [
-  { name: "Replay 1", path: "./utils/replay03.json" },
-  { name: "Replay 2", path: "./utils/replay04.json" }
-];
-
-// Sélection du menu déroulant
-const selectMenu = document.getElementById("select-files");
-
-var datas = {};
-
-// Remplir le menu déroulant avec les options basées sur les fichiers JSON
-files.forEach((file, index) => {
-  const option = document.createElement("option");
-  option.value = index;
-  option.text = file.name;
-  selectMenu.appendChild(option);
-});
-
 /** 
  * Fonction pour charger un fichier JSON
  * @param filePath nom du fichier.
@@ -2092,28 +2097,6 @@ function loadJsonFile(filePath) {
   });
 }
 
-// Charge tous les fichiers dans une Map pour pas avoir à refaire le chargement
-// plusieurs fois
-files.forEach((file, index) => {
-  loadJsonFile(file.path)
-    .then((result) => {
-      datas[index] = result.data;
-      if (index === 0) {
-        displayAllStats(result.data);
-      }
-    })
-    .catch((error) => {
-      console.error("Erreur lors du chargement du fichier JSON :", error);
-  });
-});
-
-
-/**
- * Gérer l'événement de changement dans le menu déroulant.
- */
-selectMenu.addEventListener("change", function () {
-  displayAllStats(datas[this.value]);
-});
 
 /**
  * Affiche la page entière.
