@@ -59,7 +59,8 @@ function displayFileDetails(data) {
             `;
 }
 
-/** Partie Axel **/
+/******************************* Partie Axel ********************************/
+
 function displayDebugAxel(data) {
   console.log("--- AXEL IS DEBUGGING ---");
 
@@ -1143,7 +1144,7 @@ function displayHeatmap(data, options) {
     .style("fill", colorMap);
 }
 
-/** Partie Nicolas  **/
+/******************************* Partie Nicolas ********************************/
 
 function getFramerate(data) {
   return data.properties.RecordFPS;
@@ -1190,7 +1191,7 @@ function getAllGoalInformation(data) {
   return goalInformation;
 }
 
-/** Partie Sonia  **/
+/******************************* Partie Sonia ********************************/
 
 /**
  * Énumération permettant la sélection du groupe de personne
@@ -1436,7 +1437,6 @@ function handleRowSelection(teamsStats, selectedPlayer) {
     .text(function(d) { return d; });
 
   var meanStats = rearrangeOrder(calculateMeanStats(teamsStats, selectedPlayer, playerName, SelectEnum.AllPlayers));
-  var rearrangedPlayer = rearrangeOrder(selectedPlayer);
 
   // Ajoutez une fonction pour gérer les changements dans le sélecteur
   confrontSelect.on("change", function () {
@@ -2045,7 +2045,7 @@ function displayPressure(data_ball, sumXneg, sumXpos) {
   return svg.node();
 }
 
-/***********************/
+/******************************* Bouton upload de fichiers ********************************/
 
 document
   .getElementById("uploadButton")
@@ -2126,5 +2126,7 @@ function displayAllStats(data) {
   // Affichage des statistiques gloables
   document.getElementById("playerStatsContent").innerHTML = "";
   document.getElementById("content").innerHTML = "";
+  document.getElementById("barChart").innerHTML="";
+  document.getElementById("barChartSelect").innerHTML="";
   displayPlayerStats(data);
 }
