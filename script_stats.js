@@ -23,6 +23,7 @@ async function handleFileUpload() {
       // sonia
       document.getElementById("playerStatsContent").innerHTML = "";
       document.getElementById("content").innerHTML = "";
+      document.getElementById("pressure").innerHTML = "";
       displayPlayerStats(data);
     } else {
       console.error("No file selected.");
@@ -1328,8 +1329,8 @@ function displayPlayerStats(data) {
     { team: "Team2", count: sumXpos },
   ];
 
-  d3.selectAll("#content").append("h1").text("Pressure");
-  d3.selectAll("#content")
+  // d3.selectAll("#content").append("h1").text("Pressure");
+  d3.selectAll("#pressure")
     .append("p")
     .text("Pressure is a measure of how much time the ball spends on a side.");
   displayPressure(data_ball, sumXneg, sumXpos);
@@ -1970,7 +1971,7 @@ function displayPressure(data_ball, sumXneg, sumXpos) {
   const height = 400;
 
   const svg = d3
-    .select("#content")
+    .select("#pressure")
     .append("svg")
     .attr("width", width)
     .attr("height", height);
