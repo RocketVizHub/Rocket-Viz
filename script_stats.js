@@ -1444,13 +1444,16 @@ function handleRowSelection(teamsStats, selectedPlayer) {
 
   // Ajoutez une fonction pour gérer les changements dans le sélecteur
   confrontSelect.on("change", function () {
-    
+    // Remove the "Select a player:" text and the player selection dropdown
+    d3.select("#playerSelectLabel").remove();
     d3.select("#playerSelect").remove();
+
     // Obtenez la valeur sélectionnée
     var selectedOption = confrontSelect.property("value");
     
     if (selectedOption === SelectEnum.OnePlayer) {
       // Supprimez la liste déroulante existante si elle existe déjà
+      d3.select("#playerSelectLabel").remove();
       d3.select("#playerSelect").remove();
 
       // Créez une nouvelle sélection pour les joueurs
@@ -1458,6 +1461,7 @@ function handleRowSelection(teamsStats, selectedPlayer) {
 
       playerSelectContainer
         .append("label")
+        .attr("id", "playerSelectLabel")
         .attr("for", "playerSelect")
         .text("Select a player: ");
 
@@ -1482,10 +1486,9 @@ function handleRowSelection(teamsStats, selectedPlayer) {
         var selectedPlayerName = playerSelect.property("value");
         var stats = teamsStats.flat().filter(player => player.Name === selectedPlayerName);
         meanStats = rearrangeOrder(stats[0]);
-        drawHistogram(teamsStats, selectedPlayer, meanStats);
+        drawHistogram(teamsStats, selectedPlayer, meanStats, selectedPlayerName);
       });
     } else {
-      d3.select("#playerSelect").remove();
       drawHistogram(teamsStats, selectedPlayer, selectedOption);
     }
   });
@@ -1501,7 +1504,7 @@ function handleRowSelection(teamsStats, selectedPlayer) {
  * de tous les alliés ou de tous les joueurs.
  * @returns 
  */
-function drawHistogram(teamsStats, selectedPlayer, selectedOption) {
+function drawHistogram(teamsStats, selectedPlayer, selectedOption, oppenentName = null) {
   // Clear existing bar chart
   d3.select("#barChart").selectAll("*").remove();
 
@@ -1676,13 +1679,11 @@ function drawHistogram(teamsStats, selectedPlayer, selectedOption) {
     .append("rect")
     .attr("x", 0)
     .attr("y", function (d, i) {  
-      console.log("1d", d, i);
       return i * rectWidth + width + 30;
     })
     .attr("width", rectWidth)
     .attr("height", rectWidth)
     .attr("fill", function(d) {
-    console.log("2d", d, d === playerName, playerTeam, playerTeam == 0);
       if (d === playerName) {
         if (playerTeam === 0) {
           return "#307fe2";
@@ -1701,7 +1702,10 @@ function drawHistogram(teamsStats, selectedPlayer, selectedOption) {
     .append("text")
     .attr("x", rectWidth * 1.5)
     .attr("y", (d, i) => i * rectWidth + rectWidth * 0.75 + width + 30)
-    .text((d) => d);
+    .text(function (d, i) {
+      if (oppenentName === null || i === 0) return d;
+      else return oppenentName;
+    });
 
 
   return svg.node();
