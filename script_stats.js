@@ -103,11 +103,24 @@ function displayFileDetails(data) {
   console.log(getMaxTempsPartie(getMaxFrames(data), getFramerate(data)));
   console.log(getListeFramesHighlights(data));
   // console.log(getListFramesGoals(data));
-  const fileDetailsElement = document.getElementById("fileDetails");
-  fileDetailsElement.innerHTML = `
-                <p><strong>header size:</strong> ${data.header_size}</p>
-				<p><strong>Replay Name:</strong> ${data.properties.ReplayName}</p>
-            `;
+  // const fileDetailsElement = document.getElementById("fileDetails");
+  // fileDetailsElement.innerHTML = `
+  //               <p><strong>header size:</strong> ${data.header_size}</p>
+	// 			<p><strong>Replay Name:</strong> ${data.properties.ReplayName}</p>
+  //           `;
+  d3.select("#fileDetails").selectAll("*").remove();
+  d3.select("#fileDetails")
+    .append("p")
+    .html(`<strong>Replay Name:</strong> ${data.properties.ReplayName}`);
+  d3.select("#fileDetails")
+    .append("p")
+    .html(`<strong>Map playes:</strong> ${data.properties.MapName}`);
+  d3.select("#fileDetails")
+    .append("p")
+    .html(`<strong>Date:</strong> ${data.properties.Date}`);
+  d3.select("#fileDetails")
+    .append("p")
+    .html(`<strong>Saved by:</strong> ${data.properties.PlayerName}`);
 }
 
 /******************************* Partie Axel ********************************/
