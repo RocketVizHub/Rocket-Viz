@@ -1,6 +1,8 @@
 const COL_GREEN = "#098149"; //#21A38B;
 const COL_BLUE = "#307fe2";
 const COL_ORANGE = "#e87722";
+const COL_START = "#ffffff";
+const COL_END = "#e87722";
 
 async function handleFileUpload() {
   try {
@@ -91,8 +93,9 @@ function displayDebugAxel(data) {
     width: width,
     height: height,
     container: "#ball_heatmap",
-    start_color: "#FC7C89",
-    end_color: COL_GREEN,
+    // start_color: "#FC7C89",
+    start_color: COL_START,
+    end_color: COL_END,
   });
 
   console.log("--- DEBUGGED ---");
@@ -601,14 +604,15 @@ function displayNDebugAxel(data) {
 
   heatmap = thresholdHeatmap(heatmap);
 
-  const width = 350;
-  const height = 350 * ratioXY;
+  const width = 450;
+  const height = 450 * ratioXY;
   displayHeatmap(heatmap, {
     width: width,
     height: height,
     container: "#ball_heatmap",
-    start_color: "#FC7C89",
-    end_color: COL_GREEN,
+    // start_color: "#FC7C89",
+    start_color: COL_START,
+    end_color: COL_END,
   });
 
   scoreData = getScore(data);
@@ -733,8 +737,9 @@ function refreshHeatmap(data, start, end, width, height, xSize, ySize) {
     width: width,
     height: height,
     container: "#ball_heatmap",
-    start_color: "#FC7C89",
-    end_color: COL_GREEN,
+    // start_color: "#FC7C89",
+    start_color: COL_START,
+    end_color: COL_END,
   });
 }
 
@@ -1096,19 +1101,11 @@ function displayHeatmap(data, options) {
   //   .style("stroke", "black")
   //   .attr("width", width)
   //   .attr("height", height);
-  
-  svg.append('defs')
-    .append('filter')
-    .attr('id', 'brightness')
-    .append('feComponentTransfer')
-    .append('feFuncR')
-    .attr('type', 'linear')
-    .attr('slope', '0.1'); // Adjust this value to change the brightness
 
   svg.append("svg:image")
     .attr("xlink:href", "./img/map3.png") // Remplacez par le chemin de votre image
-    .attr("width", width)
-    .style("opcacity", 0.5);
+    .attr("width", width);
+    // .style("opacity", 0.8);
     // .attr("filter", "url(#brightness)")
   // Build some scales for us to use
   const x = d3.scale.ordinal().domain(d3.range(numcols)).rangeBands([0, width]);
@@ -1150,8 +1147,8 @@ function displayHeatmap(data, options) {
 
   cell
     .append("rect")
-    .attr("width", x.rangeBand() + 0.4)
-    .attr("height", y.rangeBand() + 0.4);
+    .attr("width", x.rangeBand() + 0.5)
+    .attr("height", y.rangeBand() + 0.5);
   // .attr("width", x.rangeBand()-0.3) if we want the borders
 
   row
@@ -1160,7 +1157,7 @@ function displayHeatmap(data, options) {
       return data[i];
     })
     .style("fill", colorMap)
-    .style("opacity", 0.6);
+    .style("opacity", 0.5);
 }
 
 /******************************* Partie Nicolas ********************************/
