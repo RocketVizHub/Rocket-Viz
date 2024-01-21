@@ -95,4 +95,13 @@ text {
 	/* padding: 10px; */ 
 	/* background-color: #f0f0f0;
 	border: 1px solid #ccc; */
-  }
+}
+#timeline {
+	display: none;
+	border: 3px solid black;
+	height: 270px;
+}
+
+.timeline-visible {
+	display: block;
+}

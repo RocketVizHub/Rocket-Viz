@@ -388,7 +388,7 @@ function displayTimeline(data) {
     .attr("y", height / 4 - 5)
     .attr("width", width)
     .attr("height", 18)
-    .attr("fill", "blue");
+    .attr("fill", "#307fe2");
 
   svg
     .append("rect")
@@ -396,16 +396,16 @@ function displayTimeline(data) {
     .attr("y", height / 3 - 5)
     .attr("width", width)
     .attr("height", 18)
-    .attr("fill", "orange");
+    .attr("fill", "#e87722");
 
   // Ajout du texte pour chaque équipe
   svg
     .append("text")
     .attr("x", -10)
     .attr("y", height / 4)
-    .attr("text-anchor", "end")
-    .text("Equipe Bleue")
-    .attr("fill", "blue")
+    .attr("text-anchor", "end") 
+    .text("Blue Team")
+    .attr("fill", "#307fe2")
     .attr("font-size", "13px");
 
   svg
@@ -413,15 +413,15 @@ function displayTimeline(data) {
     .attr("x", -10)
     .attr("y", height / 3)
     .attr("text-anchor", "end")
-    .text("Equipe Orange")
-    .attr("fill", "orange")
+    .text("Orange Team")
+    .attr("fill", "#e87722")
     .attr("font-size", "13px");
 
   svg
     .append("text")
     .attr("x", width / 2)
     .attr("y", height / 2 - 10)
-    .text(`La partie à durée : ${maxDuration}`)
+    .text(`The game lasted ${maxDuration}`)
     .attr("font-size", "12px")
     .style("dominant-baseline", "hanging");
 
@@ -541,9 +541,9 @@ function displayTimeline(data) {
   Partie 4: La légende
   */
   const legendData = [
-    { icon: "img/goal_icon.png", description: "But" },
-    { icon: "img/save_icon.png", description: "Sauvegarde" },
-    { icon: "img/demolition_icon.png", description: "Joueur détruit" },
+    { icon: "img/goal_icon.png", description: "Goal" },
+    { icon: "img/save_icon.png", description: "Save" },
+    { icon: "img/demolition_icon.png", description: "Destroyed player (joueur détruit)" },
   ];
 
   const legendContainer = d3.select("#legend");
@@ -1159,7 +1159,7 @@ function getMaxTempsPartie(nbFrames, framerate) {
   const dureeEnMinutes = Math.floor(dureeEnSecondes / 60); // Partie entière des minutes
   const dureeEnSecondesRestantes = Math.round(dureeEnSecondes % 60); // Partie en secondes
 
-  return `${dureeEnMinutes} minutes et ${dureeEnSecondesRestantes} secondes`;
+  return `${dureeEnMinutes} minutes and ${dureeEnSecondesRestantes} seconds`;
 }
 
 function getListeFramesHighlights(data) {
@@ -1311,7 +1311,7 @@ function displayPlayerStats(data) {
 
   var width = d3.select("body").node().getBoundingClientRect().width;
 
-  d3.selectAll("#content").append("h1").text("Statistiques par équipe");
+  d3.selectAll("#content").append("h1").text("Team Statistics");
   displayOverviewStats(overviewStats);
 
   var locationBall = getLocations(data, 0);
@@ -1405,7 +1405,7 @@ function handleRowSelection(teamsStats, selectedPlayer) {
 
   var playerName = selectedPlayer.Name;
 
-  var textPlayerName = "Statistiques de " + playerName + " : ";
+  var textPlayerName = playerName + "'s statistics : ";
 
   d3.select("#barChartSelect").append("p").text(textPlayerName);
 
