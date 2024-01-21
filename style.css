@@ -98,7 +98,7 @@ text {
 }
 #timeline {
 	display: none;
-	border: 3px solid black;
+	/* border: 3px solid black; */
 	height: 270px;
 }
 

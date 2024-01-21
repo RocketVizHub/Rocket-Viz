@@ -93,7 +93,7 @@ quel pourcentage de la partie la balle a passé sur le demi-terrain de chacune d
 
 ## Améliorations
 - [ ] Github Pages
-- [ ] Avoir des fichiers déjà chargés
+- [x] Avoir des fichiers déjà chargés
 - [x] Intégration de la partie "Statistiques globales"
 - [ ] Mettre sur le site un lien vers le README
 - [ ] Rubrique "Problèmes" dans README
@@ -141,5 +141,5 @@ Le score du joueur est de la couleur de son équipe, le score moyen des autres j
 #### Après modification
 ![Timeline Après](./data/Timeline_new.png)
 
-## Problèmes
+## Difficultés rencontrées 
  - Complexité du fichier JSON

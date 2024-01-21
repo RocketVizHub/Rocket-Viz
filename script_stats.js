@@ -1,3 +1,7 @@
+const COL_GREEN = "#098149"; //#21A38B;
+const COL_BLUE = "#307fe2";
+const COL_ORANGE = "#e87722";
+
 async function handleFileUpload() {
   try {
     const fileInput = document.getElementById("fileInput");
@@ -87,7 +91,7 @@ function displayDebugAxel(data) {
     height: height,
     container: "#ball_heatmap",
     start_color: "#FC7C89",
-    end_color: "#21A38B",
+    end_color: COL_GREEN,
   });
 
   console.log("--- DEBUGGED ---");
@@ -139,14 +143,14 @@ function getPlayersAndTeams(data) {
 
   const playersAndTeams = playerStats.map((player) => ({
     name: player.Name,
-    team: player.Team === 0 ? "Blue" : "Orange",
+    team: player.Team === 0 ? "COL_BLUE" : "Orange",
   }));
 
   allPlayers.forEach((playerName) => {
     if (!playersAndTeams.some((player) => player.name === playerName)) {
       playersAndTeams.push({
         name: playerName,
-        team: oppositeTeam === 0 ? "Blue" : "Orange",
+        team: oppositeTeam === 0 ? "COL_BLUE" : "Orange",
       });
     }
   });
@@ -233,7 +237,7 @@ function getTeam0Destroy(data, frameIndicesWithDemolishFx) {
         playerTeams.find((player) => player.name.toLowerCase() === playerName)
           ?.team || "Unknown";
 
-      if (playerTeam === "Blue") {
+      if (playerTeam === "COL_BLUE") {
         destroyedFramesTeam0.push({ frameIndex, playerName });
       }
     });
@@ -388,7 +392,7 @@ function displayTimeline(data) {
     .attr("y", height / 4 - 5)
     .attr("width", width)
     .attr("height", 18)
-    .attr("fill", "#307fe2");
+    .attr("fill", COL_BLUE);
 
   svg
     .append("rect")
@@ -396,26 +400,26 @@ function displayTimeline(data) {
     .attr("y", height / 3 - 5)
     .attr("width", width)
     .attr("height", 18)
-    .attr("fill", "#e87722");
+    .attr("fill", COL_ORANGE);
 
   // Ajout du texte pour chaque équipe
   svg
     .append("text")
     .attr("x", -10)
-    .attr("y", height / 4)
+    .attr("y", height / 4 + 10)
     .attr("text-anchor", "end") 
     .text("Blue Team")
-    .attr("fill", "#307fe2")
-    .attr("font-size", "13px");
+    .attr("fill", COL_BLUE)
+    .attr("font-size", "14px");
 
   svg
     .append("text")
     .attr("x", -10)
-    .attr("y", height / 3)
+    .attr("y", height / 3 + 10)
     .attr("text-anchor", "end")
     .text("Orange Team")
-    .attr("fill", "#e87722")
-    .attr("font-size", "13px");
+    .attr("fill", COL_ORANGE)
+    .attr("font-size", "14px");
 
   svg
     .append("text")
@@ -603,7 +607,7 @@ function displayNDebugAxel(data) {
     height: height,
     container: "#ball_heatmap",
     start_color: "#FC7C89",
-    end_color: "#21A38B",
+    end_color: COL_GREEN,
   });
 
   scoreData = getScore(data);
@@ -729,7 +733,7 @@ function refreshHeatmap(data, start, end, width, height, xSize, ySize) {
     height: height,
     container: "#ball_heatmap",
     start_color: "#FC7C89",
-    end_color: "#21A38B",
+    end_color: COL_GREEN,
   });
 }
 
@@ -1085,13 +1089,17 @@ function displayHeatmap(data, options) {
     .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-  // Add a background to the SVG
-  const background = svg
-    .append("rect")
-    .style("stroke", "black")
+  // // Add a background to the SVG
+  // const background = svg
+  //   .append("rect")
+  //   .style("stroke", "black")
+  //   .attr("width", width)
+  //   .attr("height", height);
+  
+  svg.append("svg:image")
+    .attr("xlink:href", "./img/map.png") // Remplacez par le chemin de votre image
     .attr("width", width)
     .attr("height", height);
-
   // Build some scales for us to use
   const x = d3.scale.ordinal().domain(d3.range(numcols)).rangeBands([0, width]);
   const y = d3.scale
@@ -1141,7 +1149,8 @@ function displayHeatmap(data, options) {
     .data((d, i) => {
       return data[i];
     })
-    .style("fill", colorMap);
+    .style("fill", colorMap)
+    .style("opacity", 0.4);
 }
 
 /******************************* Partie Nicolas ********************************/
@@ -1225,43 +1234,29 @@ function getPlayerStats(data) {
  * @returns
  */
 function getTeamStats(team0, team1) {
-  let goals1 = 0,
-    assists1 = 0,
-    saves1 = 0,
-    shots1 = 0,
-    score1 = 0;
+  const getStatsTotal = (team) => team.reduce((acc, player) => {
+    acc.goals += player.Goals;
+    acc.assists += player.Assists;
+    acc.saves += player.Saves;
+    acc.shots += player.Shots;
+    acc.score += player.Score;
+    return acc;
+  }, { goals: 0, assists: 0, saves: 0, shots: 0, score: 0 });
 
-  team0.forEach((player) => {
-    goals1 = goals1 + player.Goals;
-    assists1 = assists1 + player.Assists;
-    saves1 = saves1 + player.Saves;
-    shots1 = shots1 + player.Shots;
-    score1 = score1 + player.Score;
-  });
-
-  let goals = 0,
-    assists = 0,
-    saves = 0,
-    shots = 0,
-    score = 0;
-  team1.forEach((player) => {
-    goals = goals + player.Goals;
-    assists = assists + player.Assists;
-    saves = saves + player.Saves;
-    shots = shots + player.Shots;
-    score = score + player.Score;
-  });
+  const statsTeam0 = getStatsTotal(team0);
+  const statsTeam1 = getStatsTotal(team1);
 
   const map = new Map();
 
-  map.set("Score", { [team0[0].Team]: score1, [team1[0].Team]: score });
-  map.set("Goals", { [team0[0].Team]: goals1, [team1[0].Team]: goals });
-  map.set("Assists", { [team0[0].Team]: assists1, [team1[0].Team]: assists });
-  map.set("Saves", { [team0[0].Team]: saves1, [team1[0].Team]: saves });
-  map.set("Shots", { [team0[0].Team]: shots1, [team1[0].Team]: shots });
+  map.set("Score", { [team0[0].Team]: statsTeam0.score, [team1[0].Team]: statsTeam1.score });
+  map.set("Goals", { [team0[0].Team]: statsTeam0.goals, [team1[0].Team]: statsTeam1.goals });
+  map.set("Assists", { [team0[0].Team]: statsTeam0.assists, [team1[0].Team]: statsTeam1.assists });
+  map.set("Saves", { [team0[0].Team]: statsTeam0.saves, [team1[0].Team]: statsTeam1.saves });
+  map.set("Shots", { [team0[0].Team]: statsTeam0.shots, [team1[0].Team]: statsTeam1.shots });
 
   return map;
 }
+
 /**
  * Récupère les statisques permettant de faire l'affichage de l'overview par équipe.
  * @param {*} data
@@ -1564,9 +1559,9 @@ function drawHistogram(teamsStats, selectedPlayer, selectedOption, oppenentName 
     })
     .attr("fill", function (d) {
       if (playerTeam == 0) {
-        return "#307fe2";
+        return COL_BLUE;
       } else {
-        return "#e87722";
+        return COL_ORANGE;
       }
     });
 
@@ -1588,8 +1583,6 @@ function drawHistogram(teamsStats, selectedPlayer, selectedOption, oppenentName 
   
     bars.on("mouseover", function(e, d) {
       d3.select(this).style("opacity", "0.8").text;
-      // if (d[1] != 0) {
-        var rectWidth = parseFloat(d3.select(this).attr("width"));
         var xPosition = parseFloat(d3.select(this).attr("x")) + 15;
         if (d[1] != 0) var yPosition = parseFloat(d3.select(this).attr("y")) + 10;
         else var yPosition = parseFloat(d3.select(this).attr("y")) - 15;
@@ -1601,11 +1594,10 @@ function drawHistogram(teamsStats, selectedPlayer, selectedOption, oppenentName 
             .attr("x", xPosition)
             .attr("y", yPosition)
             .attr("class", "result-text")
-            .attr("text-anchor", "end") // Adjust text anchor based on your preference
-            .attr("alignment-baseline", "ideographic") // Adjust alignment baseline based on your preference
+            .attr("text-anchor", "end") 
+            .attr("alignment-baseline", "ideographic") 
             .attr("transform", "rotate(-90 " + xPosition + " " + yPosition + ")")
             .style("color", "white");
-      // }
     });
 
     bars.on("mouseout", function() {
@@ -1632,7 +1624,6 @@ function drawHistogram(teamsStats, selectedPlayer, selectedOption, oppenentName 
   
     bars2.on("mouseover", function(e, d) {
       d3.select(this).style("opacity", "0.8").text;
-      var rectWidth = parseFloat(d3.select(this).attr("width"));
       var xPosition = parseFloat(d3.select(this).attr("x")) + 15;
       if (d[1] != 0) var yPosition = parseFloat(d3.select(this).attr("y")) + 10;
       else var yPosition = parseFloat(d3.select(this).attr("y")) - 15;
@@ -1644,8 +1635,8 @@ function drawHistogram(teamsStats, selectedPlayer, selectedOption, oppenentName 
           .attr("x", xPosition)
           .attr("y", yPosition)
           .attr("class", "result-text")
-          .attr("text-anchor", "end") // Adjust text anchor based on your preference
-          .attr("alignment-baseline", "ideographic") // Adjust alignment baseline based on your preference
+          .attr("text-anchor", "end") 
+          .attr("alignment-baseline", "ideographic") 
           .attr("transform", "rotate(-90 " + xPosition + " " + yPosition + ")")
           .style("color", "white");
     });
@@ -1657,7 +1648,7 @@ function drawHistogram(teamsStats, selectedPlayer, selectedOption, oppenentName 
   
   
  //------------------------------- Légende -------------------------------
-  const legend = svg.append("g");//.attr("transform", `translate(${height - 10})`);
+  const legend = svg.append("g");
 
   const rectWidth = 20;
 
@@ -1680,14 +1671,14 @@ function drawHistogram(teamsStats, selectedPlayer, selectedOption, oppenentName 
     .attr("fill", function(d) {
       if (d === playerName) {
         if (playerTeam === 0) {
-          return "#307fe2";
+          return COL_BLUE;
         } else {
-          return "#e87722";
+          return COL_ORANGE;
         }
       } else {
         return "grey";
       }
-    }); //({ Team1: "#307fe2", Team2: "#e87722" }[d.data.team]));
+    });
 
   legend
     .selectAll("text")
@@ -1749,9 +1740,9 @@ function displayScoreBoard(teamsStats, scoreTeam0, scoreTeam1) {
     .on("mouseover", function (e, d) {
       // d3.select(this).style("font-weight", "bold");
       if (d.Team === 0) {
-        d3.select(this).style("color", "#307fe2");
+        d3.select(this).style("color", COL_BLUE);
       } else {
-        d3.select(this).style("color", "#e87722");
+        d3.select(this).style("color", COL_ORANGE);
       }
     })
     .on("mouseout", function (e, d) {
@@ -1991,7 +1982,7 @@ function displayPressure(data_ball, sumXneg, sumXpos) {
     .enter()
     .append("path")
     .attr("d", arcCreator) 
-    .attr("fill", (d) => ({ Team1: "#307fe2", Team2: "#e87722" }[d.data.team]))
+    .attr("fill", (d) => ({ Team1: COL_BLUE, Team2: COL_ORANGE }[d.data.team]))
 
     .on("mouseover", (event, d) => {
       d3.select(`.text-${d.data.team}`).attr("opacity", 1);
@@ -2032,7 +2023,7 @@ function displayPressure(data_ball, sumXneg, sumXpos) {
     .attr("y", (d, i) => i * rectWidth)
     .attr("width", rectWidth)
     .attr("height", rectWidth)
-    .attr("fill", (d) => ({ Team1: "#307fe2", Team2: "#e87722" }[d.data.team]));
+    .attr("fill", (d) => ({ Team1: COL_BLUE, Team2: COL_ORANGE }[d.data.team]));
 
   legend
     .selectAll("text")
