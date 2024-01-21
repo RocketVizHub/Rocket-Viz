@@ -26,6 +26,8 @@ async function readExemple(path) {
     const fileContent = await fetch(path);
     const data = await fileContent.json();
 
+    displayAccordionsNReplayInformations();
+
     // Display file details
     displayFileDetails(data);
 
@@ -55,6 +57,8 @@ async function handleFileUpload() {
     if (file) {
       const fileContent = await readFileAsync(file);
       const data = JSON.parse(fileContent);
+
+      displayAccordionsNReplayInformations();
 
       // Display file details
       displayFileDetails(data);
@@ -93,6 +97,14 @@ async function readFileAsync(file) {
 
     reader.readAsText(file);
   });
+}
+
+function displayAccordionsNReplayInformations() {
+  d3.select(".fileDetails")
+    .style("display", "block");
+  
+  d3.select(".accordion")
+    .style("display", "block");
 }
 
 function displayFileDetails(data) {
