@@ -2,7 +2,8 @@ const COL_GREEN = "#098149"; //#21A38B;
 const COL_BLUE = "#307fe2";
 const COL_ORANGE = "#e87722";
 const COL_START = "#ffffff";
-const COL_END = "#e87722";
+const COL_END = "#ff0000";
+
 
 document
   .getElementById("uploadButton")
@@ -1156,19 +1157,13 @@ function displayHeatmap(data, options) {
     .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-  // // Add a background to the SVG
-  // const background = svg
-  //   .append("rect")
-  //   .style("stroke", "black")
-  //   .attr("width", width)
-  //   .attr("height", height);
-
   svg.append("svg:image")
     .attr("xlink:href", "./img/map3.png") // Remplacez par le chemin de votre image
     .attr("width", width);
     // .style("opacity", 0.8);
     // .attr("filter", "url(#brightness)")
   // Build some scales for us to use
+  
   const x = d3.scale.ordinal().domain(d3.range(numcols)).rangeBands([0, width]);
   const y = d3.scale
     .ordinal()
@@ -1218,7 +1213,9 @@ function displayHeatmap(data, options) {
       return data[i];
     })
     .style("fill", colorMap)
-    .style("opacity", 0.5);
+    .style("opacity", function(d) {
+      return (colorMap(d) === COL_START ? 0.2 : 0.4);
+    })
 }
 
 /******************************* Partie Nicolas ********************************/
