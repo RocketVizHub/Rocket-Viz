@@ -43,6 +43,11 @@ Chargement et début du traitement du fichier json.
 - (19/12/2023) Affichage d'un premier **tableau des scores** sans mise en forme.
 - (Depuis le 09/01/2024) Amélioration du **tableau des scores**, ajout des **statistiques par équipe** et du diagramme circulaire de **pressure**.
 
+### 16/01/2024 => 22/01/2024
+- Création de l'**histogramme** lors du clic sur un joueur dans le tableau des scores. Ce dernier permet de comparer le joueur sélectionné à la moyenne de tous les joueurs, de ses alliés, de ses ennemis ou d'un joueur en pariculier.
+- Améliorations graphiques : harmonisation des styles.
+- Ajout du **slider** permettant de connecter la timeline, la hitmap et le diagramme circulaire de pression.
+
 ## Structure du projet
 
 ### Timeline
@@ -96,10 +101,10 @@ quel pourcentage de la partie la balle a passé sur le demi-terrain de chacune d
 - [x] Avoir des fichiers déjà chargés
 - [x] Intégration de la partie "Statistiques globales"
 - [ ] Mettre sur le site un lien vers le README
-- [ ] Rubrique "Problèmes" dans README
+- [ ] Rubrique "Difficultés rencontrées" dans le README
 ### HeatMap
-- [ ] Fond de carte
-- [ ] Plus fluide / jolie 
+- [x] Fond de carte
+- [x] Plus fluide / jolie 
 - [ ] Infos sur les joueurs
 - [ ] Connexion timeline + HeatMap
 - [ ] Visibilité de timeline + HeatMap 
@@ -141,5 +146,14 @@ Le score du joueur est de la couleur de son équipe, le score moyen des autres j
 #### Après modification
 ![Timeline Après](./data/Timeline_new.png)
 
+### Slider
+![Slider](./data/Slider.png)
+
+Le **slider** permet de connecter les différents éléments de la partie **Time-related statistics** :
+- Timeline
+- HeatMap
+- Pressure
+
 ## Difficultés rencontrées 
  - Complexité du fichier JSON
+

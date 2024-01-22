@@ -27,26 +27,7 @@ async function readExample(path) {
     const fileContent = await fetch(path);
     const data = await fileContent.json();
 
-    displayAccordionsNReplayInformations();
-
-    // Display file details
-    displayFileDetails(data);
-
-    // Afficher la timeline avec les données récupérées
-    displayTimeline(data);
-
-    document.getElementById("slider-container").innerHTML = "";
-    slider(data, 0, getMaxFrames(data));
-
-    // Display & Debug axel
-    document.getElementById("ball_heatmap_buttons").innerHTML = "";
-    displayNDebugAxel(data);
-
-    // sonia
-    document.getElementById("playerStatsContent").innerHTML = "";
-    document.getElementById("content").innerHTML = "";
-    document.getElementById("pressure").innerHTML = "";
-    displayPlayerStats(data);
+    displayAllStats(data);
   } catch (error) {
     console.error("Error reading file:", error);
   }
@@ -62,23 +43,7 @@ async function handleFileUpload() {
       const fileContent = await readFileAsync(file);
       const data = JSON.parse(fileContent);
 
-      displayAccordionsNReplayInformations();
-
-      // Display file details
-      displayFileDetails(data);
-
-      // Afficher la timeline avec les données récupérées
-      displayTimeline(data);
-
-      // Display & Debug axel
-      document.getElementById("ball_heatmap_buttons").innerHTML = "";
-      displayNDebugAxel(data);
-
-      // sonia
-      document.getElementById("playerStatsContent").innerHTML = "";
-      document.getElementById("content").innerHTML = "";
-      document.getElementById("pressure").innerHTML = "";
-      displayPlayerStats(data);
+      displayAllStats(data);
     } else {
       console.error("No file selected.");
     }
@@ -2224,6 +2189,16 @@ function loadJsonFile(filePath) {
   });
 }
 
+/**
+ * Slider permettant de gérer la plage de données affichant la heatmap,
+ * la pressure et la timeline.
+ * @param {Map} data données du replay.
+ * @param {Integer} min valeur minimum du slider.
+ * @param {Integer} max valeur maximum du slider.
+ * @param {Integer} starting_min valeur de départ minimale du slider (par défaut min).
+ * @param {Integer} starting_max valeur de départ maximale du slider (par défaut max).
+ * @returns 
+ */
 function slider(data, min, max, starting_min=min, starting_max=max) {
 
   var range = [min, max]
@@ -2374,20 +2349,24 @@ function updateView(data, frame_min, frame_max) {
  * @param {Map} data toutes les données.
  */
 function displayAllStats(data) {
+  displayAccordionsNReplayInformations();
+
   // Display file details
   displayFileDetails(data);
 
   // Afficher la timeline avec les données récupérées
   displayTimeline(data);
 
-  // Display & Debug Axel
+  document.getElementById("slider-container").innerHTML = "";
+  slider(data, 0, getMaxFrames(data));
+
+  // Display & Debug axel
   document.getElementById("ball_heatmap_buttons").innerHTML = "";
   displayNDebugAxel(data);
 
-  // Affichage des statistiques gloables
+  // sonia
   document.getElementById("playerStatsContent").innerHTML = "";
   document.getElementById("content").innerHTML = "";
-  document.getElementById("barChart").innerHTML="";
-  document.getElementById("barChartSelect").innerHTML="";
+  document.getElementById("pressure").innerHTML = "";
   displayPlayerStats(data);
 }
