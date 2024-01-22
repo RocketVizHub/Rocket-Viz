@@ -101,6 +101,9 @@ text {
 	/* border: 3px solid black; */
 	height: 270px;
 }
+#timelineDetails {
+    margin-top: -100px;
+}
 
 .timeline-visible {
 	display: block;
@@ -135,3 +138,4 @@ rect.selection {
 #labelright {
 	text-anchor: start;
 }
+
