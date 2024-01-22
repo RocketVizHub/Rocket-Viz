@@ -2,7 +2,7 @@ const COL_GREEN = "#098149"; //#21A38B;
 const COL_BLUE = "#307fe2";
 const COL_ORANGE = "#e87722";
 const COL_START = "#ffffff";
-const COL_END = "#ff0000";
+const COL_END = "#e87722";
 
 
 document
@@ -1214,7 +1214,7 @@ function displayHeatmap(data, options) {
     })
     .style("fill", colorMap)
     .style("opacity", function(d) {
-      return (colorMap(d) === COL_START ? 0.2 : 0.4);
+      return (colorMap(d) === COL_START ? 0.5 : 0.5);
     })
 }
 
