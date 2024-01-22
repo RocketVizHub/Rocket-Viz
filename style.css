@@ -12,9 +12,6 @@ td {
 	text-align: center;
 }
 tr:hover {
-	/* font-weight: bold; */
-    /* text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4); */
-
 	background-color: rgb(240,240,240);
 }
 td::before {
@@ -72,14 +69,12 @@ text {
 	font-size: 28px;
 	padding: 3px;
 }
-
 .table-and-chart-container {
 	display: flex;
 	align-items: flex-start;	
 }
 #barChartContainer {
-	/* flex: 0 0 40%; Adjust the width of the bar chart container as needed */
-	margin-left: 50px; /* Adjust the margin between the table and the bar chart */
+	margin-left: 50px; 
 }
 #barChart.hovered {
 	opacity: 0.6;
@@ -89,12 +84,8 @@ text {
 }
 #element-ancre {
 	position: fixed;
-	/* /* left: 50px; */
 	top: 55px;
 	left: 5px;
-	/* padding: 10px; */ 
-	/* background-color: #f0f0f0;
-	border: 1px solid #ccc; */
 }
 .timeline-legend-container {
 	display: flex;
@@ -102,7 +93,6 @@ text {
 }
 #timeline {
 	display: none;
-	/* border: 3px solid black; */
 	height: 270px;
 }
 #timelineDetails {
@@ -117,26 +107,19 @@ text {
 	align-self: center;
 }
 .table>:not(caption) {
-	/* dont set a background color */
-/* 
-	background-color: #f0f0f0; */
 	font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
 	font-size: 1rem;
 	font-weight: 400;
 	text-align: center;
-	/* background-color: ; */
 }
-
 rect.overlay {
 	stroke: black;
 }
-
 rect.selection {
 	stroke: none;
  	fill: steelblue;
 	fill-opacity: 0.6;
 }
-
 #labelleft, #labelright {
 	dominant-baseline: hanging;
   	font-size: 12px;
