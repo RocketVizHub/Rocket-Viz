@@ -4,6 +4,10 @@ const COL_ORANGE = "#e87722";
 const COL_START = "#ffffff";
 const COL_END = "#e87722";
 
+var global_xSize;
+var global_ySize;
+var global_width;
+var global_height;
 
 document
   .getElementById("uploadButton")
@@ -641,6 +645,12 @@ function displayNDebugAxel(data) {
 
   const width = 450;
   const height = 450 * ratioXY;
+
+  global_xSize = xSize;
+  global_ySize = ySize;
+  global_width = width;
+  global_height = height;
+
   displayHeatmap(heatmap, {
     width: width,
     height: height,
@@ -2349,6 +2359,16 @@ function updateView(data, frame_min, frame_max) {
   // Mise à jour de l'affiche
   displayUpdateTimelineTest(data, frame_min, frame_max);
   updateBallPositionPressure(data, frame_min, frame_max);
+  refreshHeatmap(data, frameToTime(data, frame_min), frameToTime(data, frame_max), global_width, global_height, global_xSize, global_ySize);
+}
+
+function frameToTime(data, frame) {
+  const frames = data.network_frames.frames;
+  if (frame < 0 || frame >= frames.length) {
+    return -1;
+  }
+  const time = frames[frame].time;
+  return time;
 }
 
 /**
@@ -2364,12 +2384,12 @@ function displayAllStats(data) {
   // Afficher la timeline avec les données récupérées
   displayTimeline(data);
 
-  document.getElementById("slider-container").innerHTML = "";
-  slider(data, 0, getMaxFrames(data));
-
   // Display & Debug axel
   document.getElementById("ball_heatmap_buttons").innerHTML = "";
   displayNDebugAxel(data);
+
+  document.getElementById("slider-container").innerHTML = "";
+  slider(data, 0, getMaxFrames(data));
 
   // sonia
   document.getElementById("playerStatsContent").innerHTML = "";
