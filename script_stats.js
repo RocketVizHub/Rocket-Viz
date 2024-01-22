@@ -11,16 +11,16 @@ document
 document
   .getElementById("replay1")
   .addEventListener("click", function() {
-    readExemple("https://raw.githubusercontent.com/RocketVizHub/Rocket-Viz/main/utils/replay03.json");
+    readExample("https://raw.githubusercontent.com/RocketVizHub/Rocket-Viz/main/utils/replay03.json");
   });
 
 document
   .getElementById("replay2")
   .addEventListener("click", function() {
-    readExemple("https://raw.githubusercontent.com/RocketVizHub/Rocket-Viz/main/utils/replay04.json");
+    readExample("https://raw.githubusercontent.com/RocketVizHub/Rocket-Viz/main/utils/replay04.json");
   });
 
-async function readExemple(path) {
+async function readExample(path) {
   console.log(path);
   try {
     const fileContent = await fetch(path);
@@ -33,6 +33,9 @@ async function readExemple(path) {
 
     // Afficher la timeline avec les données récupérées
     displayTimeline(data);
+
+    document.getElementById("slider-container").innerHTML = "";
+    slider(data, 0, getMaxFrames(data));
 
     // Display & Debug axel
     document.getElementById("ball_heatmap_buttons").innerHTML = "";
@@ -1265,6 +1268,52 @@ function getAllGoalInformation(data) {
   return goalInformation;
 }
 
+function getFilteredData(data, startTime, endTime) {
+  const framerate = getFramerate(data);
+  const startSeconds = Number(startTime) * 60;
+  const endSeconds = Number(endTime) * 60;
+
+  // Filtrer les frames
+  const frames = data.network_frames.frames.filter(frame => {
+    return frame.time >= startSeconds && frame.time <= endSeconds;
+  });
+
+  // Partie 1: Filtrer les buts
+  const goals = getGoals(data);
+  // Filtrer les buts qui sont dans la partition de la timeline
+  const filteredGoals = goals.filter(goal => {
+    return goal.frame / framerate >= startSeconds && goal.frame / framerate <= endSeconds;
+  });
+
+  // Partie 2: Filtrer les démolitions
+  const frameIndicesWithDemolishFx = findFramesIndicesWithDemolishFx(data);
+  const demolitionDataTeam0 = getTeam0Destroy(data, frameIndicesWithDemolishFx).filter(({ frameIndex }) => frameIndex / framerate >= startSeconds && frameIndex / framerate <= endSeconds);
+  const demolitionDataTeam1 = getTeam1Destroy(data, frameIndicesWithDemolishFx).filter(({ frameIndex }) => frameIndex / framerate >= startSeconds && frameIndex / framerate <= endSeconds);
+
+  // Partie 3: Filtrer les sauvegardes
+  const team0Saves = getTeam0Saves(data);
+  const filteredSavesTeam0 = team0Saves.filter(save => {
+    return save.frame / framerate >= startSeconds && save.frame / framerate <= endSeconds;
+  });
+
+  const team1Saves = getTeam1Saves(data);
+  const filteredSavesTeam1 = team1Saves.filter(save => {
+    return save.frame / framerate >= startSeconds && save.frame / framerate <= endSeconds;
+  });
+
+  return {
+    ...data,
+    network_frames: {
+      ...data.network_frames,
+      frames: frames
+    },
+    goals: filteredGoals,
+    demolitionDataTeam0: demolitionDataTeam0,
+    demolitionDataTeam1: demolitionDataTeam1,
+    team0Saves: filteredSavesTeam0,
+    team1Saves: filteredSavesTeam1,
+  };
+}
 /******************************* Partie Sonia ********************************/
 
 /**
@@ -2122,7 +2171,131 @@ function loadJsonFile(filePath) {
   });
 }
 
+function slider(data, min, max, starting_min=min, starting_max=max) {
 
+  var range = [min, max]
+  var starting_range = [starting_min, starting_max]
+
+  var layout = {
+    width: 860,    // Set your desired width
+    height: 50,    // Set your desired height
+    margin: {top: 10, right: 20, bottom: 20, left: 20}  // Set your desired margins
+  };
+
+  // set width and height of svg
+  var w = layout.width
+  var h = layout.height
+  var margin = layout.margin
+
+  // dimensions of slider bar
+  var width = w - margin.left - margin.right;
+  var height = h - margin.top - margin.bottom;
+
+  // create x scale
+  var x = d3.scaleLinear()
+    .domain(range)  // data space
+    .range([0, width]);  // display space
+  
+  // create svg and translated g
+  var svg = d3.select("#slider-container")
+    .append("svg")
+    .attr("width", 1000)
+    .attr("height", 100);
+  const g = svg.append('g').attr('transform', `translate(${margin.left}, ${margin.top})`)
+  
+  // labels
+  var labelL = g.append('text')
+    .attr('id', 'labelleft')
+    .attr('x', 0)
+    .attr('y', height + 5)
+
+  var labelR = g.append('text')
+    .attr('id', 'labelright')
+    .attr('x', 0)
+    .attr('y', height + 5)
+
+  // define brush
+  var brush = d3.brushX()
+    .extent([[0,0], [width, height]])
+    .on('brush', function(e) {
+      var s = e.selection;
+      // update and move labels
+      if (s) {
+      labelL.attr('x', s[0])
+        .text((Math.floor(x.invert(s[0]))))
+      labelR.attr('x', s[1])
+        .text((Math.floor(x.invert(s[1]))))
+      
+      updateView(data, Math.floor(x.invert(s[0])), Math.floor(x.invert(s[1])));
+
+      // move brush handles
+      handle.attr("display", null).attr("transform", function(d, i) { return "translate(" + [ s[i], - height / 4] + ")"; });
+
+      svg.node().value = s.map(function(d) {var temp = x.invert(d); return +temp.toFixed(2)});
+      svg.node().dispatchEvent(new CustomEvent("input"));
+      }
+    })
+
+  // append brush to g
+  var gBrush = g.append("g")
+      .attr("class", "brush")
+      .call(brush)
+
+  // add brush handles (from https://bl.ocks.org/Fil/2d43867ba1f36a05459c7113c7f6f98a)
+  var brushResizePath = function(d) {
+      var e = +(d.type == "e"),
+          x = e ? 1 : -1,
+          y = height / 2;
+      return "M" + (.5 * x) + "," + y + "A6,6 0 0 " + e + " " + (6.5 * x) + "," + (y + 6) + "V" + (2 * y - 6) +
+        "A6,6 0 0 " + e + " " + (.5 * x) + "," + (2 * y) + "Z" + "M" + (2.5 * x) + "," + (y + 8) + "V" + (2 * y - 8) +
+        "M" + (4.5 * x) + "," + (y + 8) + "V" + (2 * y - 8);
+  }
+
+  var handle = gBrush.selectAll(".handle--custom")
+    .data([{type: "w"}, {type: "e"}])
+    .enter().append("path")
+    .attr("class", "handle--custom")
+    .attr("stroke", "#000")
+    .attr("fill", '#eee')
+    .attr("cursor", "ew-resize")
+    .attr("d", brushResizePath);
+    
+  // override default behaviour - clicking outside of the selected area 
+  // will select a small piece there rather than deselecting everything
+  // https://bl.ocks.org/mbostock/6498000
+  gBrush.selectAll(".overlay")
+    .each(function(d) { d.type = "selection"; })
+    .on("mousedown touchstart", brushcentered)
+  
+  function brushcentered() {
+    var dx = x(1) - x(0), // Use a fixed width when recentering.
+    cx = d3.mouse(this)[0],
+    x0 = cx - dx / 2,
+    x1 = cx + dx / 2;
+    d3.select(this.parentNode).call(brush.move, x1 > width ? [width - dx, width] : x0 < 0 ? [0, dx] : [x0, x1]);
+  }
+  
+  // select entire range
+  gBrush.call(brush.move, starting_range.map(x))
+  
+  return svg.node()
+}
+
+function displayUpdateTimelineTest(data, t0, t1) {
+  console.log("In UpdateTimelineTest");
+  try {
+    const filteredData = getFilteredData(data, t0, t1);
+
+    d3.select("#timeline").selectAll("*").remove();
+    displayTimeline(filteredData, startTime, endTime);
+  } catch (error) {
+    console.error("Error updating timeline:", error);
+  }
+}
+
+function updateView(data, t0, t1) {
+  displayUpdateTimelineTest(data, t0, t1);
+}
 /**
  * Affiche la page entière.
  * @param {Map} data toutes les données.
