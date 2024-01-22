@@ -397,9 +397,15 @@ function prepareDataForTimeline(saves, team) {
   }));
 }
 
-// Affiche la timeline
-function displayTimeline(data) {
-  const maxFrames = getMaxFrames(data);
+/**
+ * Affiche la timeline.
+ * @param {Map} data données du replay.
+ * @param {Integer} min_frame frame de début d'affichage (par défaut null). 
+ * @param {Integer} endTime frame de fin d'affichage (par défaut null).
+ */
+function displayTimeline(data, min_frame=null, max_frame=null) {
+  let maxFrames = getMaxFrames(data);
+  if (min_frame !== null && max_frame !== null) maxFrames = max_frame - min_frame;
   const framerate = getFramerate(data);
 
   const maxDuration = getMaxTempsPartie(maxFrames, framerate);
@@ -409,6 +415,7 @@ function displayTimeline(data) {
   var height = 500;
 
   const maxMinutes = maxFrames / framerate / 60;
+
   const xScale = d3.scaleLinear().domain([0, maxMinutes]).range([0, width]);
 
   // Supprime l'ancienne timeline
@@ -2316,8 +2323,7 @@ function slider(data, min, max, starting_min=min, starting_max=max) {
  * @param {Integer} frame_min frame minimum.
  * @param {Integer} frame_max frame maximum.
  */
-function displayUpdateTimelineTest(data, frame_min, frame_max) {
-  console.log("In UpdateTimelineTest");
+function displayUpdateTimeline(data, frame_min, frame_max) {
   try {
     const filteredData = getFilteredData(data, frame_min, frame_max);
 
