@@ -1423,13 +1423,69 @@ function displayPlayerStats(data) {
   d3.selectAll("#content").append("h1").text("Team Statistics");
   displayOverviewStats(overviewStats);
 
-  var locationBall = getLocations(data, 0);
+  // var locationBall = getLocations(data, 0);
 
+  // var sumXneg = 0;
+  // var sumXpos = 0;
+
+  // // La largeur du terrain est y (-5 200 => 5 200)
+  // locationBall.forEach((location) => {
+  //   if (location[1].y < 0) {
+  //     sumXneg++;
+  //   } else if (location[1].y > 0) {
+  //     sumXpos++;
+  //   }
+  // });
+
+  // var data_ball = [
+  //   { team: "Team1", count: sumXneg },
+  //   { team: "Team2", count: sumXpos },
+  // ];
+
+  // console.log("taille", locationBall.length);
+
+  // // d3.selectAll("#content").append("h1").text("Pressure");
+  // d3.selectAll("#pressure")
+  //   .append("p")
+  //   .text("Pressure is a measure of how much time the ball spends on a side.");
+  // displayPressure(data_ball, sumXneg, sumXpos);
+
+  updateBallPositionPressure(data,0, getMaxFrames(data));
+}
+
+/**
+ * Met à jour et affiche la position de la balle entre les frames passées en paramètre.
+ * @param {*} data 
+ * @param {Integer} frame_min frame minimum.
+ * @param {Integer} frame_max frame maximum.
+ */
+function updateBallPositionPressure(data, frame_min, frame_max) {
+  const frames = data.network_frames.frames;
+  const locations = new Array();
+
+  const ballsId = getBallTimeNActorId(data).map((item) => item[1]);
+
+  for (let i = frame_min; i <= frame_max; i++) {
+    const frame = frames[i];    
+    if (frame) {
+      frame.updated_actors.forEach((actor) => {
+        if (
+          ballsId.includes(actor.actor_id) &&
+          actor.attribute &&
+          actor.attribute.RigidBody &&
+          actor.attribute.RigidBody.location
+        ) {
+          locations.push([frame.time, actor.attribute.RigidBody.location]);
+        }
+      });
+    }
+  }  
+  
   var sumXneg = 0;
   var sumXpos = 0;
 
   // La largeur du terrain est y (-5 200 => 5 200)
-  locationBall.forEach((location) => {
+  locations.forEach((location) => {
     if (location[1].y < 0) {
       sumXneg++;
     } else if (location[1].y > 0) {
@@ -2177,9 +2233,9 @@ function slider(data, min, max, starting_min=min, starting_max=max) {
   var starting_range = [starting_min, starting_max]
 
   var layout = {
-    width: 860,    // Set your desired width
+    width: 980,    // Set your desired width
     height: 50,    // Set your desired height
-    margin: {top: 10, right: 20, bottom: 20, left: 20}  // Set your desired margins
+    margin: {top: 10, right: 20, bottom: 20, left: 120}  // Set your desired margins
   };
 
   // set width and height of svg
@@ -2200,7 +2256,7 @@ function slider(data, min, max, starting_min=min, starting_max=max) {
   var svg = d3.select("#slider-container")
     .append("svg")
     .attr("width", 1000)
-    .attr("height", 100);
+    .attr("height", 75);
   const g = svg.append('g').attr('transform', `translate(${margin.left}, ${margin.top})`)
   
   // labels
@@ -2281,21 +2337,41 @@ function slider(data, min, max, starting_min=min, starting_max=max) {
   return svg.node()
 }
 
-function displayUpdateTimelineTest(data, t0, t1) {
+/**
+ * Met à jour l'affichage de la timeline en fonction d'un intervalle [frame_min, frame_max].
+ * @param {Map} data données des fichiers json de replay.
+ * @param {Integer} frame_min frame minimum.
+ * @param {Integer} frame_max frame maximum.
+ */
+function displayUpdateTimelineTest(data, frame_min, frame_max) {
   console.log("In UpdateTimelineTest");
   try {
-    const filteredData = getFilteredData(data, t0, t1);
+    const filteredData = getFilteredData(data, frame_min, frame_max);
 
     d3.select("#timeline").selectAll("*").remove();
-    displayTimeline(filteredData, startTime, endTime);
+    displayTimeline(filteredData, frame_min, frame_max);
   } catch (error) {
     console.error("Error updating timeline:", error);
   }
 }
 
-function updateView(data, t0, t1) {
-  displayUpdateTimelineTest(data, t0, t1);
+/**
+ * Met à jour l'affichage en fonction d'un intervalle [frame_min, frame_max].
+ * - Clear les outputs
+ * - Affiche la timeline, la pression et la heatmap.
+ * @param {Map} data données des fichiers json de replay.
+ * @param {Integer} frame_min frame minimum.
+ * @param {Integer} frame_max frame maximum.
+ */
+function updateView(data, frame_min, frame_max) {
+  // Remise à 0
+  document.getElementById("pressure").innerHTML = "";
+
+  // Mise à jour de l'affiche
+  displayUpdateTimelineTest(data, frame_min, frame_max);
+  updateBallPositionPressure(data, frame_min, frame_max);
 }
+
 /**
  * Affiche la page entière.
  * @param {Map} data toutes les données.
