@@ -651,6 +651,8 @@ function displayTimeline(data, startTime, endTime) {
  Partie 5: Sélection de la partition de la timeline à afficher
 */
 
+
+
 function displayUpdateTimeline() {
   try {
     const startTime = Number(document.getElementById("startTime").value);
@@ -664,6 +666,22 @@ function displayUpdateTimeline() {
     console.error("Error updating timeline:", error);
   }
 }
+
+
+var slider = createD3RangeSlider(0, 6, "#slider-container");
+
+// Ajouter un écouteur de changement
+slider.onChange(function(newRange){
+
+    // Mettre à jour les valeurs affichées
+    d3.select("#startTime").text(newRange.begin);
+    d3.select("#endTime").text(newRange.end);
+    
+   // Mettre à jour la timeline
+   displayUpdateTimeline();
+});
+
+slider.range(0,6);
 
 document.getElementById("updateTimeline").addEventListener("click", displayUpdateTimeline);
 
@@ -716,6 +734,8 @@ function getFilteredData(data, startTime, endTime) {
     team1Saves: filteredSavesTeam1,
   };
 }
+
+
 
 document
   .getElementById("uploadButton")
