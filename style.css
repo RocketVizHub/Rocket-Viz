@@ -1,6 +1,6 @@
 h1 {
-	padding-top: 20px;
-	padding-bottom: 20px;
+	padding-top: 10px;
+	padding-bottom: 10px;
 }
 th {
 	text-align: center;
@@ -75,7 +75,7 @@ text {
 
 .table-and-chart-container {
 	display: flex;
-	align-items: flex-start;
+	align-items: flex-start;	
 }
 #barChartContainer {
 	/* flex: 0 0 40%; Adjust the width of the bar chart container as needed */
@@ -96,6 +96,10 @@ text {
 	/* background-color: #f0f0f0;
 	border: 1px solid #ccc; */
 }
+.timeline-legend-container {
+	display: flex;
+	align-items: flex-start;	
+}
 #timeline {
 	display: none;
 	/* border: 3px solid black; */
@@ -104,11 +108,14 @@ text {
 #timelineDetails {
     margin-top: -100px;
 }
-
 .timeline-visible {
 	display: block;
 }
-
+.legend-align {
+	padding-top: 15px;
+	padding-left: 20px;
+	align-self: center;
+}
 .table>:not(caption) {
 	/* dont set a background color */
 /* 

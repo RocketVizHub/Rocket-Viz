@@ -466,7 +466,7 @@ function displayTimeline(data) {
   svg
     .append("text")
     .attr("x", width / 2)
-    .attr("y", height / 2 - 10)
+    .attr("y", height / 2 - 40)
     .text(`The game lasted ${maxDuration}`)
     .attr("font-size", "12px")
     .style("dominant-baseline", "hanging");
@@ -589,7 +589,7 @@ function displayTimeline(data) {
   const legendData = [
     { icon: "img/goal_icon.png", description: "Goal" },
     { icon: "img/save_icon.png", description: "Save" },
-    { icon: "img/demolition_icon.png", description: "Destroyed player (joueur détruit)" },
+    { icon: "img/demolition_icon.png", description: "Destroyed player" },
   ];
 
   const legendContainer = d3.select("#legend");
@@ -604,7 +604,8 @@ function displayTimeline(data) {
       (d) =>
         `<img src="${d.icon}" alt="${d.description}" width="20" height="20"> ${d.description}`
     )
-    .style("margin-right", "20px");
+    .style("margin-right", "20px")
+    .style("margin-top", "0px");
 }
 
 /** Partie Axel **/
@@ -2228,7 +2229,7 @@ function slider(data, min, max, starting_min=min, starting_max=max) {
   var svg = d3.select("#slider-container")
     .append("svg")
     .attr("width", 1000)
-    .attr("height", 75);
+    .attr("height", 60);
   const g = svg.append('g').attr('transform', `translate(${margin.left}, ${margin.top})`)
   
   // labels
