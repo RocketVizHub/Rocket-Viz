@@ -1,4 +1,4 @@
-const COL_GREEN = "#098149"; //#21A38B;
+const COL_GREEN = "#098149";
 const COL_BLUE = "#307fe2";
 const COL_ORANGE = "#e87722";
 const COL_START = "#ffffff";
@@ -414,11 +414,13 @@ function displayTimeline(data, min_frame=null, max_frame=null) {
 
   const maxDuration = getMaxTempsPartie(maxFrames, framerate);
 
+
   var margin = { left: 100 };
   var width = 960 - margin.left;
   var height = 500;
 
   const maxMinutes = maxFrames / framerate / 60;
+  
 
   const xScale = d3.scaleLinear().domain([0, maxMinutes]).range([0, width]);
 
@@ -788,6 +790,30 @@ function refreshHeatmap(data, frame_min, frame_max, width, height, x_size, y_siz
     height: height,
     container: "#ball_heatmap",
     // start_color: "#FC7C89",
+    start_color: COL_START,
+    end_color: COL_END,
+  });
+}
+
+/**
+ * Met à jour la heatmap.
+ * @param {Map} data 
+ * @param {Integer} frame_min frame à laquelle l'affichage doit débuter.
+ * @param {Integer} frame_max frame à laquelle l'affichage doit finir.
+ * @param {Integer} width 
+ * @param {Integer} height 
+ * @param {Integer} x_size 
+ * @param {Integer} y_size 
+ */
+function updateRefreshHeatmap(data, ball_locations, width, height, x_size, y_size) {
+  ballTimeNActorId = getBallTimeNActorId(data);
+  heatmap = locationsToHeatmap(ball_locations, x_size, y_size);
+
+  heatmap = thresholdHeatmap(heatmap);
+  displayHeatmap(heatmap, {
+    width: width,
+    height: height,
+    container: "#ball_heatmap",
     start_color: COL_START,
     end_color: COL_END,
   });
@@ -1408,10 +1434,17 @@ function displayPlayerStats(data) {
   d3.selectAll("#content").append("h1").text("Team Statistics");
   displayOverviewStats(overviewStats);
   
-  updateBallPositionPressure(data,0, getMaxFrames(data));
+  updateBallPositionPressure(getLocationsBall(data, 0, getMaxFrames(data)));
 }
 
-function getLocationsTest(data, frame_min, frame_max) {
+/**
+ * Renvoie les différentes positions de la balle entre deux frames passées en paramètre.
+ * @param {Map} data données du replay.
+ * @param {Integer} frame_min frame minimum de l'intervalle.
+ * @param {Integer} frame_max frame maximum de l'intervalle.
+ * @returns 
+ */
+function getLocationsBall(data, frame_min, frame_max) {
   const frames = data.network_frames.frames;
   const locations = new Array();
 
@@ -1438,11 +1471,10 @@ function getLocationsTest(data, frame_min, frame_max) {
 /**
  * Met à jour et affiche la position de la balle entre les frames passées en paramètre.
  * @param {*} data 
- * @param {Integer} frame_min frame minimum.
- * @param {Integer} frame_max frame maximum.
+ * @param {Array} locations tableau des coordonnées 2d de la balle.
  */
-function updateBallPositionPressure(data, frame_min, frame_max) {
-  locations = getLocationsTest(data, frame_min, frame_max);
+function updateBallPositionPressure(locations) {
+  // locations = getLocationsBall(data, frame_min, frame_max);
   
   var sumXneg = 0;
   var sumXpos = 0;
@@ -2190,6 +2222,8 @@ function loadJsonFile(filePath) {
   });
 }
 
+let x_prec = 0;
+let y_prec = 0;
 /**
  * Slider permettant de gérer la plage de données affichant la heatmap,
  * la pressure et la timeline.
@@ -2254,8 +2288,11 @@ function slider(data, min, max, starting_min=min, starting_max=max) {
         .text((Math.floor(x.invert(s[0]))))
       labelR.attr('x', s[1])
         .text((Math.floor(x.invert(s[1]))))
-      
-      updateView(data, Math.floor(x.invert(s[0])), Math.floor(x.invert(s[1])));
+      if (Math.floor(x.invert(s[0])) !== x_prec || Math.floor(x.invert(s[1])) !== y_prec)
+        updateView(data, Math.floor(x.invert(s[0])), Math.floor(x.invert(s[1])));
+
+      x_prec = Math.floor(x.invert(s[0]));
+      y_prec = Math.floor(x.invert(s[1]));
 
       // move brush handles
       handle.attr("display", null).attr("transform", function(d, i) { return "translate(" + [ s[i], - height / 4] + ")"; });
@@ -2341,10 +2378,20 @@ function updateView(data, frame_min, frame_max) {
 
   // Mise à jour de l'affiche
   displayUpdateTimeline(data, frame_min, frame_max);
-  updateBallPositionPressure(data, frame_min, frame_max);
-  refreshHeatmap(data, frameToTime(data, frame_min), frameToTime(data, frame_max), global_width, global_height, global_xSize, global_ySize);
+
+  var ball_locations = getLocationsBall(data, frame_min, frame_max);
+
+  updateBallPositionPressure(ball_locations);
+
+  updateRefreshHeatmap(data, ball_locations, global_width, global_height, global_xSize, global_ySize);
 }
 
+/**
+ * Convertit un intervalle de frame en temps.
+ * @param {Map} data données des fichiers json de replay.
+ * @param {Integer} frame nombre de frames à convertir.
+ * @returns 
+ */
 function frameToTime(data, frame) {
   const frames = data.network_frames.frames;
   if (frame < 0 || frame >= frames.length) {
