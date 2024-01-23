@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Rocket Viz</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
+	<link rel="icon" href="./img/tsicons.com-Rocket League.png">
+    <style>
+        body {
+            padding-top: 56px;
+        }
+
+        @media (min-width: 768px) {
+            body {
+                padding-top: 70px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+        <a class="navbar-brand" href="#">Rocket Viz</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="index.html">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="#">About</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <h2 id="structure-du-projet">Structure du projet</h2>
+<h3 id="timeline">Timeline</h3>
+<p>La timeline est une représentation visuelle des événements clés qui se produisent pendant un match. Elle permet aux joueurs de comprendre rapidement le déroulement du match et de repérer les moments importants.</p>
+<h4 id="fonctionnalit-s-de-la-timeline">Fonctionnalités de la Timeline</h4>
+<p>La timeline de Rocket League comprend les fonctionnalités suivantes :</p>
+<p><strong>Buts</strong> : Les buts marqués par chaque équipe sont représentés sur la timeline. Chaque but est représenté par une icône de ballon de football, placée à l&#39;endroit exact de la timeline où le but a été marqué.</p>
+<p><strong>Démolitions</strong> : Les démolitions (lorsqu&#39;un joueur détruit un autre joueur en le percutant à grande vitesse) sont également représentées sur la timeline. Chaque démolition est représentée par une icône d&#39;explosion, placée à l&#39;endroit exact de la timeline où la démolition a eu lieu.</p>
+<p><strong>Sauvegardes</strong> : Les sauvegardes (lorsqu&#39;un joueur empêche un but en déviant le ballon) sont représentées sur la timeline. Chaque sauvegarde est représentée par une icône de bouclier, placée à l&#39;endroit exact de la timeline où la sauvegarde a eu lieu.</p>
+<p><strong>Info-bulles</strong> : Lorsque vous passez la souris sur une icône sur la timeline, une info-bulle apparaît, fournissant des informations supplémentaires sur l&#39;événement. Par exemple, pour une démolition, l&#39;info-bulle pourrait indiquer le nom du joueur qui a été détruit et le temps exact où la démolition a eu lieu.</p>
+<p>La timeline est un outil puissant pour analyser un match de Rocket League. Elle vous permet de voir rapidement quand et où les événements clés ont eu lieu, ce qui peut vous aider à comprendre comment le match s&#39;est déroulé et où vous pouvez vous améliorer pour les futurs matchs.</p>
+<h3 id="heatmap">HeatMap</h3>
+<p>Représente la position du ballon tout au long de la game.</p>
+<h3 id="aper-u-des-statistiques-globales">Aperçu des statistiques globales</h3>
+<h4 id="tableau-des-scores">Tableau des scores</h4>
+<p>Le tableau des scores permet de visualiser les statistiques de chaque joueurs et d&#39;avoir des statistiques précises lorsque l&#39;on clique sur le joueur.</p>
+<h4 id="statistiques-par-quipe">Statistiques par équipe</h4>
+<p>Les statistiques par équipe permettent la confrontation
+des scores totaux des deux équipes.</p>
+<h4 id="pressure">Pressure</h4>
+<p>La pressure est représentée par un diagramme circulaire montrant
+quel pourcentage de la partie la balle a passé sur le demi-terrain de chacune des deux équipes.</p>
+<h3 id="statistiques-globales">Statistiques Globales</h3>
+<ul>
+<li><strong>Hover</strong> : couleur de texte et de fond de ligne changées.</li>
+<li><strong>Score</strong> plus visible (centré et augmenté en taille).</li>
+<li><strong>MVP</strong> : le meilleur joueur de la partie voit maintenant son nom écrit en gras et une couronne placée devant son nom vient renforcer sa visibilité.
+<img src="./data/Scoreboard_new.png" alt="ScoreBoard Après"></li>
+<li>Histogramme de comparaison entre un joueur et, au choix :<ul>
+<li><strong>tous les joueurs</strong> </li>
+<li><strong>tous ses alliés</strong></li>
+<li><strong>tous ses adversaires</strong>  </li>
+</ul>
+</li>
+</ul>
+<p>Le score du joueur est de la couleur de son équipe, le score moyen des autres joueurs (ne l&#39;incluant pas lui) est en gris.</p>
+<ul>
+<li><strong>un des autres joueurs</strong> apparentant ou non à son équipe.</li>
+</ul>
+<p><img src="./data/Scoreboard_Histogramme_new.png" alt="ScoreBoard + Histogramme"></p>
+<h3 id="diagramme-circulaire-de-la-pression">Diagramme circulaire de la pression</h3>
+<p><img src="./data/Pressure_new.png" alt="Diagramme Circulaire Après"></p>
+<h3 id="heatmap">HeatMap</h3>
+<p><img src="./data/HeatMap_new.png" alt="HeatMap Après"></p>
+<h3 id="timeline">Timeline</h3>
+<p><img src="./data/Timeline_new.png" alt="Timeline Après"></p>
+<h3 id="slider">Slider</h3>
+<p><img src="./data/Slider.png" alt="Slider"></p>
+<p>Le <strong>slider</strong> permet de connecter les différents éléments de la partie <strong>Time-related statistics</strong> :</p>
+<ul>
+<li>Timeline</li>
+<li>HeatMap</li>
+<li>Pressure</li>
+</ul>
+
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
+</body>
+
+</html>
