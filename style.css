@@ -124,12 +124,12 @@ rect.selection {
 	dominant-baseline: hanging;
   	font-size: 12px;
 }
-
 #labelleft {
 	text-anchor: end;
 }
-
 #labelright {
 	text-anchor: start;
 }
-
+button {
+	font-size: 20px;
+}

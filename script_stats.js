@@ -767,15 +767,20 @@ function createButtons(
   document.getElementById(containerId).appendChild(btn);
 }
 
-function refreshHeatmap(data, start, end, width, height, xSize, ySize) {
-  console.log("refreshing heatmap");
-  console.log(start);
-  console.log(end);
-
+/**
+ * Met à jour la heatmap.
+ * @param {Map} data 
+ * @param {Integer} frame_min frame à laquelle l'affichage doit débuter.
+ * @param {Integer} frame_max frame à laquelle l'affichage doit finir.
+ * @param {Integer} width 
+ * @param {Integer} height 
+ * @param {Integer} x_size 
+ * @param {Integer} y_size 
+ */
+function refreshHeatmap(data, frame_min, frame_max, width, height, x_size, y_size) {
   ballTimeNActorId = getBallTimeNActorId(data);
-  ballLocations = getBallLocations(data, ballTimeNActorId, start, end);
-  heatmap = locationsToHeatmap(ballLocations, xSize, ySize);
-  console.log(heatmap);
+  ballLocations = getBallLocations(data, ballTimeNActorId, frame_min, frame_max);
+  heatmap = locationsToHeatmap(ballLocations, x_size, y_size);
 
   heatmap = thresholdHeatmap(heatmap);
   displayHeatmap(heatmap, {
@@ -1402,44 +1407,11 @@ function displayPlayerStats(data) {
 
   d3.selectAll("#content").append("h1").text("Team Statistics");
   displayOverviewStats(overviewStats);
-
-  // var locationBall = getLocations(data, 0);
-
-  // var sumXneg = 0;
-  // var sumXpos = 0;
-
-  // // La largeur du terrain est y (-5 200 => 5 200)
-  // locationBall.forEach((location) => {
-  //   if (location[1].y < 0) {
-  //     sumXneg++;
-  //   } else if (location[1].y > 0) {
-  //     sumXpos++;
-  //   }
-  // });
-
-  // var data_ball = [
-  //   { team: "Team1", count: sumXneg },
-  //   { team: "Team2", count: sumXpos },
-  // ];
-
-  // console.log("taille", locationBall.length);
-
-  // // d3.selectAll("#content").append("h1").text("Pressure");
-  // d3.selectAll("#pressure")
-  //   .append("p")
-  //   .text("Pressure is a measure of how much time the ball spends on a side.");
-  // displayPressure(data_ball, sumXneg, sumXpos);
-
+  
   updateBallPositionPressure(data,0, getMaxFrames(data));
 }
 
-/**
- * Met à jour et affiche la position de la balle entre les frames passées en paramètre.
- * @param {*} data 
- * @param {Integer} frame_min frame minimum.
- * @param {Integer} frame_max frame maximum.
- */
-function updateBallPositionPressure(data, frame_min, frame_max) {
+function getLocationsTest(data, frame_min, frame_max) {
   const frames = data.network_frames.frames;
   const locations = new Array();
 
@@ -1460,6 +1432,17 @@ function updateBallPositionPressure(data, frame_min, frame_max) {
       });
     }
   }  
+  return locations; 
+}
+
+/**
+ * Met à jour et affiche la position de la balle entre les frames passées en paramètre.
+ * @param {*} data 
+ * @param {Integer} frame_min frame minimum.
+ * @param {Integer} frame_max frame maximum.
+ */
+function updateBallPositionPressure(data, frame_min, frame_max) {
+  locations = getLocationsTest(data, frame_min, frame_max);
   
   var sumXneg = 0;
   var sumXpos = 0;
@@ -2357,7 +2340,7 @@ function updateView(data, frame_min, frame_max) {
   document.getElementById("pressure").innerHTML = "";
 
   // Mise à jour de l'affiche
-  displayUpdateTimelineTest(data, frame_min, frame_max);
+  displayUpdateTimeline(data, frame_min, frame_max);
   updateBallPositionPressure(data, frame_min, frame_max);
   refreshHeatmap(data, frameToTime(data, frame_min), frameToTime(data, frame_max), global_width, global_height, global_xSize, global_ySize);
 }
