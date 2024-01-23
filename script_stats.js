@@ -73,7 +73,7 @@ async function readFileAsync(file) {
 }
 
 function displayAccordionsNReplayInformations() {
-  d3.select(".fileDetails")
+  d3.select("#fileDetailsContainer")
     .style("display", "block");
   
   d3.select(".accordion")
@@ -2406,10 +2406,12 @@ function frameToTime(data, frame) {
  * @param {Map} data toutes les données.
  */
 function displayAllStats(data) {
-  displayAccordionsNReplayInformations();
-
   // Display file details
   displayFileDetails(data);
+
+  displayAccordionsNReplayInformations();
+
+  
 
   // Afficher la timeline avec les données récupérées
   displayTimeline(data);
