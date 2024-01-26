@@ -1183,13 +1183,12 @@ function prepareDataForTimeline(saves, team) {
  * @param {Integer} endTime frame de fin d'affichage (par défaut null).
  */
 function displayTimeline(data, min_frame=null, max_frame=null) {
-  console.log("--- TIMELINE ---", min_frame, max_frame);
+  console.log("--- TIMELINE ---", min_frame, max_frame, data);
   let maxFrames = getMaxFrames(data);
   if (min_frame !== null && max_frame !== null) maxFrames = max_frame - min_frame;
   const framerate = getFramerate(data);
 
   const maxDuration = getMaxTempsPartie(getMaxFrames(data), framerate);
-
 
   var margin = { left: 100 };
   var width = 960 - margin.left;
@@ -2392,22 +2391,18 @@ function slider(data, min, max, starting_min=min, starting_max=max) {
     .attr("cursor", "ew-resize")
     .attr("d", brushResizePath);
     
-  // override default behaviour - clicking outside of the selected area 
-  // will select a small piece there rather than deselecting everything
-  // https://bl.ocks.org/mbostock/6498000
   gBrush.selectAll(".overlay")
     .each(function(d) { d.type = "selection"; })
     .on("mousedown touchstart", brushcentered)
   
   function brushcentered() {
-    var dx = x(1) - x(0), // Use a fixed width when recentering.
+    var dx = x(1) - x(0),
     cx = d3.mouse(this)[0],
     x0 = cx - dx / 2,
     x1 = cx + dx / 2;
     d3.select(this.parentNode).call(brush.move, x1 > width ? [width - dx, width] : x0 < 0 ? [0, dx] : [x0, x1]);
   }
   
-  // select entire range
   gBrush.call(brush.move, starting_range.map(x))
   
   return svg.node()
@@ -2453,26 +2448,32 @@ function updateView(data, frame_min, frame_max) {
 }
 
 /**
- * Affiche la page entière.
+ * Affiche la page entière :
+ * - Partie Détails de fichiers
+ * - Partie statistiques globales :
+ *    => Tableau des scores.
+ *    => Histogramme comparaison d'un joueur en cas de clic sur un joueur.
+ *    => Comparaison des scores totaux des deux équipes.
+ * - Partie statistiques liées au temps :
+ *    => Slider permettant de choisir quel intervalle de temps regarer.
+ *    => Timeline.
+ *    => Heatmap.
+ *    => Diagramme circulaire de pression.
  * @param {Object} data toutes les données.
  */
 function displayAllStats(data) {
-  // Display file details
   displayFileDetails(data);
 
   displayAccordionsNReplayInformations();
 
-  // Afficher la timeline avec les données récupérées
   displayTimeline(data);
 
-  // Display & Debug axel
   document.getElementById("ball_heatmap_buttons").innerHTML = "";
   displayNDebugAxel(data);
 
   document.getElementById("slider-container").innerHTML = "";
   slider(data, 0, getMaxFrames(data));
 
-  // sonia
   document.getElementById("playerStatsContent").innerHTML = "";
   document.getElementById("barChartSelect").innerHTML = "";
   document.getElementById("barChart").innerHTML = "";
