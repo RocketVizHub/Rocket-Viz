@@ -9,23 +9,36 @@ var global_ySize;
 var global_width;
 var global_height;
 
+/**
+ * Bouton d'upload. En cas d'upload de fichier, affiche les statistiques.
+ */
 document
   .getElementById("uploadButton")
   .addEventListener("click", handleFileUpload);
 
+/**
+ * Bouton de chargement du premier fichier de replay. Affiche les statistiques de ce replay.
+ */
 document
   .getElementById("replay1")
   .addEventListener("click", function() {
-    readExample("https://raw.githubusercontent.com/RocketVizHub/Rocket-Viz/main/utils/replay03.json");
+    readReplay("https://raw.githubusercontent.com/RocketVizHub/Rocket-Viz/main/utils/replay03.json");
   });
 
+ /**
+ * Bouton de chargement du second fichier de replay. Affiche les statistiques de ce replay.
+ */
 document
   .getElementById("replay2")
   .addEventListener("click", function() {
-    readExample("https://raw.githubusercontent.com/RocketVizHub/Rocket-Viz/main/utils/replay04.json");
+    readReplay("https://raw.githubusercontent.com/RocketVizHub/Rocket-Viz/main/utils/replay04.json");
   });
 
-async function readExample(path) {
+/**
+ * Affiche les statistiques du fichier path.
+ * @param {String} path chemin du fichier de replay.
+ */
+async function readReplay(path) {
   console.log(path);
   try {
     const fileContent = await fetch(path);
@@ -37,7 +50,9 @@ async function readExample(path) {
   }
 }
 
-
+/**
+ * Affiche les statistiques du fichier chargé par l'utilisateur.
+ */
 async function handleFileUpload() {
   try {
     const fileInput = document.getElementById("fileInput");
@@ -56,6 +71,11 @@ async function handleFileUpload() {
   }
 }
 
+/**
+ * Lit un fichier. @TODO
+ * @param {} file fichier à afficher.
+ * @returns 
+ */
 async function readFileAsync(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -72,6 +92,9 @@ async function readFileAsync(file) {
   });
 }
 
+/**
+ * @TODO
+ */
 function displayAccordionsNReplayInformations() {
   d3.select("#fileDetailsContainer")
     .style("display", "block");
@@ -80,19 +103,22 @@ function displayAccordionsNReplayInformations() {
     .style("display", "block");
 }
 
+/**
+ * Affiche les détails d'un fichier chargé (que ce soit en l'uploadant ou en utilisant un fichier pré-chargé) :
+ * - Nom du replay
+ * - Carte sur laquelle la partie a été jouée
+ * - Date du replay
+ * - Nom du joueur ayant enregistré la partie
+ * @param {Object} data données d'un replay.
+ */
 function displayFileDetails(data) {
   console.log(Object.keys(data.properties));
   list_frame_demo = findFramesIndicesWithDemolishFx(data);
   console.log(getReservationAfterDestroy(data, list_frame_demo));
   console.log(getMaxFrames(data));
   console.log(getMaxTempsPartie(getMaxFrames(data), getFramerate(data)));
-  console.log(getListeFramesHighlights(data));
-  // console.log(getListFramesGoals(data));
-  // const fileDetailsElement = document.getElementById("fileDetails");
-  // fileDetailsElement.innerHTML = `
-  //               <p><strong>header size:</strong> ${data.header_size}</p>
-	// 			<p><strong>Replay Name:</strong> ${data.properties.ReplayName}</p>
-  //           `;
+  console.log(getListFramesHighlights(data));
+
   d3.select("#fileDetails").selectAll("*").remove();
   d3.select("#fileDetails")
     .append("p")
@@ -108,10 +134,57 @@ function displayFileDetails(data) {
     .html(`<strong>Saved by:</strong> ${data.properties.PlayerName}`);
 }
 
+/**
+ * Cherche le nombre de frames par secondes de la partie.
+ * @param {Object} data données d'un replay.
+ * @returns le nombre de frames par seconde.
+ */
+function getFramerate(data) {
+  return data.properties.RecordFPS;
+}
+
+/**
+ * Retourne le nombres de frames de la partie.
+ * @param {Object} data données d'un replay.
+ * @returns le nombre max de frames.
+ */
+function getMaxFrames(data) {
+  return data.properties.NumFrames;
+}
+
+/**
+ * Calcule le temps maximal d'une partie.
+ * @param {Integer} nbFrames nombre de frames de la partie.
+ * @param {Integer} framerate nombre de frames par seconde.
+ * @returns String la durée de la partie.
+ */
+function getMaxTempsPartie(nbFrames, framerate) {
+  const dureeEnSecondes = nbFrames / framerate;
+  const dureeEnMinutes = Math.floor(dureeEnSecondes / 60); // Partie entière des minutes
+  const dureeEnSecondesRestantes = Math.round(dureeEnSecondes % 60); // Partie en secondes
+
+  return `${dureeEnMinutes} minutes et ${dureeEnSecondesRestantes} secondes`;
+}
+
+/**
+ * Récupère la liste des frames qui contiennent un moment fort.
+ * @param {Object} data données d'un replay.
+ * @returns Array des frames contenant un moment fort.
+ */
+function getListFramesHighlights(data) {
+  const highlights = data.properties.HighLights;
+  const framesHighlights = highlights.map((highlight) => highlight.frame); // Récupérer les valeurs de la propriété "frame"
+  return framesHighlights;
+}
+
 /******************************* Partie Axel ********************************/
 
+/**
+ * @TODO
+ * @param {Object} data données d'un replay.
+ */
 function displayDebugAxel(data) {
-  console.log("--- AXEL IS DEBUGGING ---");
+  console.log("--- DEBUGGING ---");
 
   debugClassIndices(data);
   console.log(getCarsIds(data));
@@ -143,487 +216,12 @@ function displayDebugAxel(data) {
   console.log("--- DEBUGGED ---");
 }
 
-function getFramerate(data) {
-  return data.properties.RecordFPS;
-}
-
-function getMaxFrames(data) {
-  return data.properties.NumFrames;
-}
-
-function getLastFrameTime(data) {
-  if (data.network_frames && data.network_frames.frames.length > 0) {
-    const lastFrame =
-      data.network_frames.frames[data.network_frames.frames.length - 1];
-    return lastFrame.time;
-  }
-  return null;
-}
-
-function getMaxTempsPartie(nbFrames, framerate) {
-  const dureeEnSecondes = nbFrames / framerate;
-  const dureeEnMinutes = Math.floor(dureeEnSecondes / 60); // Partie entière des minutes
-  const dureeEnSecondesRestantes = Math.round(dureeEnSecondes % 60); // Partie en secondes
-
-  return `${dureeEnMinutes} minutes et ${dureeEnSecondesRestantes} secondes`;
-}
-
-function getGoals(data) {
-  const goals = data.properties.Goals;
-  return goals.map((goal) => ({
-    frame: goal.frame,
-    team: goal.PlayerTeam,
-    player: goal.PlayerName,
-  }));
-}
-
-// Récupère les joueurs et leurs équipes
-function getPlayersAndTeams(data) {
-  const playerStats = data.properties.PlayerStats;
-  const knownPlayerName = data.properties.PlayerName;
-  const knownPlayerTeam = playerStats.find(
-    (player) => player.Name === knownPlayerName
-  ).Team;
-  const oppositeTeam = knownPlayerTeam === 0 ? 1 : 0;
-  const allPlayers = filterFramesWithReservation(data);
-
-  const playersAndTeams = playerStats.map((player) => ({
-    name: player.Name,
-    team: player.Team === 0 ? "COL_BLUE" : "Orange",
-  }));
-
-  allPlayers.forEach((playerName) => {
-    if (!playersAndTeams.some((player) => player.name === playerName)) {
-      playersAndTeams.push({
-        name: playerName,
-        team: oppositeTeam === 0 ? "COL_BLUE" : "Orange",
-      });
-    }
-  });
-
-  return playersAndTeams;
-}
-
-// Récupère la liste des frames qui contiennent un moment fort
-function getListeFramesHighlights(data) {
-  const highlights = data.properties.HighLights;
-  const framesHighlights = highlights.map((highlight) => highlight.frame); // Récupérer les valeurs de la propriété "frame"
-  return framesHighlights;
-}
-
-// Récupère les indices de toutes les frames qui contiennent un DemolishFx
-function findFramesIndicesWithDemolishFx(data) {
-  const frames = data.network_frames.frames;
-  const framesIndicesWithDemolishFx = frames
-    .map((frame, index) => {
-      if (
-        frame.updated_actors.some(
-          (actor) => actor.attribute && actor.attribute.DemolishFx
-        )
-      ) {
-        return index;
-      }
-      return null;
-    })
-    .filter((index) => index !== null);
-  return framesIndicesWithDemolishFx;
-}
-
-// Function qui récupère les réservations après la destruction pour tous les joueurs
-function getReservationAfterDestroy(data, frameIndicesWithDemolishFx) {
-  const frames = data.network_frames.frames;
-  const playerTeams = getPlayersAndTeams(data);
-
-  frameIndicesWithDemolishFx.forEach((frameIndex) => {
-    const frame = frames[frameIndex];
-
-    const filteredActors = frame.updated_actors.filter((actor) => {
-      // Filtrer les acteurs avec Reservation et number: 1
-      return (
-        actor.attribute &&
-        actor.attribute.Reservation &&
-        actor.attribute.Reservation.number === 1
-      );
-    });
-
-    // Afficher les réservations filtrées
-    filteredActors.forEach((filteredActor, actorIndex) => {
-      const reservationName = filteredActor.attribute.Reservation.name || "N/A";
-      const playerName = reservationName.toLowerCase(); // Assurez-vous que le nom du joueur est en minuscules pour la correspondance
-      const playerTeam =
-        playerTeams.find((player) => player.name.toLowerCase() === playerName)
-          ?.team || "Unknown";
-
-      console.log(
-        `Frame ${frameIndex}, Actor ${actorIndex}, Reservation Name: ${reservationName}, Player Team: ${playerTeam}`
-      );
-    });
-  });
-}
-
-function getTeam0Destroy(data, frameIndicesWithDemolishFx) {
-  const frames = data.network_frames.frames;
-  const playerTeams = getPlayersAndTeams(data);
-  const destroyedFramesTeam0 = [];
-
-  frameIndicesWithDemolishFx.forEach((frameIndex) => {
-    const frame = frames[frameIndex];
-    const filteredActors = frame.updated_actors.filter((actor) => {
-      return (
-        actor.attribute &&
-        actor.attribute.Reservation &&
-        actor.attribute.Reservation.number === 1
-      );
-    });
-
-    filteredActors.forEach((filteredActor) => {
-      const reservationName = filteredActor.attribute.Reservation.name || "N/A";
-      const playerName = reservationName.toLowerCase();
-      const playerTeam =
-        playerTeams.find((player) => player.name.toLowerCase() === playerName)
-          ?.team || "Unknown";
-
-      if (playerTeam === "COL_BLUE") {
-        destroyedFramesTeam0.push({ frameIndex, playerName });
-      }
-    });
-  });
-
-  return destroyedFramesTeam0;
-}
-
-function getTeam1Destroy(data, frameIndicesWithDemolishFx) {
-  const frames = data.network_frames.frames;
-  const playerTeams = getPlayersAndTeams(data);
-  const destroyedFramesTeam1 = [];
-
-  frameIndicesWithDemolishFx.forEach((frameIndex) => {
-    const frame = frames[frameIndex];
-    const filteredActors = frame.updated_actors.filter((actor) => {
-      return (
-        actor.attribute &&
-        actor.attribute.Reservation &&
-        actor.attribute.Reservation.number === 1
-      );
-    });
-
-    filteredActors.forEach((filteredActor) => {
-      const reservationName = filteredActor.attribute.Reservation.name || "N/A";
-      const playerName = reservationName.toLowerCase();
-      const playerTeam =
-        playerTeams.find((player) => player.name.toLowerCase() === playerName)
-          ?.team || "Unknown";
-
-      if (playerTeam === "Orange") {
-        destroyedFramesTeam1.push({ frameIndex, playerName });
-      }
-    });
-  });
-
-  return destroyedFramesTeam1;
-}
-
-// Récupère le temps où le joueur a été détruit
-function TimesWithDemolishFx(data) {
-  const frames = data.network_frames.frames;
-  const framesWithDemolishFx = frames
-    .filter((frame) => {
-      return frame.updated_actors.some((actor) => {
-        return actor.attribute && actor.attribute.DemolishFx;
-      });
-    })
-    .map((frame) => frame.time);
-  console.log("Temps ou a lieu une DemolishFx:", framesWithDemolishFx);
-  return framesWithDemolishFx;
-}
-
-// Récupère les noms des joueurs de la partie, qui ont une réservation
-function filterFramesWithReservation(data) {
-  const frames = data.network_frames.frames;
-  const namesWithReservation = new Set();
-  frames.forEach((frame) => {
-    frame.updated_actors.forEach((actor) => {
-      if (actor.attribute && actor.attribute.Reservation) {
-        namesWithReservation.add(actor.attribute.Reservation.name);
-      }
-    });
-  });
-  return Array.from(namesWithReservation);
-}
-
-// Récupère les saves de la partie, avec l'équipe et la frame
-function getSaves(data) {
-  const saves = [];
-  if (data.tick_marks) {
-    data.tick_marks.forEach((tick_mark) => {
-      if (
-        tick_mark.description === "Team0Goal" ||
-        tick_mark.description === "Team1Goal"
-      ) {
-        saves.push(tick_mark);
-      }
-    });
-  }
-  return saves;
-}
-
-// Récupère les saves de l'équipe 0
-function getTeam0Saves(data) {
-  const team0Saves = [];
-  if (data.tick_marks) {
-    data.tick_marks.forEach((tick_mark) => {
-      if (tick_mark.description === "Team0Save") {
-        team0Saves.push(tick_mark);
-      }
-    });
-  }
-  return team0Saves;
-}
-
-// Récupère les saves de l'équipe 1
-function getTeam1Saves(data) {
-  const team1Saves = [];
-  if (data.tick_marks) {
-    data.tick_marks.forEach((tick_mark) => {
-      if (tick_mark.description === "Team1Save") {
-        team1Saves.push(tick_mark);
-      }
-    });
-  }
-  return team1Saves;
-}
-
-function prepareDataForTimeline(saves, team) {
-  return saves.map((save) => ({
-    time: save.frame,
-    event: save.description,
-    team: team,
-  }));
-}
-
 /**
- * Affiche la timeline.
- * @param {Map} data données du replay.
- * @param {Integer} min_frame frame de début d'affichage (par défaut null). 
- * @param {Integer} endTime frame de fin d'affichage (par défaut null).
+ * @TODO
+ * @param {Object} data données d'un replay.
  */
-function displayTimeline(data, min_frame=null, max_frame=null) {
-  let maxFrames = getMaxFrames(data);
-  if (min_frame !== null && max_frame !== null) maxFrames = max_frame - min_frame;
-  const framerate = getFramerate(data);
-
-  const maxDuration = getMaxTempsPartie(maxFrames, framerate);
-
-
-  var margin = { left: 100 };
-  var width = 960 - margin.left;
-  var height = 500;
-
-  const maxMinutes = maxFrames / framerate / 60;
-  
-
-  const xScale = d3.scaleLinear().domain([0, maxMinutes]).range([0, width]);
-
-  // Supprime l'ancienne timeline
-  d3.select("#timeline").selectAll("*").remove();
-
-  d3.select("#timeline")
-    .classed("timeline-hidden", false)
-    .style("display", "block");
-
-  // Création du conteneur SVG
-  const svg = d3
-    .select("#timeline")
-    .append("svg")
-    .attr("width", width + margin.left)
-    .attr("height", height)
-    .append("g")
-    .attr("transform", "translate(" + margin.left + ",0)");
-
-  // Ajouter un rectangle pour chaque équipe
-  svg
-    .append("rect")
-    .attr("x", 0)
-    .attr("y", height / 4 - 5)
-    .attr("width", width)
-    .attr("height", 18)
-    .attr("fill", COL_BLUE);
-
-  svg
-    .append("rect")
-    .attr("x", 0)
-    .attr("y", height / 3 - 5)
-    .attr("width", width)
-    .attr("height", 18)
-    .attr("fill", COL_ORANGE);
-
-  // Ajout du texte pour chaque équipe
-  svg
-    .append("text")
-    .attr("x", -10)
-    .attr("y", height / 4 + 10)
-    .attr("text-anchor", "end") 
-    .text("Blue Team")
-    .attr("fill", COL_BLUE)
-    .attr("font-size", "14px");
-
-  svg
-    .append("text")
-    .attr("x", -10)
-    .attr("y", height / 3 + 10)
-    .attr("text-anchor", "end")
-    .text("Orange Team")
-    .attr("fill", COL_ORANGE)
-    .attr("font-size", "14px");
-
-  svg
-    .append("text")
-    .attr("x", width / 2)
-    .attr("y", height / 2 - 40)
-    .text(`The game lasted ${maxDuration}`)
-    .attr("font-size", "12px")
-    .style("dominant-baseline", "hanging");
-
-  /*
-  Partie 1: Les goals
-  */
-
-  const goals = getGoals(data);
-  goals.forEach((goal) => {
-    const x = xScale(goal.frame / framerate / 60);
-
-    svg
-      .append("image")
-      .attr("xlink:href", "img/goal_icon.png")
-      .attr("x", x)
-      .attr("y", goal.team === 0 ? height / 4.75 : height / 3.3)
-      .attr("width", 35)
-      .on("mouseover", function () {
-        const time = (goal.frame / framerate).toFixed(2);
-        d3.select(this)
-          .append("title")
-          .text(`Goal by ${goal.player} at ${time} seconds`);
-      });
-  });
-
-  /*
-  Partie 2: Les saves
-  */
-
-  const team0Saves = getTeam0Saves(data);
-  const team1Saves = getTeam1Saves(data);
-
-  const timelineDataTeam0 = prepareDataForTimeline(team0Saves, "Team 0");
-  const timelineDataTeam1 = prepareDataForTimeline(team1Saves, "Team 1");
-
-  timelineDataTeam0.forEach((save) => {
-    const x = xScale(save.time / framerate / 60);
-
-    svg
-      .append("image")
-      .attr("xlink:href", "img/save_icon.png")
-      .attr("x", x)
-      .attr("y", height / 4.75)
-      .attr("width", 35)
-      .attr("height", 35)
-      .on("mouseover", function () {
-        const time = (save.time / framerate).toFixed(2);
-        d3.select(this)
-          .append("title")
-          .text(`Save by ${save.team} at ${time} seconds`);
-      });
-  });
-
-  timelineDataTeam1.forEach((save) => {
-    const x = xScale(save.time / framerate / 60);
-
-    svg
-      .append("image")
-      .attr("xlink:href", "img/save_icon.png")
-      .attr("x", x)
-      .attr("y", height / 3.3)
-      .attr("width", 35)
-      .attr("height", 35)
-      .on("mouseover", function () {
-        const time = (save.time / framerate).toFixed(2);
-        d3.select(this)
-          .append("title")
-          .text(`Save by ${save.team} at ${time} seconds`);
-      });
-  });
-
-  /*
-  Partie 3: Les demolitions
-  */
-
-  const frameIndicesWithDemolishFx = findFramesIndicesWithDemolishFx(data);
-  let demolitionDataTeam0 = getTeam0Destroy(data, frameIndicesWithDemolishFx);
-  let demolitionDataTeam1 = getTeam1Destroy(data, frameIndicesWithDemolishFx);
-
-  demolitionDataTeam0.forEach(({ frameIndex, playerName }) => {
-    const x = xScale(frameIndex / framerate / 60);
-
-    svg
-      .append("image")
-      .attr("xlink:href", "img/demolition_icon.png")
-      .attr("x", x)
-      .attr("y", height / 4)
-      .attr("width", 20)
-      .attr("height", 20)
-      .on("mouseover", function () {
-        const time = (frameIndex / framerate).toFixed(2);
-        d3.select(this)
-          .append("title")
-          .text(`${playerName} demolished at ${time} seconds`);
-      });
-  });
-
-  demolitionDataTeam1.forEach(({ frameIndex, playerName }) => {
-    const x = xScale(frameIndex / framerate / 60);
-
-    svg
-      .append("image")
-      .attr("xlink:href", "img/demolition_icon.png")
-      .attr("x", x)
-      .attr("y", height / 3)
-      .attr("width", 20)
-      .attr("height", 20)
-      .on("mouseover", function () {
-        const time = (frameIndex / framerate).toFixed(2);
-        d3.select(this)
-          .append("title")
-          .text(`${playerName} demolished at ${time} seconds`);
-      });
-  });
-
-  /*
-  Partie 4: La légende
-  */
-  const legendData = [
-    { icon: "img/goal_icon.png", description: "Goal" },
-    { icon: "img/save_icon.png", description: "Save" },
-    { icon: "img/demolition_icon.png", description: "Destroyed player" },
-  ];
-
-  const legendContainer = d3.select("#legend");
-  legendContainer.selectAll("*").remove();
-
-  legendContainer
-    .selectAll("div")
-    .data(legendData)
-    .enter()
-    .append("div")
-    .html(
-      (d) =>
-        `<img src="${d.icon}" alt="${d.description}" width="20" height="20"> ${d.description}`
-    )
-    .style("margin-right", "20px")
-    .style("margin-top", "0px");
-}
-
-/** Partie Axel **/
 function displayNDebugAxel(data) {
-  console.log("--- AXEL IS DEBUGGING ---");
+  console.log("--- DEBUGGING ---");
 
   debugClassIndices(data);
   ballTimeNActorId = getBallTimeNActorId(data);
@@ -631,8 +229,6 @@ function displayNDebugAxel(data) {
   ballLocations = getBallLocations(data, ballTimeNActorId, 0, -1);
   console.log(ballLocations);
 
-  // ballLocations = getLocations(data, 0);
-  // console.log(ballLocations);
   minMaxLocations = getMinMaxLocations(ballLocations);
   console.log(minMaxLocations);
   ratioXY =
@@ -657,7 +253,6 @@ function displayNDebugAxel(data) {
     width: width,
     height: height,
     container: "#ball_heatmap",
-    // start_color: "#FC7C89",
     start_color: COL_START,
     end_color: COL_END,
   });
@@ -690,10 +285,15 @@ function displayNDebugAxel(data) {
       ySize
     );
   }
-
   console.log("--- DEBUGGED ---");
 }
 
+/**
+ * Calcule le score d'une partie en regardant pour chaque but, l'équipe qui l'a marqué.
+ * @param {Object} data données d'un replay.
+ * @returns {List} chaque élément et soit "Blue" si le but a été marqué par l'équipe bleue, 
+ * soit "Orange" s'il a été marque par l'équipe orange.
+ */
 function getScore(data) {
   const goals = getGoals(data);
   const score = { Blue: 0, Orange: 0 };
@@ -719,6 +319,20 @@ function getScore(data) {
   return scoreList;
 }
 
+/**
+ * @TODO
+ * @param {*} id 
+ * @param {*} text 
+ * @param {*} team 
+ * @param {*} containerId 
+ * @param {*} data 
+ * @param {*} start 
+ * @param {*} end 
+ * @param {*} width 
+ * @param {*} height 
+ * @param {*} xSize 
+ * @param {*} ySize 
+ */
 function createButtons(
   id,
   text,
@@ -769,9 +383,10 @@ function createButtons(
   document.getElementById(containerId).appendChild(btn);
 }
 
+
 /**
  * Met à jour la heatmap.
- * @param {Map} data 
+ * @param {Object} data 
  * @param {Integer} frame_min frame à laquelle l'affichage doit débuter.
  * @param {Integer} frame_max frame à laquelle l'affichage doit finir.
  * @param {Integer} width 
@@ -797,7 +412,7 @@ function refreshHeatmap(data, frame_min, frame_max, width, height, x_size, y_siz
 
 /**
  * Met à jour la heatmap.
- * @param {Map} data 
+ * @param {Object} data 
  * @param {Integer} frame_min frame à laquelle l'affichage doit débuter.
  * @param {Integer} frame_max frame à laquelle l'affichage doit finir.
  * @param {Integer} width 
@@ -1234,51 +849,13 @@ function displayHeatmap(data, options) {
 
 /******************************* Partie Nicolas ********************************/
 
-function getFramerate(data) {
-  return data.properties.RecordFPS;
-}
-
-function getMaxFrames(data) {
-  return data.properties.NumFrames; // récupère le nombre de frame max
-}
-
-function getMaxTempsPartie(nbFrames, framerate) {
-  const dureeEnSecondes = nbFrames / framerate;
-  const dureeEnMinutes = Math.floor(dureeEnSecondes / 60); // Partie entière des minutes
-  const dureeEnSecondesRestantes = Math.round(dureeEnSecondes % 60); // Partie en secondes
-
-  return `${dureeEnMinutes} minutes and ${dureeEnSecondesRestantes} seconds`;
-}
-
-function getListeFramesHighlights(data) {
-  const highlights = data.properties.HighLights; // Récupérer la liste des moments forts
-  const framesHighlights = highlights.map((highlight) => highlight.frame); // Récupérer les valeurs de la propriété "frame"
-  return framesHighlights;
-}
-
-function getPlayerNamesGoal(data) {
-  const goals = data.properties.Goals;
-  const playerNames = goals.map((goal) => goal.PlayerName);
-  return playerNames;
-}
-
-function getFramesGoal(data) {
-  const goals = data.properties.Goals;
-  const frames = goals.map((goal) => goal.frame);
-  return frames;
-}
-
-function getAllGoalInformation(data) {
-  const goals = data.properties.Goals;
-  const goalInformation = goals.map((goal) => {
-    return {
-      PlayerName: goal.PlayerName,
-      frame: goal.frame,
-    };
-  });
-  return goalInformation;
-}
-
+/**
+ * Trouve les buts, les démolitions et les sauvegardes dans un intervalle donné en paramètre.
+ * @param {Object} data données d'un replay.
+ * @param {Integer} startTime frame de début.
+ * @param {Integer} endTime frame de fin.
+ * @returns {Object} contenant les buts, les démolitions et les sauvegrades sur l'intervalle spécifié.
+ */
 function getFilteredData(data, startTime, endTime) {
   const framerate = getFramerate(data);
   const startSeconds = Number(startTime) * 60;
@@ -1325,6 +902,507 @@ function getFilteredData(data, startTime, endTime) {
     team1Saves: filteredSavesTeam1,
   };
 }
+/**
+ * Récupère les buts.
+ * @param {Object} data données d'un replay.
+ * @returns Un Map des frames, équipes et joueurs.
+ */
+function getGoals(data) {
+  const goals = data.properties.Goals;
+  return goals.map((goal) => ({
+    frame: goal.frame,
+    team: goal.PlayerTeam,
+    player: goal.PlayerName,
+  }));
+}
+
+/**
+ * Récupère les joueurs et leurs équipes
+ * @param {Object} data données d'un replay.
+ * @returns Map contenant les noms des joueurs et leur équipe.
+ */
+function getPlayersAndTeams(data) {
+  const playerStats = data.properties.PlayerStats;
+  const knownPlayerName = data.properties.PlayerName;
+  const knownPlayerTeam = playerStats.find(
+    (player) => player.Name === knownPlayerName
+  ).Team;
+  const oppositeTeam = knownPlayerTeam === 0 ? 1 : 0;
+  const allPlayers = filterFramesWithReservation(data);
+
+  const playersAndTeams = playerStats.map((player) => ({
+    name: player.Name,
+    team: player.Team === 0 ? "COL_BLUE" : "Orange",
+  }));
+
+  allPlayers.forEach((playerName) => {
+    if (!playersAndTeams.some((player) => player.name === playerName)) {
+      playersAndTeams.push({
+        name: playerName,
+        team: oppositeTeam === 0 ? "COL_BLUE" : "Orange",
+      });
+    }
+  });
+
+  return playersAndTeams;
+}
+
+/**
+ * Récupère les indices de toutes les frames qui contiennent un DemolishFx.
+ * @param {Object} data données d'un replay.
+ * @returns @TODO
+ */
+function findFramesIndicesWithDemolishFx(data) {
+  const frames = data.network_frames.frames;
+  const framesIndicesWithDemolishFx = frames
+    .map((frame, index) => {
+      if (
+        frame.updated_actors.some(
+          (actor) => actor.attribute && actor.attribute.DemolishFx
+        )
+      ) {
+        return index;
+      }
+      return null;
+    })
+    .filter((index) => index !== null);
+  return framesIndicesWithDemolishFx;
+}
+
+/**
+ * Récupère les réservations après la destruction pour tous les joueurs.
+ * @param {Object} data données d'un replay.
+ * @param {*} frameIndicesWithDemolishFx @TODO 
+ */
+function getReservationAfterDestroy(data, frameIndicesWithDemolishFx) {
+  const frames = data.network_frames.frames;
+  const playerTeams = getPlayersAndTeams(data);
+
+  frameIndicesWithDemolishFx.forEach((frameIndex) => {
+    const frame = frames[frameIndex];
+
+    const filteredActors = frame.updated_actors.filter((actor) => {
+      return (
+        actor.attribute &&
+        actor.attribute.Reservation &&
+        actor.attribute.Reservation.number === 1
+      );
+    });
+
+    // Afficher les réservations filtrées
+    filteredActors.forEach((filteredActor, actorIndex) => {
+      const reservationName = filteredActor.attribute.Reservation.name || "N/A";
+      const playerName = reservationName.toLowerCase(); 
+      const playerTeam =
+        playerTeams.find((player) => player.name.toLowerCase() === playerName)
+          ?.team || "Unknown";
+
+      console.log(
+        `Frame ${frameIndex}, Actor ${actorIndex}, Reservation Name: ${reservationName}, Player Team: ${playerTeam}`
+      );
+    });
+  });
+}
+
+function getTeam0Destroy(data, frameIndicesWithDemolishFx) {
+  const frames = data.network_frames.frames;
+  const playerTeams = getPlayersAndTeams(data);
+  const destroyedFramesTeam0 = [];
+
+  frameIndicesWithDemolishFx.forEach((frameIndex) => {
+    const frame = frames[frameIndex];
+    const filteredActors = frame.updated_actors.filter((actor) => {
+      return (
+        actor.attribute &&
+        actor.attribute.Reservation &&
+        actor.attribute.Reservation.number === 1
+      );
+    });
+
+    filteredActors.forEach((filteredActor) => {
+      const reservationName = filteredActor.attribute.Reservation.name || "N/A";
+      const playerName = reservationName.toLowerCase();
+      const playerTeam =
+        playerTeams.find((player) => player.name.toLowerCase() === playerName)
+          ?.team || "Unknown";
+
+      if (playerTeam === "COL_BLUE") {
+        destroyedFramesTeam0.push({ frameIndex, playerName });
+      }
+    });
+  });
+
+  return destroyedFramesTeam0;
+}
+
+/**
+ * Récupère les destructions de l'équipe 1.
+ * @param {Object} data données d'un replay.
+ * @param {@TODO} frameIndicesWithDemolishFx @TODO
+ * @returns @TODO
+ */
+function getTeam1Destroy(data, frameIndicesWithDemolishFx) {
+  const frames = data.network_frames.frames;
+  const playerTeams = getPlayersAndTeams(data);
+  const destroyedFramesTeam1 = [];
+
+  frameIndicesWithDemolishFx.forEach((frameIndex) => {
+    const frame = frames[frameIndex];
+    const filteredActors = frame.updated_actors.filter((actor) => {
+      return (
+        actor.attribute &&
+        actor.attribute.Reservation &&
+        actor.attribute.Reservation.number === 1
+      );
+    });
+
+    filteredActors.forEach((filteredActor) => {
+      const reservationName = filteredActor.attribute.Reservation.name || "N/A";
+      const playerName = reservationName.toLowerCase();
+      const playerTeam =
+        playerTeams.find((player) => player.name.toLowerCase() === playerName)
+          ?.team || "Unknown";
+
+      if (playerTeam === "Orange") {
+        destroyedFramesTeam1.push({ frameIndex, playerName });
+      }
+    });
+  });
+
+  return destroyedFramesTeam1;
+}
+
+/**
+ * Récupère le moment où un joueur a été détruit.
+ * @param {Object} data données d'un replay.
+ * @returns @TODO
+ */
+function TimesWithDemolishFx(data) {
+  const frames = data.network_frames.frames;
+  const framesWithDemolishFx = frames
+    .filter((frame) => {
+      return frame.updated_actors.some((actor) => {
+        return actor.attribute && actor.attribute.DemolishFx;
+      });
+    })
+    .map((frame) => frame.time);
+  console.log("Temps ou a lieu une DemolishFx:", framesWithDemolishFx);
+  return framesWithDemolishFx;
+}
+
+/**
+ * Récupère les noms des joueurs de la partie, qui ont une réservation @TODO expliquer le terme réservation
+ * @param {Object} data données d'un replay.
+ * @returns {Array} des joueurs ayant eu une réservation.
+ */
+function filterFramesWithReservation(data) {
+  const frames = data.network_frames.frames;
+  const namesWithReservation = new Set();
+  frames.forEach((frame) => {
+    frame.updated_actors.forEach((actor) => {
+      if (actor.attribute && actor.attribute.Reservation) {
+        namesWithReservation.add(actor.attribute.Reservation.name);
+      }
+    });
+  });
+  return Array.from(namesWithReservation);
+}
+
+/**
+ * Récupère les saves de la partie, avec l'équipe et la frame. @TODO expliquer "saves"
+ * @param {Object} data données d'un replay.
+ * @returns {Array} des saves, de l'équipe et de la frame.
+ */
+function getSaves(data) {
+  const saves = [];
+  if (data.tick_marks) {
+    data.tick_marks.forEach((tick_mark) => {
+      if (
+        tick_mark.description === "Team0Goal" ||
+        tick_mark.description === "Team1Goal"
+      ) {
+        saves.push(tick_mark);
+      }
+    });
+  }
+  return saves;
+}
+
+/**
+ * Récupère les saves de l'équipe 0.
+ * @param {Object} data données d'un replay.
+ * @returns {Array} les saves de l'équipe 0.
+ */
+function getTeam0Saves(data) {
+  const team0Saves = [];
+  if (data.tick_marks) {
+    data.tick_marks.forEach((tick_mark) => {
+      if (tick_mark.description === "Team0Save") {
+        team0Saves.push(tick_mark);
+      }
+    });
+  }
+  return team0Saves;
+}
+
+/**
+ * Récupère les saves de l'équipe 1.
+ * @param {Object} data données d'un replay.
+ * @returns {Array} les saves de l'équipe 1.
+ */
+function getTeam1Saves(data) {
+  const team1Saves = [];
+  if (data.tick_marks) {
+    data.tick_marks.forEach((tick_mark) => {
+      if (tick_mark.description === "Team1Save") {
+        team1Saves.push(tick_mark);
+      }
+    });
+  }
+  return team1Saves;
+}
+
+/**
+ * @TODO
+ * @param {*} saves 
+ * @param {*} team 
+ * @returns 
+ */
+function prepareDataForTimeline(saves, team) {
+  return saves.map((save) => ({
+    time: save.frame,
+    event: save.description,
+    team: team,
+  }));
+}
+
+/**
+ * Affiche la timeline.
+ * @param {Object} data données du replay.
+ * @param {Integer} min_frame frame de début d'affichage (par défaut null). 
+ * @param {Integer} endTime frame de fin d'affichage (par défaut null).
+ */
+function displayTimeline(data, min_frame=null, max_frame=null) {
+  console.log("--- TIMELINE ---", min_frame, max_frame);
+  let maxFrames = getMaxFrames(data);
+  if (min_frame !== null && max_frame !== null) maxFrames = max_frame - min_frame;
+  const framerate = getFramerate(data);
+
+  const maxDuration = getMaxTempsPartie(getMaxFrames(data), framerate);
+
+
+  var margin = { left: 100 };
+  var width = 960 - margin.left;
+  var height = 500;
+
+  const maxMinutes = maxFrames / framerate / 60;
+  
+
+  const xScale = d3.scaleLinear().domain([0, maxMinutes]).range([0, width]);
+
+  // Supprime l'ancienne timeline
+  d3.select("#timeline").selectAll("*").remove();
+
+  d3.select("#timeline")
+    .classed("timeline-hidden", false)
+    .style("display", "block");
+
+  // Création du conteneur SVG
+  const svg = d3
+    .select("#timeline")
+    .append("svg")
+    .attr("width", width + margin.left)
+    .attr("height", height)
+    .append("g")
+    .attr("transform", "translate(" + margin.left + ",0)");
+
+  // Ajouter un rectangle pour chaque équipe
+  svg
+    .append("rect")
+    .attr("x", 0)
+    .attr("y", height / 4 - 5)
+    .attr("width", width)
+    .attr("height", 18)
+    .attr("fill", COL_BLUE);
+
+  svg
+    .append("rect")
+    .attr("x", 0)
+    .attr("y", height / 3 - 5)
+    .attr("width", width)
+    .attr("height", 18)
+    .attr("fill", COL_ORANGE);
+
+  // Ajout du texte pour chaque équipe
+  svg
+    .append("text")
+    .attr("x", -10)
+    .attr("y", height / 4 + 10)
+    .attr("text-anchor", "end") 
+    .text("Blue Team")
+    .attr("fill", COL_BLUE)
+    .attr("font-size", "14px");
+
+  svg
+    .append("text")
+    .attr("x", -10)
+    .attr("y", height / 3 + 10)
+    .attr("text-anchor", "end")
+    .text("Orange Team")
+    .attr("fill", COL_ORANGE)
+    .attr("font-size", "14px");
+
+  svg
+    .append("text")
+    .attr("x", width / 2)
+    .attr("y", height / 2 - 40)
+    .text(`The game lasted ${maxDuration}`)
+    .attr("font-size", "12px")
+    .style("dominant-baseline", "hanging");
+
+  /*
+  Partie 1: Les goals
+  */
+
+  const goals = getGoals(data);
+  goals.forEach((goal) => {
+    const x = xScale(goal.frame / framerate / 60);
+
+    svg
+      .append("image")
+      .attr("xlink:href", "img/goal_icon.png")
+      .attr("x", x)
+      .attr("y", goal.team === 0 ? height / 4.75 : height / 3.3)
+      .attr("width", 35)
+      .on("mouseover", function () {
+        const time = (goal.frame / framerate).toFixed(2);
+        d3.select(this)
+          .append("title")
+          .text(`Goal by ${goal.player} at ${time} seconds`);
+      });
+  });
+
+  /*
+  Partie 2: Les saves
+  */
+
+  const team0Saves = getTeam0Saves(data);
+  const team1Saves = getTeam1Saves(data);
+
+  const timelineDataTeam0 = prepareDataForTimeline(team0Saves, "Team 0");
+  const timelineDataTeam1 = prepareDataForTimeline(team1Saves, "Team 1");
+
+  timelineDataTeam0.forEach((save) => {
+    const x = xScale(save.time / framerate / 60);
+
+    svg
+      .append("image")
+      .attr("xlink:href", "img/save_icon.png")
+      .attr("x", x)
+      .attr("y", height / 4.75)
+      .attr("width", 35)
+      .attr("height", 35)
+      .on("mouseover", function () {
+        const time = (save.time / framerate).toFixed(2);
+        d3.select(this)
+          .append("title")
+          .text(`Save by ${save.team} at ${time} seconds`);
+      });
+  });
+
+  timelineDataTeam1.forEach((save) => {
+    const x = xScale(save.time / framerate / 60);
+
+    svg
+      .append("image")
+      .attr("xlink:href", "img/save_icon.png")
+      .attr("x", x)
+      .attr("y", height / 3.3)
+      .attr("width", 35)
+      .attr("height", 35)
+      .on("mouseover", function () {
+        const time = (save.time / framerate).toFixed(2);
+        d3.select(this)
+          .append("title")
+          .text(`Save by ${save.team} at ${time} seconds`);
+      });
+  });
+
+  /*
+  Partie 3: Les demolitions
+  */
+
+  const frameIndicesWithDemolishFx = findFramesIndicesWithDemolishFx(data);
+  let demolitionDataTeam0 = getTeam0Destroy(data, frameIndicesWithDemolishFx);
+  let demolitionDataTeam1 = getTeam1Destroy(data, frameIndicesWithDemolishFx);
+
+  console.log("frameIndicesWithDemolishFx", frameIndicesWithDemolishFx);
+  console.log("Dem team 0", demolitionDataTeam0);
+  console.log("Dem team 1", demolitionDataTeam1);
+
+  demolitionDataTeam0.forEach(({ frameIndex, playerName }) => {
+    const x = xScale(frameIndex / framerate / 60);
+
+    svg
+      .append("image")
+      .attr("xlink:href", "img/demolition_icon.png")
+      .attr("x", x)
+      .attr("y", height / 4)
+      .attr("width", 20)
+      .attr("height", 20)
+      .on("mouseover", function () {
+        const time = (frameIndex / framerate).toFixed(2);
+        d3.select(this)
+          .append("title")
+          .text(`${playerName} demolished at ${time} seconds`);
+      });
+  });
+
+  demolitionDataTeam1.forEach(({ frameIndex, playerName }) => {
+    const x = xScale(frameIndex / framerate / 60);
+
+    svg
+      .append("image")
+      .attr("xlink:href", "img/demolition_icon.png")
+      .attr("x", x)
+      .attr("y", height / 3)
+      .attr("width", 20)
+      .attr("height", 20)
+      .on("mouseover", function () {
+        const time = (frameIndex / framerate).toFixed(2);
+        d3.select(this)
+          .append("title")
+          .text(`${playerName} demolished at ${time} seconds`);
+      });
+  });
+
+  /*
+  Partie 4: La légende
+  */
+  const legendData = [
+    { icon: "img/goal_icon.png", description: "Goal" },
+    { icon: "img/save_icon.png", description: "Save" },
+    { icon: "img/demolition_icon.png", description: "Destroyed player" },
+  ];
+
+  const legendContainer = d3.select("#legend");
+  legendContainer.selectAll("*").remove();
+
+  legendContainer
+    .selectAll("div")
+    .data(legendData)
+    .enter()
+    .append("div")
+    .html(
+      (d) =>
+        `<img src="${d.icon}" alt="${d.description}" width="20" height="20"> ${d.description}`
+    )
+    .style("margin-right", "20px")
+    .style("margin-top", "0px");
+}
+
+
+
 /******************************* Partie Sonia ********************************/
 
 /**
@@ -1401,7 +1479,7 @@ function getOverviewStats(data) {
 }
 
 /**
- * Affiachge global des statistiques des joueurs : tableau des scores, overview par équipe, pression.
+ * Affichage global des statistiques des joueurs : tableau des scores, overview par équipe, pression.
  * @param {Array} data
  */
 function displayPlayerStats(data) {
@@ -1439,7 +1517,7 @@ function displayPlayerStats(data) {
 
 /**
  * Renvoie les différentes positions de la balle entre deux frames passées en paramètre.
- * @param {Map} data données du replay.
+ * @param {Object} data données du replay.
  * @param {Integer} frame_min frame minimum de l'intervalle.
  * @param {Integer} frame_max frame maximum de l'intervalle.
  * @returns 
@@ -1863,7 +1941,7 @@ function drawHistogram(teamsStats, selectedPlayer, selectedOption, oppenentName 
 
 /**
  * Trouve le meilleur joueur de la game.
- * @param {Map} teamsStats 
+ * @param {Map} teamsStats statistiques de l'équipe (Score, Saves, Assists, Goals, Shots).
  * @returns le nom du meilleur joueur de la partie.
  */
 function findMVP(teamsStats) {
@@ -1882,9 +1960,9 @@ function findMVP(teamsStats) {
 
 /**
  * Affiche le tableau des scores.
- * @param {Array} teamsStats
- * @param {Integer} scoreTeam0
- * @param {Integer} scoreTeam1
+ * @param {Array} teamsStats statistiques de l'équipe (Score, Saves, Assists, Goals, Shots).
+ * @param {Integer} scoreTeam0 score de l'équipe 0.
+ * @param {Integer} scoreTeam1 score de l'équipe 1.
  */
 function displayScoreBoard(teamsStats, scoreTeam0, scoreTeam1) {
   var rows = d3
@@ -1987,7 +2065,7 @@ function displayScoreBoard(teamsStats, scoreTeam0, scoreTeam1) {
 
 /**
  * Affiche les statistique de confrontation entre les deux équipes.
- * @param {Map} overviewStats
+ * @param {Map} overviewStats statistiques des équipes (Score, Saves, Assists, Goals, Shots).
  */
 function displayOverviewStats(overviewStats) {
   var widthDelta = 125;
@@ -2121,7 +2199,7 @@ function displayOverviewStats(overviewStats) {
 
 /**
  * Diagramme circulaire la pression (c'est-à-dire le temps que passe la balle dans chaque camp).
- * @param {Map} data_ball : positions de la balle au cours de la partie.
+ * @param {Object} data_ball : positions de la balle au cours de la partie.
  * @param {Integer} sumXneg : nombre de fois que la balle est du côté de l'équipe 0.
  * @param {Integer} sumXpos : nombre de fois que la balle est du côté de l'équipe 1.
  * @returns
@@ -2210,24 +2288,12 @@ function displayPressure(data_ball, sumXneg, sumXpos) {
   return svg.node();
 }
 
-/** 
- * Fonction pour charger un fichier JSON
- * @param filePath nom du fichier.
- */
-function loadJsonFile(filePath) {
-  return new Promise((resolve, reject) => {
-    d3.json(filePath)
-      .then((data) => resolve({ filePath, data }))
-      .catch((error) => reject({ filePath, error }));
-  });
-}
-
 let x_prec = 0;
 let y_prec = 0;
 /**
  * Slider permettant de gérer la plage de données affichant la heatmap,
  * la pressure et la timeline.
- * @param {Map} data données du replay.
+ * @param {Object} data données du replay.
  * @param {Integer} min valeur minimum du slider.
  * @param {Integer} max valeur maximum du slider.
  * @param {Integer} starting_min valeur de départ minimale du slider (par défaut min).
@@ -2349,7 +2415,7 @@ function slider(data, min, max, starting_min=min, starting_max=max) {
 
 /**
  * Met à jour l'affichage de la timeline en fonction d'un intervalle [frame_min, frame_max].
- * @param {Map} data données des fichiers json de replay.
+ * @param {Object} data données des fichiers json de replay.
  * @param {Integer} frame_min frame minimum.
  * @param {Integer} frame_max frame maximum.
  */
@@ -2368,7 +2434,7 @@ function displayUpdateTimeline(data, frame_min, frame_max) {
  * Met à jour l'affichage en fonction d'un intervalle [frame_min, frame_max].
  * - Clear les outputs
  * - Affiche la timeline, la pression et la heatmap.
- * @param {Map} data données des fichiers json de replay.
+ * @param {Object} data données des fichiers json de replay.
  * @param {Integer} frame_min frame minimum.
  * @param {Integer} frame_max frame maximum.
  */
@@ -2387,23 +2453,8 @@ function updateView(data, frame_min, frame_max) {
 }
 
 /**
- * Convertit un intervalle de frame en temps.
- * @param {Map} data données des fichiers json de replay.
- * @param {Integer} frame nombre de frames à convertir.
- * @returns 
- */
-function frameToTime(data, frame) {
-  const frames = data.network_frames.frames;
-  if (frame < 0 || frame >= frames.length) {
-    return -1;
-  }
-  const time = frames[frame].time;
-  return time;
-}
-
-/**
  * Affiche la page entière.
- * @param {Map} data toutes les données.
+ * @param {Object} data toutes les données.
  */
 function displayAllStats(data) {
   // Display file details
