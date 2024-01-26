@@ -1144,10 +1144,10 @@ function getTeam1Saves(data) {
 }
 
 /**
- * @TODO
- * @param {*} saves 
- * @param {*} team 
- * @returns 
+ * Crée un objet contenant les données nécessaires à l'affichage de la timeline.
+ * @param {Array} saves tableau composé des saves.
+ * @param {String} team nom de l'équipe.
+ * @returns {Object} composé du temps, de l'évènement et de l'équipe.
  */
 function prepareDataForTimeline(saves, team) {
   return saves.map((save) => ({
