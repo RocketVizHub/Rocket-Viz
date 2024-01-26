@@ -112,12 +112,7 @@ function displayAccordionsNReplayInformations() {
  * @param {Object} data données d'un replay.
  */
 function displayFileDetails(data) {
-  console.log(Object.keys(data.properties));
   list_frame_demo = findFramesIndicesWithDemolishFx(data);
-  console.log(getReservationAfterDestroy(data, list_frame_demo));
-  console.log(getMaxFrames(data));
-  console.log(getMaxTempsPartie(getMaxFrames(data), getFramerate(data)));
-  console.log(getListFramesHighlights(data));
 
   d3.select("#fileDetails").selectAll("*").remove();
   d3.select("#fileDetails")
@@ -857,6 +852,7 @@ function displayHeatmap(data, options) {
  * @returns {Object} contenant les buts, les démolitions et les sauvegrades sur l'intervalle spécifié.
  */
 function getFilteredData(data, startTime, endTime) {
+  data = data;
   const framerate = getFramerate(data);
   const startSeconds = Number(startTime) * 60;
   const endSeconds = Number(endTime) * 60;
@@ -875,8 +871,10 @@ function getFilteredData(data, startTime, endTime) {
 
   // Partie 2: Filtrer les démolitions
   const frameIndicesWithDemolishFx = findFramesIndicesWithDemolishFx(data);
-  const demolitionDataTeam0 = getTeam0Destroy(data, frameIndicesWithDemolishFx).filter(({ frameIndex }) => frameIndex / framerate >= startSeconds && frameIndex / framerate <= endSeconds);
-  const demolitionDataTeam1 = getTeam1Destroy(data, frameIndicesWithDemolishFx).filter(({ frameIndex }) => frameIndex / framerate >= startSeconds && frameIndex / framerate <= endSeconds);
+
+  const demolitionDataTeam0_ = getTeam0Destroy(data, frameIndicesWithDemolishFx);
+  
+  const demolitionDataTeam1 = getTeam1Destroy(data, frameIndicesWithDemolishFx);
 
   // Partie 3: Filtrer les sauvegardes
   const team0Saves = getTeam0Saves(data);
@@ -896,12 +894,13 @@ function getFilteredData(data, startTime, endTime) {
       frames: frames
     },
     goals: filteredGoals,
-    demolitionDataTeam0: demolitionDataTeam0,
+    demolitionDataTeam0: demolitionDataTeam0_,
     demolitionDataTeam1: demolitionDataTeam1,
     team0Saves: filteredSavesTeam0,
     team1Saves: filteredSavesTeam1,
   };
 }
+
 /**
  * Récupère les buts.
  * @param {Object} data données d'un replay.
@@ -950,7 +949,7 @@ function getPlayersAndTeams(data) {
 /**
  * Récupère les indices de toutes les frames qui contiennent un DemolishFx.
  * @param {Object} data données d'un replay.
- * @returns @TODO
+ * @returns {Array} des indices de frames avec DemolishFx.
  */
 function findFramesIndicesWithDemolishFx(data) {
   const frames = data.network_frames.frames;
@@ -972,7 +971,7 @@ function findFramesIndicesWithDemolishFx(data) {
 /**
  * Récupère les réservations après la destruction pour tous les joueurs.
  * @param {Object} data données d'un replay.
- * @param {*} frameIndicesWithDemolishFx @TODO 
+ * @param {*} frameIndicesWithDemolishFx tableau des indices de frames avec DemolishFx.
  */
 function getReservationAfterDestroy(data, frameIndicesWithDemolishFx) {
   const frames = data.network_frames.frames;
@@ -1007,7 +1006,7 @@ function getReservationAfterDestroy(data, frameIndicesWithDemolishFx) {
 function getTeam0Destroy(data, frameIndicesWithDemolishFx) {
   const frames = data.network_frames.frames;
   const playerTeams = getPlayersAndTeams(data);
-  const destroyedFramesTeam0 = [];
+  let destroyedFramesTeam0 = [];
 
   frameIndicesWithDemolishFx.forEach((frameIndex) => {
     const frame = frames[frameIndex];
@@ -1038,13 +1037,13 @@ function getTeam0Destroy(data, frameIndicesWithDemolishFx) {
 /**
  * Récupère les destructions de l'équipe 1.
  * @param {Object} data données d'un replay.
- * @param {@TODO} frameIndicesWithDemolishFx @TODO
- * @returns @TODO
+ * @param {Array} frameIndicesWithDemolishFx tableau des indices de frames avec DemolishFx.
+ * @returns {Array} des frames de destruction de l'équipe 1.
  */
 function getTeam1Destroy(data, frameIndicesWithDemolishFx) {
   const frames = data.network_frames.frames;
   const playerTeams = getPlayersAndTeams(data);
-  const destroyedFramesTeam1 = [];
+  let destroyedFramesTeam1 = [];
 
   frameIndicesWithDemolishFx.forEach((frameIndex) => {
     const frame = frames[frameIndex];
@@ -1075,7 +1074,7 @@ function getTeam1Destroy(data, frameIndicesWithDemolishFx) {
 /**
  * Récupère le moment où un joueur a été détruit.
  * @param {Object} data données d'un replay.
- * @returns @TODO
+ * @returns {Array} des temps où il y a eu la destruction.
  */
 function TimesWithDemolishFx(data) {
   const frames = data.network_frames.frames;
@@ -1086,12 +1085,11 @@ function TimesWithDemolishFx(data) {
       });
     })
     .map((frame) => frame.time);
-  console.log("Temps ou a lieu une DemolishFx:", framesWithDemolishFx);
   return framesWithDemolishFx;
 }
 
 /**
- * Récupère les noms des joueurs de la partie, qui ont une réservation @TODO expliquer le terme réservation
+ * Récupère les noms des joueurs de la partie, grace à la réservation éffectuée par le serveur.
  * @param {Object} data données d'un replay.
  * @returns {Array} des joueurs ayant eu une réservation.
  */
@@ -1109,7 +1107,7 @@ function filterFramesWithReservation(data) {
 }
 
 /**
- * Récupère les saves de la partie, avec l'équipe et la frame. @TODO expliquer "saves"
+ * Récupère les sauvetage éffectuer par les joueurs durant la partie, avec l'équipe et la frame.
  * @param {Object} data données d'un replay.
  * @returns {Array} des saves, de l'équipe et de la frame.
  */
@@ -1332,12 +1330,8 @@ function displayTimeline(data, min_frame=null, max_frame=null) {
   */
 
   const frameIndicesWithDemolishFx = findFramesIndicesWithDemolishFx(data);
-  let demolitionDataTeam0 = getTeam0Destroy(data, frameIndicesWithDemolishFx);
-  let demolitionDataTeam1 = getTeam1Destroy(data, frameIndicesWithDemolishFx);
-
-  console.log("frameIndicesWithDemolishFx", frameIndicesWithDemolishFx);
-  console.log("Dem team 0", demolitionDataTeam0);
-  console.log("Dem team 1", demolitionDataTeam1);
+  const demolitionDataTeam0 = getTeam0Destroy(data, frameIndicesWithDemolishFx);
+  const demolitionDataTeam1 = getTeam1Destroy(data, frameIndicesWithDemolishFx);
 
   demolitionDataTeam0.forEach(({ frameIndex, playerName }) => {
     const x = xScale(frameIndex / framerate / 60);
