@@ -2411,8 +2411,6 @@ function displayAllStats(data) {
 
   displayAccordionsNReplayInformations();
 
-  
-
   // Afficher la timeline avec les données récupérées
   displayTimeline(data);
 
@@ -2425,6 +2423,8 @@ function displayAllStats(data) {
 
   // sonia
   document.getElementById("playerStatsContent").innerHTML = "";
+  document.getElementById("barChartSelect").innerHTML = "";
+  document.getElementById("barChart").innerHTML = "";
   document.getElementById("content").innerHTML = "";
   document.getElementById("pressure").innerHTML = "";
   displayPlayerStats(data);
