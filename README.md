@@ -47,6 +47,7 @@ Chargement et début du traitement du fichier json.
 - Création de l'**histogramme** lors du clic sur un joueur dans le tableau des scores. Ce dernier permet de comparer le joueur sélectionné à la moyenne de tous les joueurs, de ses alliés, de ses ennemis ou d'un joueur en pariculier.
 - Améliorations graphiques : harmonisation des styles.
 - Ajout du **slider** permettant de connecter la timeline, la hitmap et le diagramme circulaire de pression.
+- Ajout de fichiers pré-chargés.
 
 ## Structure du projet
 
@@ -97,17 +98,21 @@ La pressure est représentée par un diagramme circulaire montrant
 quel pourcentage de la partie la balle a passé sur le demi-terrain de chacune des deux équipes.
 
 ## Améliorations
-- [ ] Github Pages
-- [x] Avoir des fichiers déjà chargés
+- [x] Github Pages
+- [x] Avoir des fichiers de replays déjà chargés
 - [x] Intégration de la partie "Statistiques globales"
-- [ ] Mettre sur le site un lien vers le README
-- [ ] Rubrique "Difficultés rencontrées" dans le README
+- [x] Mettre sur le site un lien vers le README
+- [x] Rubrique "Difficultés rencontrées" dans le README
 ### HeatMap
 - [x] Fond de carte
 - [x] Plus fluide / jolie 
-- [ ] Infos sur les joueurs
-- [ ] Connexion timeline + HeatMap
-- [ ] Visibilité de timeline + HeatMap 
+- [x] Connexion timeline + HeatMap
+- [x] Visibilité de timeline + HeatMap 
+
+
+### Fichiers pré-chargés
+Nous avons ajouté en haut de la page des fichiers pré-chargés. L'utilisateur n'est plus obligé de forcément charger un fichier, il peut soit upload un fichier, soit sélectionner un fichier parmi les fichiers pré-chargés.
+![Pré-chargement de fichiers](./data/preload.png)
 
 ### Statistiques Globales
 #### Avant modification

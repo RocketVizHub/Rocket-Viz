@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <title>Rocket-Viz</title>
+</head>
+<body>
+
+<div class="container mt-5">
+
+    <h1 class="text-center">Rocket-Viz</h1>
+
+    <p>Projet de visualisation des données du jeu Rocket League.
+        Rocket League est un jeu vidéo dont le but est de marquer des buts en utilisant des voitures pour frapper un ballon dans un but adverse, combinant ainsi des éléments de football et de conduite.</p>
+
+    <p>Nous utilisons : <a href="https://github.com/nickbabcock/rrrocket" target="_blank">https://github.com/nickbabcock/rrrocket</a> pour parser un fichier de replay Rocket League en fichier json.</p>
+
+    <h2>Séparation du travail</h2>
+    <ul>
+        <li><strong>Nicolas</strong>: Timeline</li>
+        <li><strong>Axel</strong>: Heatmap</li>
+        <li><strong>Sonia</strong>: tableau des scores, statistiques par équipe, diagramme pression.</li>
+    </ul>
+
+    <h2>Suivi</h2>
+    <h3>13/12/2023 - Définition du projet</h3>
+    <p>Choix du sujet : Analyse de données personnelles du jeu <strong>Rocket-League</strong>.</p>
+
+    <h3>19/12/2023 - Début du projet</h3>
+    <p>Chargement et début du traitement du fichier json.</p>
+
+    <h3>19/12/2023 => 16/01/2024 - Début de la partie Statistique globales</h3>
+    <h4>Nicolas</h4>
+    <p>(Depuis le 19/12/2023) Affichage de la <strong>timeline</strong>.</p>
+
+    <h4>Axel</h4>
+    <p>(Depuis le 19/12/2023) Affichage de la <strong>heatmap</strong>.</p>
+
+    <h4>Sonia</h4>
+    <p>(19/12/2023) Affichage d'un premier <strong>tableau des scores</strong> sans mise en forme.</p>
+    <p>(Depuis le 09/01/2024) Amélioration du <strong>tableau des scores</strong>, ajout des <strong>statistiques par équipe</strong> et du diagramme circulaire de <strong>pressure</strong>.</p>
+
+    <h3>16/01/2024 => 22/01/2024</h3>
+    <p>Création de l'<strong>histogramme</strong> lors du clic sur un joueur dans le tableau des scores. Ce dernier permet de comparer le joueur sélectionné à la moyenne de tous les joueurs, de ses alliés, de ses ennemis ou d'un joueur en particulier.</p>
+    <p>Améliorations graphiques : harmonisation des styles.</p>
+    <p>Ajout du <strong>slider</strong> permettant de connecter la timeline, la hitmap et le diagramme circulaire de pression.</p>
+    <p>Ajout de fichiers pré-chargés.</p>
+
+    <h2>Structure du projet</h2>
+
+    <h3>Timeline</h3>
+    <p>La timeline est une représentation visuelle des événements clés qui se produisent pendant un match. Elle permet aux joueurs de comprendre rapidement le déroulement du match et de repérer les moments importants.</p>
+
+    <h4>Fonctionnalités de la Timeline</h4>
+    <p>La timeline de Rocket League comprend les fonctionnalités suivantes :</p>
+    <ul>
+        <li><strong>Buts</strong>: Les buts marqués par chaque équipe sont représentés sur la timeline. Chaque but est représenté par une icône de ballon de football, placée à l'endroit exact de la timeline où le but a été marqué.</li>
+        <li><strong>Démolitions</strong>: Les démolitions (lorsqu'un joueur détruit un autre joueur en le percutant à grande vitesse) sont également représentées sur la timeline. Chaque démolition est représentée par une icône d'explosion, placée à l'endroit exact de la timeline où la démolition a eu lieu.</li>
+        <li><strong>Sauvegardes</strong>: Les sauvegardes (lorsqu'un joueur empêche un but en déviant le ballon) sont représentées sur la timeline. Chaque sauvegarde est représentée par une icône de bouclier, placée à l'endroit exact de la timeline où la sauvegarde a eu lieu.</li>
+        <li><strong>Info-bulles</strong>: Lorsque vous passez la souris sur une icône sur la timeline, une info-bulle apparaît, fournissant des informations supplémentaires sur l'événement. Par exemple, pour une démolition, l'info-bulle pourrait indiquer le nom du joueur qui a été détruit et le temps exact où la démolition a eu lieu.</li>
+    </ul>
+    <p>La timeline est un outil puissant pour analyser un match de Rocket League. Elle vous permet de voir rapidement quand et où les événements clés ont eu lieu, ce qui peut vous aider à comprendre comment le match s'est déroulé et où vous pouvez vous améliorer pour les futurs matchs.</p>
+
+    <h3>HeatMap</h3>
+    <p>Représente la position du ballon tout au long de la partie.</p>
+
+    <h3>Aperçu des statistiques globales</h3>
+
+    <h4>Tableau des scores</h4>
+    <p>Le tableau des scores est composé de la manière suivante :</p>
+    <table class="table">
+        <thead>
+        <tr>
+            <th></th>
+            <th>Score</th>
+            <th>Goals</th>
+            <th>Assists</th>
+            <th>Saves</th>
+            <th>Shots</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>Score Team 1</td>
+            <td>Joueur 1</td>
+            <td>120</td>
+            <td>0</td>
+            <td>1</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        <tr>
+            <td></td>
+            <td>Joueur 2</td>
+            <td>150</td>
+            <td>1</td>
+            <td>0</td>
+            <td>0</td>
+            <td>1</td>
+        </tr>
+        <tr>
+            <td>Score Team 2</td>
+            <td>Joueur 3</td>
+            <td>250</td>
+            <td>1</td>
+            <td>0</td>
+            <td>1</td>
+            <td>0</td>
+        </tr>
+        <tr>
+            <td></td>
+            <td>Joueur 4</td>
+            <td>220</td>
+            <td>0</td>
+            <td>1</td>
+            <td>0</td>
+            <td>0</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <h4>Statistiques par équipe</h4>
+    <p>Les statistiques par équipe permettent la confrontation des scores totaux des deux équipes.</p>
+
+    <h4>Pressure</h4>
+    <p>La pressure est représentée par un diagramme circulaire montrant quel pourcentage de la partie la balle a passé sur le demi-terrain de chacune des deux équipes.</p>
+
+    <h2>Améliorations</h2>
+    <ul>
+        <li>[x] Github Pages</li>
+        <li>[x] Avoir des fichiers de replays déjà chargés</li>
+        <li>[x] Intégration de la partie "Statistiques globales"</li>
+        <li>[x] Mettre sur le site un lien vers le README</li>
+        <li>[x] Rubrique "Difficultés rencontrées" dans le README</li>
+    </ul>
+
+    <h3>HeatMap</h3>
+    <ul>
+        <li>[x] Fond de carte</li>
+        <li>[x] Plus fluide / jolie</li>
+        <li>[x] Connexion timeline + HeatMap</li>
+        <li>[x] Visibilité de timeline + HeatMap</li>
+    </ul>
+
+    <h3>Fichiers pré-chargés</h3>
+    <p>Nous avons ajouté en haut de la page des fichiers pré-chargés. L'utilisateur n'est plus obligé de forcément charger un fichier, il peut soit upload un fichier, soit sélectionner un fichier parmi les fichiers pré-chargés.</p>
+    <img src="./data/preload.png" alt="Pré-chargement de fichiers" class="img-fluid">
+
+    <h3>Statistiques Globales</h3>
+
+    <h4>Avant modification</h4>
+    <img src="./data/Scoreboard.png" alt="ScoreBoard Avant" class="img-fluid">
+
+    <h4>Après modification</h4>
+    <ul>
+        <li><strong>Hover</strong>: couleur de texte et de fond de ligne changées.</li>
+        <li><strong>Score</strong> plus visible (centré et augmenté en taille).</li>
+        <li><strong>MVP</strong>: le meilleur joueur de la partie voit maintenant son nom écrit en gras et une couronne placée devant son nom vient renforcer sa visibilité.</li>
+    </ul>
+    <img src="./data/Scoreboard_new.png" alt="ScoreBoard Après" class="img-fluid">
+    <p>Histogramme de comparaison entre un joueur et, au choix :</p>
+    <ul>
+        <li><strong>tous les joueurs</strong></li>
+        <li><strong>tous ses alliés</strong></li>
+        <li><strong>tous ses adversaires</strong></li>
+        <li><strong>un des autres joueurs</strong> apparentant ou non à son équipe.</li>
+    </ul>
+    <p>Le score du joueur est de la couleur de son équipe, le score moyen des autres joueurs (ne l'incluant pas lui) est en gris.</p>
+    <img src="./data/Scoreboard_Histogramme_new.png" alt="ScoreBoard + Histogramme" class="img-fluid">
+
+    <h3>Diagramme circulaire de la pression</h3>
+
+    <h4>Modification</h4>
+    <ul>
+        <li>Transparence lors du hover</li>
+    </ul>
+    <img src="./data/Pressure_new.png" alt="Diagramme Circulaire Après" class="img-fluid">
+
+    <h3>HeatMap</h3>
+
+    <h4>Avant modification</h4>
+    <img src="./data/HeatMap.png" alt="HeatMap Avant" class="img-fluid">
+
+    <h4>Après modification</h4>
+    <img src="./data/HeatMap_new.png" alt="HeatMap Après" class="img-fluid">
+
+    <h3>Timeline</h3>
+
+    <h4>Avant modification</h4>
+    <img src="./data/Timeline.png" alt="Timeline Avant" class="img-fluid">
+
+    <h4>Après modification</h4>
+    <img src="./data/Timeline_new.png" alt="Timeline Après" class="img-fluid">
+
+    <h3>Slider</h3>
+    <img src="./data/Slider.png" alt="Slider" class="img-fluid">
+
+    <p>Le <strong>slider</strong> permet de connecter les différents éléments de la partie <strong>Time-related statistics</strong> :</p>
+    <ul>
+        <li>Timeline</li>
+        <li>HeatMap</li>
+        <li>Pressure</li>
+    </ul>
+
+    <h2>Difficultés rencontrées</h2>
+    <p> - Complexité du fichier JSON</p>
+
+</div>
+
+<!-- Add Bootstrap JS and Popper.js if needed -->
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
+</body>
+</html>
