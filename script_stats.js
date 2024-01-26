@@ -319,7 +319,7 @@ function getScore(data) {
  * @param {*} text 
  * @param {*} team 
  * @param {*} containerId 
- * @param {*} data 
+ * @param {Object} data données d'un replay.
  * @param {*} start 
  * @param {*} end 
  * @param {*} width 
@@ -1393,8 +1393,15 @@ const SelectEnum = {
 
 /**
  * Récupère les statistiques des joueurs.
- * @param {*} data
- * @returns
+ * @param {Object} data données d'un replay.
+ * @returns {Object} contenant les informations d'un joueur :
+ * - Nom 
+ * - Équipe
+ * - Score
+ * - Goals
+ * - Assists
+ * - Saves
+ * - Shots
  */
 function getPlayerStats(data) {
   return data.properties.PlayerStats;
@@ -1407,8 +1414,8 @@ function getPlayerStats(data) {
  * - Assists
  * - Saves
  * - Shots
- * @param {Array} team0 tableau des joueurs de l'équipe 0
- * @param {Array} team1 tableau des joueurs de l'équipe 1
+ * @param {Array} team0 tableau des joueurs de l'équipe 0.
+ * @param {Array} team1 tableau des joueurs de l'équipe 1.
  * @returns
  */
 function getTeamStats(team0, team1) {
@@ -1454,7 +1461,7 @@ function getOverviewStats(data) {
 
 /**
  * Affichage global des statistiques des joueurs : tableau des scores, overview par équipe, pression.
- * @param {Array} data
+ * @param {Object} data données d'un replay.
  */
 function displayPlayerStats(data) {
   var scoreTeam0;
@@ -1522,7 +1529,7 @@ function getLocationsBall(data, frame_min, frame_max) {
 
 /**
  * Met à jour et affiche la position de la balle entre les frames passées en paramètre.
- * @param {*} data 
+ * @param {Object} data données d'un replay.
  * @param {Array} locations tableau des coordonnées 2d de la balle.
  */
 function updateBallPositionPressure(locations) {  
@@ -1605,7 +1612,6 @@ function rearrangeOrder(selectedPlayer) {
  * les autres joueurs de la partie.
  * @param {Map} teamsStats tableau contenant les statistiques de tous les joueurs.
  * @param {Map} selectedPlayer joueur sélectionné.
- * @returns 
  */
 function handleRowSelection(teamsStats, selectedPlayer) {
   d3.select("#barChart").selectAll("*").remove();
@@ -1697,7 +1703,6 @@ function handleRowSelection(teamsStats, selectedPlayer) {
  * @param {Map} selectedPlayer contient les informations du joueur sélectionné.
  * @param {Enum} selectedOption Confrontation à la moyenne de tous les ennemis,
  * de tous les alliés ou de tous les joueurs.
- * @returns 
  */
 function drawHistogram(teamsStats, selectedPlayer, selectedOption, oppenentName = null) {
   d3.select("#barChart").selectAll("*").remove();
