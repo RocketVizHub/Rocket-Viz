@@ -203,7 +203,6 @@ function displayDebugAxel(data) {
     width: width,
     height: height,
     container: "#ball_heatmap",
-    // start_color: "#FC7C89",
     start_color: COL_START,
     end_color: COL_END,
   });
@@ -399,7 +398,6 @@ function refreshHeatmap(data, frame_min, frame_max, width, height, x_size, y_siz
     width: width,
     height: height,
     container: "#ball_heatmap",
-    // start_color: "#FC7C89",
     start_color: COL_START,
     end_color: COL_END,
   });
@@ -497,14 +495,12 @@ function getBallLocations(data, ballTimeNActorId, startTime, endTime) {
   if endTime is -1, we will take all the frames after startTime
   for each frame we will pick the actor in ballTimeNActorId with the corresponding time
   */
-  // console.log(ballTimeNActorId);
   const frames = data.network_frames.frames;
   const locations = new Array();
   frames.forEach((frame) => {
     if (frame.time >= startTime && (frame.time <= endTime || endTime === -1)) {
       // check what actor_id we need to use
       ballActorId = findBallActorId(ballTimeNActorId, frame.time);
-      // console.log(ballActorId);
 
       frame.updated_actors.forEach((actor) => {
         if (
@@ -513,7 +509,6 @@ function getBallLocations(data, ballTimeNActorId, startTime, endTime) {
           actor.attribute.RigidBody &&
           actor.attribute.RigidBody.location
         ) {
-          // console.log(actor.attribute.RigidBody.location);
           locations.push([frame.time, actor.attribute.RigidBody.location]);
         }
       });
@@ -531,7 +526,6 @@ function getBallLocations(data, ballTimeNActorId, startTime, endTime) {
 function findBallActorId(ballTimeNActorId, time) {
   for (let i = 0; i < ballTimeNActorId.length - 1; i++) {
     if (ballTimeNActorId[i + 1][0] > time) {
-      // console.log(ballTimeNActorId[i][1]);
       return ballTimeNActorId[i][1];
     }
   }
@@ -549,16 +543,12 @@ function getLocations(data, actor_id) {
   const locations = new Array();
   frames.forEach((frame) => {
     frame.updated_actors.forEach((actor) => {
-      // if (actor.attribute && actor.attribute.Reservation) {
-      //   namesWithReservation.add(actor.attribute.Reservation.name);
-      // }
       if (
         actor.actor_id === actor_id &&
         actor.attribute &&
         actor.attribute.RigidBody &&
         actor.attribute.RigidBody.location
       ) {
-        // console.log(actor.attribute.RigidBody.location);
         locations.push([frame.time, actor.attribute.RigidBody.location]);
       }
     });
@@ -692,7 +682,6 @@ function locationsToHeatmap(locations, xSize, ySize) {
       yIndex = ySize - 1;
     }
 
-    // heatmap[xIndex][yIndex] += 1;
     // we want to add 1 to the corresponding square every 0.02 seconds
     const time = location[0];
     // get the next time if we are not at the end of the array
@@ -747,7 +736,6 @@ function thresholdHeatmap(heatmap) {
  */
 function displayHeatmap(data, options) {
   const margin = { top: 0, right: 0, bottom: 0, left: 0 };
-  // const margin = { top: 50, right: 50, bottom: 180, left: 180 };
   const width = options.width;
   const height = options.height;
   const container = options.container;
@@ -782,27 +770,23 @@ function displayHeatmap(data, options) {
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
   svg.append("svg:image")
-    .attr("xlink:href", "./img/map3.png") // Remplacez par le chemin de votre image
+    .attr("xlink:href", "./img/map3.png") 
     .attr("width", width);
-    // .style("opacity", 0.8);
-    // .attr("filter", "url(#brightness)")
+
   // Build some scales for us to use
-  
   const x = d3.scale.ordinal().domain(d3.range(numcols)).rangeBands([0, width]);
   const y = d3.scale
     .ordinal()
     .domain(d3.range(numrows))
     .rangeBands([0, height]);
 
-  // scale our colors from the start
-  // color to the end color.
+  // scale our colors from the start color to the end color.
   const colorMap = d3.scale
     .linear()
     .domain([minValue, maxValue])
     .range([startColor, endColor]);
 
-  // Generate rows and columns and add
-  // color fills.
+  // Generate rows and columns and add color fills.
   const row = svg
     .selectAll(".row")
     .data(data)
@@ -829,7 +813,6 @@ function displayHeatmap(data, options) {
     .append("rect")
     .attr("width", x.rangeBand() + 0.5)
     .attr("height", y.rangeBand() + 0.5);
-  // .attr("width", x.rangeBand()-0.3) if we want the borders
 
   row
     .selectAll(".cell")
@@ -1181,7 +1164,6 @@ function prepareDataForTimeline(saves, team) {
  * @param {Integer} endTime frame de fin d'affichage (par défaut null).
  */
 function displayTimeline(data, min_frame=null, max_frame=null) {
-  console.log("--- TIMELINE ---", min_frame, max_frame, data);
   let maxFrames = getMaxFrames(data);
   if (min_frame !== null && max_frame !== null) maxFrames = max_frame - min_frame;
   const framerate = getFramerate(data);
@@ -1455,8 +1437,8 @@ function getTeamStats(team0, team1) {
 
 /**
  * Récupère les statisques permettant de faire l'affichage de l'overview par équipe.
- * @param {*} data
- * @returns
+ * @param {Object} data données d'un replay.
+ * @returns les statistiques des deux équipes : score, goals, assists, saves, shots.
  */
 function getOverviewStats(data) {
   const player = getPlayerStats(data);
@@ -1467,7 +1449,6 @@ function getOverviewStats(data) {
 
   overviewInformation = getTeamStats(playerTeam0, playerTeam1);
 
-  //return la fusion des deux objets
   return overviewInformation;
 }
 
@@ -1544,9 +1525,7 @@ function getLocationsBall(data, frame_min, frame_max) {
  * @param {*} data 
  * @param {Array} locations tableau des coordonnées 2d de la balle.
  */
-function updateBallPositionPressure(locations) {
-  // locations = getLocationsBall(data, frame_min, frame_max);
-  
+function updateBallPositionPressure(locations) {  
   var sumXneg = 0;
   var sumXpos = 0;
 
@@ -1564,7 +1543,6 @@ function updateBallPositionPressure(locations) {
     { team: "Team2", count: sumXpos },
   ];
 
-  // d3.selectAll("#content").append("h1").text("Pressure");
   d3.selectAll("#pressure")
     .append("p")
     .text("Pressure is a measure of how much time the ball spends on a side.");
@@ -1630,7 +1608,6 @@ function rearrangeOrder(selectedPlayer) {
  * @returns 
  */
 function handleRowSelection(teamsStats, selectedPlayer) {
-  // Clear existing bar chart
   d3.select("#barChart").selectAll("*").remove();
   d3.select("#barChartSelect").selectAll("*").remove();
 
@@ -1639,11 +1616,8 @@ function handleRowSelection(teamsStats, selectedPlayer) {
   var textPlayerName = playerName + "'s statistics : ";
 
   d3.select("#barChartSelect").append("p").text(textPlayerName);
-
-  // Sélectionnez l'élément où vous souhaitez ajouter le sélecteur (par exemple, le body du document)
   var body = d3.select("#barChartSelect");
 
-  // Ajoutez le label et le sélecteur
   var selectorContainer = body.append("div");
 
   selectorContainer
@@ -1656,7 +1630,6 @@ function handleRowSelection(teamsStats, selectedPlayer) {
     .append("select")
     .attr("id", "confrontSelect");
 
-  // Ajoutez les options au sélecteur
   var options = Object.values(SelectEnum);
 
   confrontSelect
@@ -1669,21 +1642,16 @@ function handleRowSelection(teamsStats, selectedPlayer) {
 
   var meanStats = rearrangeOrder(calculateMeanStats(teamsStats, selectedPlayer, playerName, SelectEnum.AllPlayers));
 
-  // Ajoutez une fonction pour gérer les changements dans le sélecteur
   confrontSelect.on("change", function () {
-    // Remove the "Select a player:" text and the player selection dropdown
     d3.select("#playerSelectLabel").remove();
     d3.select("#playerSelect").remove();
 
-    // Obtenez la valeur sélectionnée
     var selectedOption = confrontSelect.property("value");
     
     if (selectedOption === SelectEnum.OnePlayer) {
-      // Supprimez la liste déroulante existante si elle existe déjà
       d3.select("#playerSelectLabel").remove();
       d3.select("#playerSelect").remove();
 
-      // Créez une nouvelle sélection pour les joueurs
       var playerSelectContainer = body.append("div");
 
       playerSelectContainer
@@ -1697,7 +1665,6 @@ function handleRowSelection(teamsStats, selectedPlayer) {
         .append("select")
         .attr("id", "playerSelect");
 
-      // Ajoutez les options des noms des joueurs à la nouvelle liste déroulante
       var playerOptions = teamsStats.flatMap(team => team.map(player => player.Name));
 
       playerSelect
@@ -1733,7 +1700,6 @@ function handleRowSelection(teamsStats, selectedPlayer) {
  * @returns 
  */
 function drawHistogram(teamsStats, selectedPlayer, selectedOption, oppenentName = null) {
-  // Clear existing bar chart
   d3.select("#barChart").selectAll("*").remove();
 
   var playerName = selectedPlayer.Name;
@@ -1753,7 +1719,7 @@ function drawHistogram(teamsStats, selectedPlayer, selectedOption, oppenentName 
   var widthDelta = 10;
   var width = rearrangedPlayer.size * (2 * barWidth + widthDelta);
   var height = 400;
-  // Create a bar chart
+
   var svg = d3.select("#barChart")
     .append("svg")
     .attr("width", width)
@@ -1809,7 +1775,6 @@ function drawHistogram(teamsStats, selectedPlayer, selectedOption, oppenentName 
         return d[0];
       })
       .attr("y", function (d) {
-        // return 250;
         return width + 15;
       })
       .attr("x", function (d, i) {
@@ -1968,13 +1933,11 @@ function displayScoreBoard(teamsStats, scoreTeam0, scoreTeam1) {
   var rows2 = rows
     .selectAll("tr")
     .data(function (d) {
-      // joins inner array of each row
       return d;
     })
     .enter()
     .append("tr")
     .on("mouseover", function (e, d) {
-      // d3.select(this).style("font-weight", "bold");
       if (d.Team === 0) {
         d3.select(this).style("color", COL_BLUE);
       } else {
@@ -1982,7 +1945,6 @@ function displayScoreBoard(teamsStats, scoreTeam0, scoreTeam1) {
       }
     })
     .on("mouseout", function (e, d) {
-      //put the text in normal
       d3.select(this).style("font", null).style("color", null);
     })
     .on("click", function (e, d) {
@@ -2012,7 +1974,6 @@ function displayScoreBoard(teamsStats, scoreTeam0, scoreTeam1) {
         }
       );
       if (d == scoreTeam0)
-        // var text = "🏁 " + d;
         var text = "🏳  " + d;
       else 
         var text = "🏳 " + d;
@@ -2068,7 +2029,7 @@ function displayOverviewStats(overviewStats) {
     .attr("width", 1000)
     .attr("height", 300);
 
-  var width = 1000; // Ajout de la variable width pour référence
+  var width = 1000; 
 
   // Rectangle pour les stats du joueur 1
   var rectanglesPlayer1 = svg.selectAll(".team1")
@@ -2098,7 +2059,7 @@ function displayOverviewStats(overviewStats) {
       return d[1][0]; // Valeur de la team 1
     })
     .attr("y", function (d, i) {
-      return i * 50 + centrageVertical; // Ajuster pour le centrage vertical
+      return i * 50 + centrageVertical;
     })
     .attr("x", widthDelta + 15);
 
@@ -2119,9 +2080,8 @@ function displayOverviewStats(overviewStats) {
   rectanglesPlayer1.on("mouseout", function (e, d) {
     var rect = d3.select(this);
 
-    // Supprimer la classe pour le survol
     rect.classed("hovered", false);
-    // Supprimer le texte pour le pourcentage
+    
     svg.select(".percentage-text").remove();
   });
 
@@ -2156,7 +2116,7 @@ function displayOverviewStats(overviewStats) {
       return "";
     })
     .attr("y", function (d, i) {
-      return i * 50 + centrageVertical; // Ajuster pour le centrage vertical
+      return i * 50 + centrageVertical; 
     })
     .attr("x", width - 15)
     .attr("text-anchor", "end");
@@ -2285,7 +2245,7 @@ let x_prec = 0;
 let y_prec = 0;
 /**
  * Slider permettant de gérer la plage de données affichant la heatmap,
- * la pressure et la timeline.
+ * la pressure et la timeline. 
  * @param {Object} data données du replay.
  * @param {Integer} min valeur minimum du slider.
  * @param {Integer} max valeur maximum du slider.
@@ -2299,33 +2259,30 @@ function slider(data, min, max, starting_min=min, starting_max=max) {
   var starting_range = [starting_min, starting_max]
 
   var layout = {
-    width: 980,    // Set your desired width
-    height: 50,    // Set your desired height
-    margin: {top: 10, right: 20, bottom: 20, left: 120}  // Set your desired margins
+    width: 980,   
+    height: 50,    
+    margin: {top: 10, right: 20, bottom: 20, left: 120}  
   };
 
-  // set width and height of svg
-  var w = layout.width
-  var h = layout.height
-  var margin = layout.margin
+  var w = layout.width;
+  var h = layout.height;
+  var margin = layout.margin;
 
-  // dimensions of slider bar
+  // Dimensions du slider
   var width = w - margin.left - margin.right;
   var height = h - margin.top - margin.bottom;
 
-  // create x scale
   var x = d3.scaleLinear()
-    .domain(range)  // data space
-    .range([0, width]);  // display space
+    .domain(range)  
+    .range([0, width]); 
   
-  // create svg and translated g
   var svg = d3.select("#slider-container")
     .append("svg")
     .attr("width", 1000)
     .attr("height", 60);
   const g = svg.append('g').attr('transform', `translate(${margin.left}, ${margin.top})`)
   
-  // labels
+  // Labels
   var labelL = g.append('text')
     .attr('id', 'labelleft')
     .attr('x', 0)
@@ -2336,7 +2293,7 @@ function slider(data, min, max, starting_min=min, starting_max=max) {
     .attr('x', 0)
     .attr('y', height + 5)
 
-  // define brush
+  // Brush
   var brush = d3.brushX()
     .extent([[0,0], [width, height]])
     .on('brush', function(e) {
@@ -2431,7 +2388,7 @@ function updateView(data, frame_min, frame_max) {
   // Remise à 0
   document.getElementById("pressure").innerHTML = "";
 
-  // Mise à jour de l'affiche
+  // Mise à jour de l'affichage
   displayUpdateTimeline(data, frame_min, frame_max);
 
   var ball_locations = getLocationsBall(data, frame_min, frame_max);
