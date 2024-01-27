@@ -14,8 +14,8 @@ Nous utilisons : https://github.com/nickbabcock/rrrocket pour parser un fichier 
 
 Nous avons chacun travaillé sur différentes parties :
 
-- **Nicolas** : Timeline
-- **Axel** : Heatmap
+- **Nicolas** : Timeline.
+- **Axel** : Heatmap et json.
 - **Sonia** : tableau des scores, statistiques par équipe, diagramme pression.
 
 ## Suivi
@@ -36,7 +36,12 @@ Chargement et début du traitement du fichier json.
 
 #### Axel
 
+- (19/12/2023) : Scripts pour la compréhension du json.
 - (Depuis le 19/12/2023) Affichage de la **heatmap**.
+- (06/01/2024) : Ajout de la **heatmap** dynamique en fonction du temps.
+- (10/01/2024) : Lien des parties hors page principale.
+- (Depuis le 16/01/2024) : Nettoyage et lien entre la **heatmap** et la **slider**.
+- (Depuis le 10/01/2024) : Boostrap et mise en forme de la page principale.
 
 #### Sonia
 
