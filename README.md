@@ -165,5 +165,7 @@ Le **slider** permet de connecter les différents éléments de la partie **Time
 - Pressure
 
 ## Difficultés rencontrées 
- - Complexité du fichier JSON
-
+- Complexité du fichier JSON
+  - Compréhension de la partie *network_frames*.
+  - Identifiants dynamiques pour tous.
+  - Pas de déinition des identifiants.
